@@ -57,19 +57,20 @@ Eight mechanics that add meaningful skill to the property investment game, phase
 
 **New file:** `data/uk_regional_hpi.py` — regional multipliers relative to the national index, one value per semi-annual period (interpolated to quarterly alongside main data).
 
-**Regions:** North, South, East, West, Midlands, Scotland, Wales.
+**Regions:** London, South, East, West, Midlands, North, Scotland, Wales. *(8 regions — London split out from South to reflect its distinct price behaviour at higher multiples.)*
 
 **Multiplier profiles** derived from real UK regional HPI divergence:
 
 | Region | Boom behaviour | Correction behaviour |
 |---|---|---|
-| South (London/SE) | Up to 1.5× national | Converges or underperforms |
+| London | Up to 1.4× national | Amplifies corrections |
+| South | Up to 1.2× national | Converges or underperforms |
+| East | 0.95–1.10× national | Tracks national |
+| West | 0.90–1.05× national | Tracks national |
+| Midlands | 0.90–1.05× national | Tracks national |
 | North | 0.7–0.85× national | Stable, less volatile |
 | Scotland | 0.75–0.90× national | Stable |
 | Wales | 0.70–0.85× national | Stable |
-| Midlands | 0.90–1.05× national | Tracks national |
-| East | 0.95–1.10× national | Tracks national |
-| West | 0.90–1.05× national | Tracks national |
 
 **Property update formula** changes from:
 
@@ -108,10 +109,13 @@ At purchase, the player chooses LTV and rate type. The decision screen financing
 | 5-year fix 50% | 50% | Locked for 20 turns | Base rate + 0.25% |
 | 5-year fix 75% | 75% | Locked for 20 turns | Base rate + 0.25% |
 
-**Property state** gains three new fields:
-- `rate_type` — `"variable"`, `"fix_2yr"`, or `"fix_5yr"`
-- `locked_rate` — the rate at time of purchase (or refinance)
-- `fix_turns_remaining` — decrements each turn; 0 means reverted to variable
+**Player state** gains a `mortgages[]` list (one entry per mortgaged property) rather than storing rate fields on the property object itself. Each mortgage entry holds:
+- `prop_id` — links back to the property
+- `rate_type` — `"variable"`, `"fixed_2yr"`, or `"fixed_5yr"`
+- `rate` / `fixed_rate` — the effective rate at purchase or refinance
+- `fix_expires_tick` — the tick at which the fix reverts to variable (replaces `fix_turns_remaining`)
+- `loan` — outstanding loan balance
+- `monthly_payment` — recalculated each turn for variable mortgages
 
 When a fix expires, a news item is generated: *"Your 2-year fix on P-042 has expired — now on variable rate."*
 
@@ -221,9 +225,12 @@ score = portfolio_value + cash - leverage_penalty - concentration_penalty
 |---|---|---|
 | `quarterly_entries[]` | `uk_macro_history.py` | 1 |
 | `uk_regional_hpi.py` | new file | 1 |
-| `property.rate_type` | property object | 2 |
-| `property.locked_rate` | property object | 2 |
-| `property.fix_turns_remaining` | property object | 2 |
+| `player.mortgages[]` | player state | 2 |
+| `mortgage.rate_type` | mortgage object | 2 |
+| `mortgage.fixed_rate` | mortgage object | 2 |
+| `mortgage.fix_expires_tick` | mortgage object | 2 |
+| `mortgage.loan` | mortgage object | 2 |
+| `mortgage.monthly_payment` | mortgage object | 2 |
 | `property.renovated` | property object | 3 |
 | `game_state.refinance_cooldown` | game state | 2 |
 
