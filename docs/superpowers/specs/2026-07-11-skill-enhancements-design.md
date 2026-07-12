@@ -265,6 +265,8 @@ Player makes their action for the turn. One action only per turn.
 
 **Footer (sticky):** Action hint label + countdown timer + action buttons (BUY / HOLD / REMORTGAGE / RENOVATE / SELL) + **CONFIRM** button → submits to `/decision/confirm`
 
+*Note: EPC Upgrade is not a footer button — it is triggered by clicking an upgrade button inline within the EPC compliance panel in the main content area. It sets the action to `upgrade_epc` and is confirmed via the same CONFIRM button.*
+
 ---
 
 ### Page 3 — Round Summary (`/round-summary`)
