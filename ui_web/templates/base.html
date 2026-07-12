@@ -23,13 +23,23 @@
   }
 
   /* ── Base ── */
-  html, body {
+  html {
+    height: 100%;
+  }
+  body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Courier New', Courier, monospace;
     font-size: 15px;
     line-height: 1.5;
-    min-height: 100vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .page-wrap {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
   }
 
   /* ── Layout helpers ── */
@@ -38,6 +48,7 @@
     margin: 0 auto;
     padding: 24px 20px;
   }
+
 
   .row {
     display: flex;
@@ -224,6 +235,7 @@
   .scroll-list {
     max-height: 260px;
     overflow-y: auto;
+    overflow-x: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
@@ -238,13 +250,12 @@
     gap: 12px;
     flex-wrap: wrap;
   }
+  .btn-short { display: none; }
+  .btn-full  { display: inline; }
 
   /* ── Decision footer ── */
   .decision-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    flex-shrink: 0;
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 100;
@@ -260,6 +271,12 @@
   .decision-footer-left {
     flex: 1;
     min-width: 0;
+  }
+  .footer-confirm-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
   }
 
   /* ── Mobile stat bar (hidden on desktop, shown on mobile) ── */
@@ -290,12 +307,27 @@
     /* Hide non-essential table columns */
     .col-hide-mobile { display: none; }
 
-    /* Footer — action buttons wrap, timer+confirm stack */
-    .decision-footer { padding: 10px 12px; }
-    .decision-footer-inner { flex-wrap: wrap; gap: 10px; }
+    /* Tighter table padding on mobile */
+    th { padding: 4px 4px; font-size: 10px; }
+    td { padding: 3px 4px; font-size: 12px; }
+    tr.prop-row { height: 28px; }
+
+    /* Footer — single compact row on mobile */
+    .decision-footer { padding: 6px; }
+    .decision-footer-inner { flex-direction: column; gap: 4px; }
     .decision-footer-left { width: 100%; }
-    .action-row { flex-wrap: wrap; }
-    .action-row .btn { flex: 1 1 calc(50% - 6px); text-align: center; padding: 0 8px; }
+    .footer-confirm-row { display: flex; align-items: center; gap: 4px; width: 100%; }
+    .footer-confirm-row .action-row { flex: 1; }
+    #confirm-btn { font-size: 11px; padding: 0 6px; height: 34px; line-height: 34px; letter-spacing: 0; white-space: nowrap; }
+    #turn-timer { font-size: 16px !important; min-width: 36px; }
+    #decision-btn { font-size: 12px; padding: 6px 8px; text-align: center; }
+    /* Hide expandable panels inside footer on mobile — too tall for fixed footer */
+    #ltv-panel, #renovate-panel { display: none !important; }
+    .action-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+    .action-row .btn,
+    .action-row .btn-large { width: 100%; text-align: center; padding: 0; height: 34px; line-height: 34px; font-size: 10px; letter-spacing: 0; min-width: 0; }
+    .btn-full { display: none; }
+    .btn-short { display: inline; }
 
     /* Opening page — stack two columns */
     .row { flex-direction: column; }

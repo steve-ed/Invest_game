@@ -2,6 +2,7 @@ import sys
 import os
 import copy
 import random
+import math
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ui_kivy'))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'data'))
@@ -388,6 +389,11 @@ def init_game_state(total_ticks=None, archetype='balanced'):
     # Normalise price_index so the game always starts at 100.0
     price_scale = 100.0 / base_price_index
 
+    # Fixed chart bounds: full game price-index range, rounded to nearest 5
+    _all_pi = [entry[2] * price_scale for entry in macro_slice]
+    price_chart_min = math.floor(min(_all_pi) / 5) * 5
+    price_chart_max = math.ceil(max(_all_pi) / 5) * 5
+
     arc = SCENARIO_ARCS.get(total_ticks, SCENARIO_ARC_40)  # kept for advance_signal only
 
     gs = {
@@ -433,6 +439,8 @@ def init_game_state(total_ticks=None, archetype='balanced'):
         'next_prop_id': 100,
         'macro_history': [],
         'score_history': [],
+        'price_chart_min': price_chart_min,
+        'price_chart_max': price_chart_max,
         'reg_events_fired': [],   # list of event keys that have already fired
         'rent_freeze': {},        # {region_or_'ALL': ticks_remaining}
         'refinance_cooldown': 0,
@@ -1036,6 +1044,9 @@ def turn():
         rent_freeze=gs.get('rent_freeze', {}),
         regional_growths=regional_growths,
         national_growth=round(nat_growth, 2),
+        macro_history=gs.get('macro_history', []),
+        price_chart_min=gs.get('price_chart_min', 80),
+        price_chart_max=gs.get('price_chart_max', 120),
     )
 
 
@@ -1158,8 +1169,10 @@ def round_summary():
     rank = get_player_rank(gs)
     player_score_val = next((e['score'] for e in gs['leaderboard'] if e['name'] == 'You'), 0)
     next_url = url_for('end') if gs.get('game_over') else None
+    _, score_bars = build_chart_data(gs)
     return render_template('round_summary.html', gs=gs, round=gs['last_round'],
-                           rank=rank, player_score=player_score_val, next_url=next_url)
+                           rank=rank, player_score=player_score_val, next_url=next_url,
+                           score_bars=score_bars)
 
 
 @app.route('/end')

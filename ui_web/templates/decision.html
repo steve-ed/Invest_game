@@ -61,7 +61,7 @@
   </div>
 
   <!-- ── Main area ── -->
-  <div class="main-area" style="padding-bottom: 180px;">
+  <div class="main-area" id="main-area">
 
     <div class="mobile-stat-bar">
       <span class="accent" style="font-weight:bold;">T{{ gs.tick + 1 }}/{{ gs.total_ticks }}</span>
@@ -71,6 +71,7 @@
     </div>
 
     <h2 style="margin-bottom:16px;">YOUR DECISION — Turn {{ gs.tick + 1 }}</h2>
+
 
     <form method="POST" action="/decision/confirm" id="decision-form">
       <input type="hidden" name="action"       id="action-field"    value="hold">
@@ -195,7 +196,7 @@
       <div class="panel">
         <div class="panel-title">Your Portfolio — click to select for SELL</div>
         {% if portfolio %}
-        <table>
+        <div style="overflow-x:auto;"><table>
           <thead>
             <tr>
               <th>ID</th>
@@ -225,7 +226,7 @@
             </tr>
             {% endfor %}
           </tbody>
-        </table>
+        </table></div>
         {% else %}
         <p class="muted">No properties in portfolio.</p>
         {% endif %}
@@ -242,7 +243,8 @@
             <span class="badge badge-dim" style="float:right; font-size:11px;">COOLDOWN: {{ refinance_cooldown }} turns</span>
           {% endif %}
         </div>
-        <table>
+        <div style="overflow-x:auto;">
+        <table style="min-width:420px;">
           <thead>
             <tr>
               <th>ID</th>
@@ -280,6 +282,7 @@
             {% endfor %}
           </tbody>
         </table>
+        </div>
         <div id="remortgage-hint" style="margin-top:10px; font-size:13px; color:var(--dim);"></div>
 
         <!-- LTV + rate type for remortgage (shown when property selected) -->
@@ -324,7 +327,7 @@
         <p class="muted" style="font-size:12px; margin-bottom:10px;">
           Non-compliant properties earn 15% less rent until upgraded. Cost: £{{ EPC_UPGRADE_COST | currency }} per property.
         </p>
-        <table>
+        <div style="overflow-x:auto;"><table>
           <thead>
             <tr>
               <th>ID</th>
@@ -352,51 +355,13 @@
             </tr>
             {% endfor %}
           </tbody>
-        </table>
+        </table></div>
       </div>
       {% endif %}
       {% endif %}
 
     </form>
 
-    <!-- Regional guide -->
-    <div class="panel" style="margin-top:16px;">
-      <div class="panel-title">Regional Guide</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Region</th>
-            <th style="text-align:right;">Yield</th>
-            <th style="text-align:right;">Growth factor</th>
-            <th style="text-align:right;">Risk profile</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for region, p in region_profiles.items() %}
-          <tr>
-            <td>{{ region }}</td>
-            <td style="text-align:right; color:var(--accent);">{{ (p.annual_yield * 100) | round(1) }}%</td>
-            <td style="text-align:right;
-              {% if p.growth_factor > 1.1 %}color:var(--accent);
-              {% elif p.growth_factor < 0.85 %}color:var(--muted);
-              {% endif %}">
-              {{ p.growth_factor }}x
-            </td>
-            <td style="text-align:right; font-size:12px; color:var(--dim);">
-              {% if p.growth_factor >= 1.3 %}High vol — amplifies booms & crashes
-              {% elif p.growth_factor >= 1.1 %}Medium vol
-              {% elif p.growth_factor >= 0.9 %}Low vol
-              {% else %}Very low vol — stable income
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div class="muted" style="font-size:11px; margin-top:8px;">
-        Growth factor multiplies the national price movement each turn. A London property grows (or falls) 1.4× the national rate. A Wales property moves 0.75×.
-      </div>
-    </div>
   </div>
 </div>
 
@@ -483,22 +448,18 @@
         </div>
         <div id="renovate-hint" style="margin-top:6px; font-size:13px; color:var(--dim);"></div>
       </div>
-      <!-- Action buttons + hint -->
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-        <div class="action-row">
-          <button type="button" class="btn btn-large" id="btn-buy"        onclick="setAction('buy')">BUY</button>
-          <button type="button" class="btn btn-large active" id="btn-hold" onclick="setAction('hold')">HOLD</button>
-          <button type="button" class="btn btn-large" id="btn-remortgage" onclick="setAction('remortgage')">REMORTGAGE</button>
-          <button type="button" class="btn btn-large" id="btn-renovate"   onclick="setAction('renovate')">RENOVATE</button>
-          <button type="button" class="btn btn-large btn-red" id="btn-sell" onclick="setAction('sell')">SELL</button>
-        </div>
-        <div style="font-size:13px; color:var(--muted);" id="action-hint">HOLD selected — no property action this turn.</div>
-      </div>
+      <!-- Hint -->
+      <div style="font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="action-hint">HOLD selected — no property action this turn.</div>
     </div>
-    <div style="display:flex; align-items:center; gap:16px; flex-shrink:0;">
-      <div style="text-align:center;">
-        <div style="font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; margin-bottom:2px;">Time</div>
-        <div id="turn-timer" style="font-size:32px; font-weight:bold; font-family:'Courier New',monospace; color:var(--accent); letter-spacing:0.08em; min-width:64px;">0:20</div>
+    <!-- Timer + confirm: always on bottom row on mobile -->
+    <div class="footer-confirm-row">
+      <div id="turn-timer" style="font-size:22px; font-weight:bold; font-family:'Courier New',monospace; color:var(--accent); min-width:48px;">0:20</div>
+      <div class="action-row" style="flex:1;">
+        <button type="button" class="btn btn-large" id="btn-buy"        onclick="setAction('buy')">BUY</button>
+        <button type="button" class="btn btn-large active" id="btn-hold" onclick="setAction('hold')">HOLD</button>
+        <button type="button" class="btn btn-large" id="btn-remortgage" onclick="setAction('remortgage')"><span class="btn-full">REMORTGAGE</span><span class="btn-short">RE-MTG</span></button>
+        <button type="button" class="btn btn-large" id="btn-renovate"   onclick="setAction('renovate')"><span class="btn-full">RENOVATE</span><span class="btn-short">RENOV</span></button>
+        <button type="button" class="btn btn-large btn-red" id="btn-sell" onclick="setAction('sell')">SELL</button>
       </div>
       <button type="submit" form="decision-form" class="btn btn-large" id="confirm-btn">&gt;&gt; CONFIRM</button>
     </div>
@@ -854,6 +815,7 @@
   }
 </script>
 
+<script>
   // Player turn timer — auto-holds at 0
   var TURN_SECONDS = 20;
   var timerRemaining = TURN_SECONDS;
@@ -891,5 +853,6 @@
   document.getElementById('decision-form').addEventListener('submit', function() {
     clearInterval(timerInterval);
   });
+
 </script>
 {% endblock %}

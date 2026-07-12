@@ -69,28 +69,6 @@
     </div>
 
     <div class="panel">
-      <div class="panel-title">Regional Growth This Quarter</div>
-      <style>
-        .heatmap-table { width:100%; border-collapse:collapse; font-size:0.82em; }
-        .heatmap-table th, .heatmap-table td { padding:3px 6px; text-align:left; }
-        .heatmap-table th { color:var(--muted); font-weight:normal; }
-        .heat-hot  { background:rgba(220,38,38,0.15); }
-        .heat-cold { background:rgba(37,99,235,0.15); }
-      </style>
-      <table class="heatmap-table">
-        <tr><th>Region</th><th>Growth</th><th>vs Nat.</th></tr>
-        {% for region, growth in regional_growths.items() | sort(attribute='1', reverse=True) %}
-        {% set diff = (growth - national_growth) | round(2) %}
-        <tr class="{% if diff > 0.3 %}heat-hot{% elif diff < -0.3 %}heat-cold{% endif %}">
-          <td>{{ region }}</td>
-          <td>{{ growth }}%</td>
-          <td>{% if diff > 0 %}+{% endif %}{{ diff }}%</td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-
-    <div class="panel">
       <div class="panel-title">Your Rank</div>
       <div style="font-size:32px; font-weight:bold; color:var(--accent);">#{{ rank }}</div>
       <div class="muted" style="font-size:13px;">Score</div>
@@ -140,36 +118,119 @@
       <span style="color:{{ archetype_meta.color }};">{{ archetype_meta.short }}</span>
     </div>
 
-    <!-- Actor position history -->
-    <div class="panel">
-      <div class="panel-title">
-        Actor Positions
-        <span style="float:right; font-size:12px; color:var(--dim);">
-          <span style="color:#00FF88;">&#9632;</span> You &nbsp;
-          <span style="color:#FBBF24;">&#9632;</span> Conservative &nbsp;
-          <span style="color:#F87171;">&#9632;</span> Aggressive
-        </span>
+    <!-- Macro Indicators Chart -->
+    <div class="panel" style="margin-bottom:8px;">
+      <div class="panel-title">Macro Indicators</div>
+      <canvas id="macro-chart" style="display:block; width:100%; height:110px;"></canvas>
+      <div style="display:flex; gap:16px; font-size:10px; margin-top:4px; flex-wrap:wrap;">
+        <span style="color:#00FF88;">&#9644; Prices</span>
+        <span style="color:#F87171;">&#9644; Rate</span>
+        <span style="color:#FBBF24;">&#9644; Rent Growth</span>
       </div>
-      <div style="display:flex; align-items:flex-end; height:80px; margin-top:8px;">
-        {% set col_w = 'calc(' ~ '100% / ' ~ gs.total_ticks ~ ')' %}
-        {% for t in range(1, gs.total_ticks + 1) %}
-        {% set bar = score_bars[t - 1] if t <= score_bars|length else none %}
-        <div style="width:{{ col_w }}; padding:0 1px; box-sizing:border-box; height:100%; display:flex; flex-direction:column-reverse;">
-          {% if bar %}
-          {% for seg in bar.segments %}
-          <div style="background:{{ seg.color }}; flex:{{ seg.pct }}; opacity:0.85; min-height:1px;"
-               title="{{ seg.name }}: ${{ '{:,.0f}'.format(seg.score) }}"></div>
-          {% endfor %}
-          {% endif %}
-        </div>
+    </div>
+    <script>
+    window.addEventListener('load', function() {
+      var hist = {{ macro_history | tojson }};
+      var totalTicks = {{ gs.total_ticks }};
+      var canvas = document.getElementById('macro-chart');
+      var W = canvas.parentElement.clientWidth - 32;
+      var H = 110;
+      canvas.width = W; canvas.height = H;
+      var ctx = canvas.getContext('2d');
+      // left margin for price labels, right margin for %rate labels, bottom for tick labels
+      var padL = 34, padR = 28, padT = 6, padB = 14;
+      var innerW = W - padL - padR, innerH = H - padT - padB;
+
+      ctx.font = '9px Courier New';
+
+      // Fixed price scale computed at game start from full macro_slice range
+      var pMin = {{ price_chart_min }};
+      var pMax = {{ price_chart_max }};
+      var pRng = pMax - pMin || 1;
+      var priceVals = hist.map(function(h) { return h.price_index; });
+
+      // Right scale fixed 0-15%
+      var rMin = 0, rMax = 15, rRng = 15;
+
+      // Grid lines at 0%, 5%, 10%, 15% of right scale (fractions: 0, 1/3, 2/3, 1)
+      var gridFracs = [0, 1/3, 2/3, 1];
+      var gridPcts  = [0, 5, 10, 15];
+      ctx.strokeStyle = '#1E2A3A';
+      ctx.lineWidth = 1;
+      gridFracs.forEach(function(frac) {
+        var y = padT + innerH - frac * innerH;
+        ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + innerW, y); ctx.stroke();
+      });
+
+      // Right y-axis labels (rate/rent %)
+      ctx.fillStyle = '#7A8196';
+      ctx.textAlign = 'left';
+      gridFracs.forEach(function(frac, i) {
+        var y = padT + innerH - frac * innerH;
+        ctx.fillText(gridPcts[i] + '%', padL + innerW + 3, y + 3);
+      });
+
+      // Left y-axis labels (price index) — top, middle, bottom
+      ctx.textAlign = 'right';
+      [[0, pMin], [0.5, (pMin + pMax) / 2], [1, pMax]].forEach(function(pair) {
+        var frac = pair[0], val = pair[1];
+        var y = padT + innerH - frac * innerH;
+        ctx.fillStyle = '#00FF88';
+        ctx.fillText(val.toFixed(0), padL - 3, y + 3);
+      });
+
+      // X tick markers
+      var step = Math.ceil(totalTicks / 5);
+      ctx.fillStyle = '#7A8196';
+      ctx.textAlign = 'center';
+      for (var t = 1; t <= totalTicks; t += step) {
+        var x = padL + ((t - 1) / (totalTicks - 1)) * innerW;
+        ctx.fillText('T' + t, x, H - 2);
+      }
+
+      // Draw series
+      function drawSeries(vals, colour, mn, mx) {
+        if (vals.length < 2) return;
+        var rng = mx - mn || 1;
+        ctx.strokeStyle = colour;
+        ctx.lineWidth = 1.5;
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        vals.forEach(function(v, i) {
+          var x = padL + (i / (totalTicks - 1)) * innerW;
+          var y = padT + innerH - ((v - mn) / rng) * innerH;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+
+      drawSeries(priceVals,                                        '#00FF88', pMin, pMax);
+      drawSeries(hist.map(function(h) { return h.rate; }),        '#F87171', rMin, rMax);
+      drawSeries(hist.map(function(h) { return h.rent_growth; }), '#FBBF24', rMin, rMax);
+    });
+    </script>
+
+    <!-- Regional Growth -->
+    <style>
+      .heatmap-table { width:100%; border-collapse:collapse; font-size:0.82em; }
+      .heatmap-table th, .heatmap-table td { padding:3px 6px; text-align:left; }
+      .heatmap-table th { color:var(--muted); font-weight:normal; }
+      .heat-hot  { background:rgba(220,38,38,0.15); }
+      .heat-cold { background:rgba(37,99,235,0.15); }
+    </style>
+    <div class="panel" style="margin-bottom:8px;">
+      <div class="panel-title">Regional Growth This Quarter</div>
+      <table class="heatmap-table">
+        <tr><th>Region</th><th>Growth</th><th>vs Nat.</th></tr>
+        {% for region, growth in regional_growths.items() | sort(attribute='1', reverse=True) %}
+        {% set diff = (growth - national_growth) | round(2) %}
+        <tr class="{% if diff > 0.3 %}heat-hot{% elif diff < -0.3 %}heat-cold{% endif %}">
+          <td>{{ region }}</td>
+          <td>{{ growth }}%</td>
+          <td>{% if diff > 0 %}+{% endif %}{{ diff }}%</td>
+        </tr>
         {% endfor %}
-      </div>
-      <div style="display:flex; margin-top:4px;">
-        {% set col_w = 'calc(' ~ '100% / ' ~ gs.total_ticks ~ ')' %}
-        {% for t in range(1, gs.total_ticks + 1) %}
-        <div style="width:{{ col_w }}; text-align:center; font-size:10px; color:var(--dim);">T{{ t }}</div>
-        {% endfor %}
-      </div>
+      </table>
     </div>
 
     <!-- Portfolio -->
