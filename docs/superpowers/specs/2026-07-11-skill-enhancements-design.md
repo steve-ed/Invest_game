@@ -244,8 +244,7 @@ Shown at the start of each turn. Player reviews the market environment before co
 - Mobile stat bar (mobile only): tick, rank, cash, archetype
 - Macro indicators canvas chart — full game timeline with fixed y-axes (price index auto-scaled to game range; rate and rent growth fixed 0–15%)
 - Regional growth heatmap — one row per region, growth % vs national, heat-coloured for outliers
-- Player portfolio table: ID, region, value, rent/mo, yield, EPC status, vacancy/renovation status
-- Mortgage table (if any): property, rate type, loan, monthly payment
+- Player portfolio summary: property count, total portfolio value, cash, monthly mortgage cost (not a full table — summary line only)
 - Regulatory alerts panel (if EPC or rent freeze active)
 - AI positions: each AI's last action, rationale, property count, portfolio value
 - News: last 2 news items
