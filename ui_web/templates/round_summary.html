@@ -132,7 +132,7 @@
         </table>
       </div>
       <div style="font-size:12px; color:var(--muted); margin-top:6px;">
-        {{ gs.player.portfolio | length }} propert{{ 'y' if gs.player.portfolio | length == 1 else 'ies' }} · Total: £{{ '{:,.0f}'.format(gs.player.portfolio | sum(attribute='value')) }}
+        {{ gs.player.portfolio | length }} propert{{ 'y' if gs.player.portfolio | length == 1 else 'ies' }} · Total: £{{ '{:,.0f}'.format(gs.player.portfolio | sum(attribute='value')) }} · Cash: <span style="color:var(--accent);">{{ gs.player.cash | currency }}</span>
       </div>
       {% else %}
       <div class="muted" style="font-size:13px;">No properties held.</div>
