@@ -192,41 +192,15 @@
         {% endif %}
       </div>
 
-      <!-- Portfolio properties -->
+      <!-- Portfolio summary -->
       <div class="panel">
-        <div class="panel-title">Your Portfolio — click to select for SELL</div>
+        <div class="panel-title">Your Portfolio</div>
         {% if portfolio %}
-        <div style="overflow-x:auto;"><table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Region</th>
-              <th style="text-align:right;">Value</th>
-              <th style="text-align:right;" class="col-hide-mobile">Rent/mo</th>
-              <th style="text-align:right;">Yield</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="portfolio-table">
-            {% for prop in portfolio %}
-            <tr class="prop-row"
-                data-id="{{ prop.id }}"
-                data-type="portfolio"
-                onclick="selectPortfolioProp(this)">
-              <td class="accent">{{ prop.id }}</td>
-              <td>{{ prop.region }}</td>
-              <td style="text-align:right;">{{ prop.value | currency }}</td>
-              <td style="text-align:right;" class="col-hide-mobile">{{ prop.rent | currency }}</td>
-              <td style="text-align:right;">{{ prop.yield_pct | round(1) }}%</td>
-              <td>
-                {% if prop.get('vacant', false) %}
-                  <span class="badge badge-red" style="font-size:10px;">VACANT</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table></div>
+        <div style="font-size:13px; color:var(--text);">
+          {{ portfolio | length }} propert{{ 'y' if portfolio | length == 1 else 'ies' }}
+          &nbsp;·&nbsp; Portfolio: <span style="font-weight:bold;">{{ portfolio | sum(attribute='value') | currency }}</span>
+          &nbsp;·&nbsp; Cash: <span style="font-weight:bold; color:var(--accent);">{{ gs.player.cash | currency }}</span>
+        </div>
         {% else %}
         <p class="muted">No properties in portfolio.</p>
         {% endif %}
