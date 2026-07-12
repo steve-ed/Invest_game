@@ -21,8 +21,28 @@ START_STATE = {
                 {"id": "P-015", "region": "Wales",    "value": 125000, "rent": 678},   # 0.76x — highest yield
             ],
         },
-        {"name": "Conservative", "cash": 360000, "props": 5, "portfolio_value": 840000},
-        {"name": "Aggressive",   "cash": 190000, "props": 5, "portfolio_value": 1010000},
+        {
+            "name": "Mr Hugh Price", "cash": 190000,
+            # Capital growth focus: London/South heavy, lower yield
+            "portfolio": [
+                {"id": "P-H01", "region": "London",  "value": 330000, "rent": 963},
+                {"id": "P-H02", "region": "South",   "value": 248000, "rent": 827},
+                {"id": "P-H03", "region": "South",   "value": 200000, "rent": 667},
+                {"id": "P-H04", "region": "East",    "value": 142000, "rent": 533},
+                {"id": "P-H05", "region": "East",    "value":  90000, "rent": 338},
+            ],
+        },
+        {
+            "name": "Mr Max Lever", "cash": 190000,
+            # Leverage/income focus: high-yield regions, more properties
+            "portfolio": [
+                {"id": "P-M01", "region": "North",    "value": 220000, "rent": 1100},
+                {"id": "P-M02", "region": "Midlands", "value": 210000, "rent": 963},
+                {"id": "P-M03", "region": "Wales",    "value": 195000, "rent": 1056},
+                {"id": "P-M04", "region": "North",    "value": 195000, "rent":  975},
+                {"id": "P-M05", "region": "Scotland", "value": 190000, "rent":  871},
+            ],
+        },
     ],
     # Opening market shows the full regional spread so the player can immediately
     # see the yield vs. growth trade-off.
@@ -59,7 +79,7 @@ GAME_STATE = {
     },
     "ai": [
         {
-            "name": "Conservative",
+            "name": "Mr Hugh Price",
             "cash": 30000,
             "portfolio_value": 410000,
             "props": 2,
@@ -68,13 +88,13 @@ GAME_STATE = {
             "rationale": "waiting for rate cut",
         },
         {
-            "name": "Aggressive",
+            "name": "Mr Max Lever",
             "cash": 15000,
             "portfolio_value": 520000,
             "props": 4,
             "last_action": "buy",
             "last_property": "P-003",
-            "rationale": "chasing yield in North",
+            "rationale": "chasing highest value asset",
         },
     ],
     "market": [
@@ -87,9 +107,9 @@ GAME_STATE = {
         "> Scenario: Baseline -> Recovery",
     ],
     "leaderboard": [
-        {"name": "You",          "score": 485200},
-        {"name": "Aggressive",   "score": 520000},
-        {"name": "Conservative", "score": 410000},
+        {"name": "You",           "score": 485200},
+        {"name": "Mr Max Lever",  "score": 520000},
+        {"name": "Mr Hugh Price", "score": 410000},
     ],
     "end": {
         "player_breakdown": {"portfolio": 750000, "cash": 62000, "rent": 80000},

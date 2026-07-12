@@ -86,7 +86,7 @@ def player_net_worth(gs):
 
 
 AGENT_FEE_RATE = 0.015          # 1.5% of sale price charged by selling agent
-FIX_PREMIUMS   = {'variable': 0.0, 'fixed_2yr': 0.5, 'fixed_5yr': 0.25}
+FIX_PREMIUMS   = {'variable': 2.0, 'fixed_2yr': 2.5, 'fixed_5yr': 2.25}
 FIX_DURATIONS  = {'fixed_2yr': 8, 'fixed_5yr': 20}   # ticks (quarterly periods)
 
 EPC_UPGRADE_COST    = 5000
@@ -152,7 +152,8 @@ ARCHETYPE_META = {
 }
 
 # Approximate annual yield rates used for AI cumulative-rent estimation
-_AI_YIELDS = {'Conservative': 0.055, 'Aggressive': 0.045}
+# Mr Hugh Price targets high-value/lower-yield capital growth properties
+# Mr Max Lever uses high leverage — income yield net of costs is modest
 
 
 def leverage_penalty(portfolio_value, total_debt):
@@ -182,13 +183,7 @@ def concentration_penalty(portfolio):
 
 def score_for_archetype(archetype, portfolio_value, cash, cumulative_rent, total_debt,
                         concentration_pen=0):
-    penalty = leverage_penalty(portfolio_value, total_debt) + concentration_pen
-    if archetype == 'income':
-        return cumulative_rent + cash - penalty
-    elif archetype == 'growth':
-        return portfolio_value + cash - penalty
-    else:  # balanced
-        return portfolio_value + cash + int(cumulative_rent * 0.4) - penalty
+    return portfolio_value - total_debt + cash - concentration_pen
 
 
 def player_score(gs):
@@ -206,10 +201,11 @@ def update_leaderboard(gs):
     archetype = gs.get('archetype', 'balanced')
     entries = [{'name': 'You', 'score': player_score(gs)}]
     for ai in gs['ai']:
-        # AI state has no per-region breakdown; concentration penalty not applied
+        con_pen = concentration_penalty(ai.get('portfolio', []))
         score = score_for_archetype(
             archetype, ai['portfolio_value'], ai['cash'],
             ai.get('cumulative_rent', 0), ai.get('total_debt', 0),
+            concentration_pen=con_pen,
         )
         entries.append({'name': ai['name'], 'score': score})
     entries.sort(key=lambda x: x['score'], reverse=True)
@@ -287,14 +283,14 @@ def _add_auction_property(gs):
 
 
 def _resolve_auction(gs, auction_prop, player_bid, ltv, rate_type):
-    """Resolve auction bidding. Returns winner name ('player' or 'Aggressive')."""
+    """Resolve auction bidding. Mr Max Lever bids 5% above asking; player must beat that."""
     asking = auction_prop['value']
-    aggressive_bid = int(asking * 1.05)
+    lever_bid = int(asking * 1.05)
 
-    if player_bid > 0 and player_bid >= aggressive_bid:
+    if player_bid > 0 and player_bid >= lever_bid:
         winner = 'player'
     else:
-        winner = 'Aggressive'
+        winner = 'Mr Max Lever'
 
     if winner == 'player':
         player = gs['player']
@@ -323,7 +319,7 @@ def _resolve_auction(gs, auction_prop, player_bid, ltv, rate_type):
             gs['market'].remove(auction_prop)
             gs['news'].append(f"! Auction won: {auction_prop['id']} for £{player_bid:,}.")
         else:
-            winner = 'Aggressive'
+            winner = 'Mr Max Lever'
 
     if winner != 'player':
         ai = next((a for a in gs['ai'] if a['name'] == winner), None)
@@ -333,7 +329,7 @@ def _resolve_auction(gs, auction_prop, player_bid, ltv, rate_type):
             if auction_prop in gs['market']:
                 gs['market'].remove(auction_prop)
             gs['news'].append(
-                f"! Auction: {winner} won {auction_prop['id']} with bid £{int(asking * 1.05) if winner == 'Aggressive' else asking:,}."
+                f"! Auction: {winner} won {auction_prop['id']} with bid £{lever_bid:,}."
             )
 
     return winner
@@ -360,7 +356,27 @@ def _derive_scenario(price_index, prev_price_index, rate):
     return 'Baseline'
 
 
-def init_game_state(total_ticks=None, archetype='balanced'):
+def _build_starting_mortgages(portfolio, rate, target_debt=200_000):
+    """Create variable-rate mortgages distributed proportionally across starting properties."""
+    total_value = sum(p['value'] for p in portfolio)
+    effective_rate = round(rate + FIX_PREMIUMS['variable'], 2)
+    mortgages = []
+    for prop in portfolio:
+        loan = int(prop['value'] / total_value * target_debt)
+        if loan > 0:
+            mortgages.append({
+                'prop_id':        prop['id'],
+                'loan':           loan,
+                'rate_type':      'variable',
+                'rate':           effective_rate,
+                'fixed_rate':     None,
+                'fix_expires_tick': None,
+                'monthly_payment': round(loan * effective_rate / 100 / 12, 2),
+            })
+    return mortgages
+
+
+def init_game_state(total_ticks=20, archetype='balanced'):
     """Build a fresh GAME_STATE from START_STATE."""
     ss = dd.START_STATE
     player_actor = ss['actors'][0]
@@ -369,16 +385,16 @@ def init_game_state(total_ticks=None, archetype='balanced'):
     total_ticks = total_ticks or ss['total_ticks']
 
     # Pick a random historical start period (hidden from player until game end)
-    min_year, max_year = hist.get_quarterly_start_limits(total_ticks)
+    min_year, max_year = hist.get_start_limits(total_ticks)
     start_year = random.randint(min_year, max_year)
-    start_quarter = random.choice([1, 2, 3, 4])
+    start_half = random.choice([1, 2])
     # Ensure enough data remains
     while True:
         try:
-            macro_slice = hist.get_quarterly_slice(start_year, start_quarter, total_ticks)
+            macro_slice = hist.get_slice(start_year, start_half, total_ticks)
             break
         except ValueError:
-            start_quarter = 1
+            start_half = 1
             start_year -= 1
 
     first = macro_slice[0]
@@ -403,7 +419,7 @@ def init_game_state(total_ticks=None, archetype='balanced'):
         'macro_slice': macro_slice,              # historical data; one entry per tick
         'price_scale': price_scale,              # normalisation factor
         'real_start_year': start_year,
-        'real_start_half': start_quarter,   # key kept for template compatibility
+        'real_start_half': start_half,
         'archetype': archetype if archetype in ARCHETYPE_META else 'balanced',
         'scenario': _derive_scenario(100.0, 100.0, starting_rate),
         'macro': {
@@ -412,22 +428,30 @@ def init_game_state(total_ticks=None, archetype='balanced'):
             'rent_growth': starting_rent_growth,
             'prev': {'price_index': 100.0, 'rate': starting_rate, 'rent_growth': starting_rent_growth},
         },
+        # Starting mortgages: ~£200k distributed proportionally across starting portfolio
+        # at the historical starting rate (variable, no fix).
         'player': {
             'cash': player_actor['cash'],
             'portfolio': copy.deepcopy(player_actor['portfolio']),
-            'mortgages': [],
+            'mortgages': _build_starting_mortgages(
+                copy.deepcopy(player_actor['portfolio']), starting_rate, target_debt=200_000
+            ),
             'cumulative_rent': 0,
         },
         'ai': [
             {
                 'name': a['name'],
                 'cash': a['cash'],
-                'portfolio_value': a['portfolio_value'],
-                'props': a['props'],
+                'portfolio': copy.deepcopy(a['portfolio']),
+                'mortgages': _build_starting_mortgages(
+                    copy.deepcopy(a['portfolio']), starting_rate, target_debt=200_000
+                ),
+                'portfolio_value': sum(p['value'] for p in a['portfolio']),
+                'props': len(a['portfolio']),
                 'last_action': 'hold',
                 'last_property': None,
                 'rationale': 'waiting to see how the market moves',
-                'total_debt': 0,
+                'total_debt': 200_000,
                 'cumulative_rent': 0,
             }
             for a in ai_actors
@@ -553,57 +577,73 @@ _SELL_SCENARIOS = {'Correction', 'Crash'}
 
 
 def _ai_sell_one(gs, ai):
-    """Sell one average-valued AI property back to the market. Returns sold value."""
-    if ai['props'] <= 0:
+    """Sell one AI property (closest to average value) back to the market. Returns sold value."""
+    portfolio = ai.get('portfolio', [])
+    if not portfolio:
         return 0
-    prop_value = int(ai['portfolio_value'] / ai['props'])
-    debt_per_prop = int(ai.get('total_debt', 0) / ai['props'])
-    net_proceeds = max(0, prop_value - debt_per_prop)
-    pid = gs['next_prop_id']
-    gs['next_prop_id'] += 1
-    region = _REGIONS[pid % len(_REGIONS)]
-    yield_rate = REGION_PROFILES[region]['annual_yield']
-    rent = int(prop_value * yield_rate / 12)
-    gs['market'].append({'id': f'P-{pid}', 'region': region, 'value': prop_value, 'rent': rent})
-    ai['portfolio_value'] -= prop_value
-    ai['total_debt'] = max(0, ai.get('total_debt', 0) - debt_per_prop)
-    ai['props'] -= 1
+    avg = ai['portfolio_value'] / len(portfolio)
+    prop = min(portfolio, key=lambda p: abs(p['value'] - avg))
+    mortgage = next((m for m in ai.get('mortgages', []) if m['prop_id'] == prop['id']), None)
+    loan = mortgage['loan'] if mortgage else 0
+    net_proceeds = max(0, prop['value'] - loan)
+    portfolio.remove(prop)
+    if mortgage:
+        ai['mortgages'].remove(mortgage)
     ai['cash'] += net_proceeds
-    return prop_value
+    ai['total_debt'] = max(0, ai.get('total_debt', 0) - loan)
+    ai['portfolio_value'] -= prop['value']
+    ai['props'] -= 1
+    gs['market'].append(prop)
+    return prop['value']
+
+
+_CAPITAL_MAX_RATE  = 7.0   # Mr Hugh Price pauses buying above this rate (selective — capital strategy)
+_CAPITAL_FALL_TICKS = 2   # consecutive price falls before Mr Hugh Price sells
+_LEVERAGE_BUY_RATE  = 9.0  # Mr Max Lever buys opportunistically in broad rate window
+_LEVERAGE_SELL_RATE = 12.0  # Mr Max Lever only sells in extreme rate spike
 
 
 def ai_decide(gs, ai):
     """Return (action, prop_or_None, rationale, ltv) for one AI actor."""
     market = gs['market']
     name = ai['name']
-    scenario = gs['scenario']
     macro = gs['macro']
-    price_falling = macro['price_index'] < macro['prev']['price_index']
+    rate = macro['rate']
+    history = gs.get('macro_history', [])
 
-    if name == 'Aggressive':
-        # Sell during correction or crash to protect gains
-        if scenario in _SELL_SCENARIOS and ai['props'] > 0:
-            return 'sell', None, 'cutting exposure in correction', 0.0
-        ltv = 0.75
-        affordable = [p for p in market if p['value'] * 0.25 <= ai['cash']]
-        if affordable:
-            prop = max(affordable, key=lambda p: p['value'])
-            return 'buy', prop, 'chasing highest value asset (75% LTV)', ltv
-        return 'hold', None, 'insufficient cash to buy', 0.0
+    if name == 'Mr Max Lever':
+        # Sell when rates are critically high
+        if rate > _LEVERAGE_SELL_RATE and ai['props'] > 0:
+            return 'sell', None, f'selling — rate {rate}% exceeds stress threshold', 0.0
+        # Buy at max leverage when rate is acceptable
+        if rate <= _LEVERAGE_BUY_RATE:
+            ltv = 0.75
+            affordable = [p for p in market if not p.get('auction') and p['value'] * (1 - ltv) <= ai['cash']]
+            if affordable:
+                prop = max(affordable, key=lambda p: p['value'])
+                return 'buy', prop, f'max leverage at {rate}% rate — highest value target', ltv
+        return 'hold', None, f'holding — rate {rate}% above buy threshold', 0.0
 
-    elif name == 'Conservative':
-        # Sell when prices are falling (exits earlier than Aggressive)
-        if price_falling and ai['props'] > 0:
-            return 'sell', None, 'defensive exit on falling prices', 0.0
-        ltv = 0.50
-        good_yield = [
-            p for p in market
-            if gross_yield(p) > 4.0 and p['value'] * 0.50 <= ai['cash']
-        ]
-        if good_yield:
-            prop = min(good_yield, key=lambda p: p['value'])
-            return 'buy', prop, 'buying cheapest high-yield property (50% LTV)', ltv
-        return 'hold', None, 'no properties meet yield threshold', 0.0
+    elif name == 'Mr Hugh Price':
+        # Sell after sustained price falls (capital strategy — protect gains)
+        if len(history) >= _CAPITAL_FALL_TICKS:
+            falling = all(
+                history[-(i + 1)]['price_index'] < history[-(i + 2)]['price_index']
+                for i in range(_CAPITAL_FALL_TICKS)
+                if len(history) > i + 1
+            )
+            if falling and ai['props'] > 0:
+                return 'sell', None, 'prices falling for 2+ ticks — protecting capital', 0.0
+        # Rate gate: capital gains evaporate with high mortgage costs
+        if rate > _CAPITAL_MAX_RATE:
+            return 'hold', None, f'holding — rate {rate}% above capital strategy threshold', 0.0
+        ltv = 0.60
+        # Target higher-value properties (capital growth focus)
+        candidates = [p for p in market if not p.get('auction') and p['value'] * (1 - ltv) <= ai['cash']]
+        if candidates:
+            prop = max(candidates, key=lambda p: p['value'])
+            return 'buy', prop, 'targeting highest value property for capital growth (60% LTV)', ltv
+        return 'hold', None, 'no affordable properties at 60% LTV', 0.0
 
     return 'hold', None, 'holding position', 0.0
 
@@ -618,11 +658,19 @@ def apply_ai_actions(gs):
         if action == 'buy' and prop:
             deposit = int(prop['value'] * (1 - ltv))
             loan = int(prop['value'] * ltv)
+            effective_rate = round(gs['macro']['rate'] + FIX_PREMIUMS['variable'], 2)
             ai['cash'] -= deposit
             ai['total_debt'] = ai.get('total_debt', 0) + loan
             ai['portfolio_value'] += prop['value']
             ai['props'] += 1
             ai['last_property'] = prop['id']
+            ai['portfolio'].append(prop)
+            if loan > 0:
+                ai['mortgages'].append({
+                    'prop_id': prop['id'], 'loan': loan, 'rate_type': 'variable',
+                    'rate': effective_rate, 'fixed_rate': None, 'fix_expires_tick': None,
+                    'monthly_payment': round(loan * effective_rate / 100 / 12, 2),
+                })
             gs['market'].remove(prop)
             results.append({'name': ai['name'], 'action': 'buy', 'prop': copy.copy(prop), 'rationale': rationale})
         elif action == 'sell':
@@ -712,18 +760,19 @@ def advance_tick(gs):
     for mortgage in player.get('mortgages', []):
         rt = mortgage.get('rate_type', 'variable')
         expires = mortgage.get('fix_expires_tick')
+        var_rate = round(current_rate + FIX_PREMIUMS['variable'], 2)
         if rt != 'variable' and expires and tick >= expires:
             mortgage['rate_type'] = 'variable'
-            mortgage['rate'] = current_rate
+            mortgage['rate'] = var_rate
             mortgage['fixed_rate'] = None
             mortgage['fix_expires_tick'] = None
-            mortgage['monthly_payment'] = round((mortgage['loan'] * current_rate / 100) / 12, 2)
+            mortgage['monthly_payment'] = round((mortgage['loan'] * var_rate / 100) / 12, 2)
             gs['news'].append(
-                f"! {mortgage['prop_id']} fix expired — reverted to variable ({current_rate}%)."
+                f"! {mortgage['prop_id']} fix expired — reverted to variable ({var_rate}%)."
             )
         elif rt == 'variable':
-            mortgage['rate'] = current_rate
-            mortgage['monthly_payment'] = round((mortgage['loan'] * current_rate / 100) / 12, 2)
+            mortgage['rate'] = var_rate
+            mortgage['monthly_payment'] = round((mortgage['loan'] * var_rate / 100) / 12, 2)
 
     # Player: rent income for 3 months (quarterly)
     _apply_void_risk(gs)
@@ -731,13 +780,18 @@ def advance_tick(gs):
         int(p['rent'] * (1 - EPC_RENT_PENALTY) if not p.get('epc_compliant', True) else p['rent'])
         for p in player['portfolio']
         if not p.get('vacant', False)
-    ) * 3
+    ) * 6
     player['cash'] += rent_income
     player['cumulative_rent'] = player.get('cumulative_rent', 0) + rent_income
 
     # Player: mortgage payments for 3 months (interest-only, quarterly)
+    # Surcharge: individual property LTV > 65% of current value incurs extra 1.5% annual interest
+    prop_values = {p['id']: p['value'] for p in player['portfolio']}
     for mortgage in player.get('mortgages', []):
-        player['cash'] -= mortgage['monthly_payment'] * 3
+        player['cash'] -= mortgage['monthly_payment'] * 6
+        prop_val = prop_values.get(mortgage['prop_id'], 0)
+        if prop_val > 0 and mortgage['loan'] / prop_val > 0.65:
+            player['cash'] -= int(mortgage['loan'] * 0.015 / 12 * 6)
 
     # Player: property value growth — era-aware regional rates
     year = current_real_year(gs)
@@ -757,15 +811,34 @@ def advance_tick(gs):
         p['value'] = int(p['value'] * (1 + rg))
         p['rent'] = int(p['rent'] * (1 + rg * 0.5))
 
-    # AI: income + portfolio growth + cumulative rent tracking
+    # AI: per-property growth + rent income + mortgage payments (same model as player)
     for ai in gs['ai']:
-        ai_rent = int(ai['portfolio_value'] * _AI_YIELDS.get(ai['name'], 0.050) / 4)
+        # Update variable mortgage rates
+        for mortgage in ai.get('mortgages', []):
+            if mortgage.get('rate_type', 'variable') == 'variable':
+                var_rate = round(current_rate + FIX_PREMIUMS['variable'], 2)
+                mortgage['rate'] = var_rate
+                mortgage['monthly_payment'] = round(mortgage['loan'] * var_rate / 100 / 12, 2)
+
+        # Rent income (6 months)
+        ai_rent = sum(p['rent'] * 6 for p in ai.get('portfolio', []))
         ai['cash'] += ai_rent
         ai['cumulative_rent'] = ai.get('cumulative_rent', 0) + ai_rent
-        ai['portfolio_value'] = int(ai['portfolio_value'] * (1 + quarterly_growth))
-        total_debt = ai.get('total_debt', 0)
-        if total_debt > 0:
-            ai['cash'] -= int(total_debt * gs['macro']['rate'] / 100 / 12 * 3)
+
+        # Per-property value and rent growth using same regional HPI as player
+        for p in ai.get('portfolio', []):
+            gf = regional_hpi.get_regional_multiplier(year, p.get('region', 'West'))
+            rg = quarterly_growth * gf
+            p['value'] = int(p['value'] * (1 + rg))
+            p['rent'] = int(p['rent'] * (1 + rg * 0.5))
+
+        # Recompute derived aggregate fields
+        ai['portfolio_value'] = sum(p['value'] for p in ai.get('portfolio', []))
+        ai['props'] = len(ai.get('portfolio', []))
+        ai['total_debt'] = sum(m['loan'] for m in ai.get('mortgages', []))
+
+        # Mortgage interest payments (6 months)
+        ai['cash'] -= int(sum(m['monthly_payment'] * 6 for m in ai.get('mortgages', [])))
 
     # Macro: advance to next entry's values
     prev = {
@@ -837,7 +910,7 @@ def advance_tick(gs):
         'rate': gs['macro']['rate'],
         'rent_growth': gs['macro']['rent_growth'],
     })
-    _ACTOR_ORDER = ['You', 'Conservative', 'Aggressive']
+    _ACTOR_ORDER = ['You', 'Mr Hugh Price', 'Mr Max Lever']
     lb_map = {e['name']: e['score'] for e in gs['leaderboard']}
     gs['score_history'].append({
         'tick': new_tick,
@@ -867,7 +940,7 @@ def _build_end_state(gs):
     end_year = end_entry[0]
     end_half = end_entry[1]
     era_label = hist.get_era_label(start_year)
-    min_year, max_year = hist.get_quarterly_start_limits(gs['total_ticks'])
+    min_year, max_year = hist.get_start_limits(gs['total_ticks'])
 
     gs['end'] = {
         'player_breakdown': {
@@ -898,7 +971,7 @@ def _build_end_state(gs):
 # Chart helpers
 # ---------------------------------------------------------------------------
 
-_ACTOR_COLORS = {'You': '#00FF88', 'Conservative': '#FBBF24', 'Aggressive': '#F87171'}
+_ACTOR_COLORS = {'You': '#00FF88', 'Mr Hugh Price': '#FBBF24', 'Mr Max Lever': '#F87171'}
 
 
 def sparkline_points(values, width=100, height=30, padding=3):

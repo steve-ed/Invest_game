@@ -54,7 +54,7 @@
     <!-- AI decisions -->
     {% for ai in round.ai %}
     <div class="panel round-card">
-      <div class="round-actor {{ ai.name.lower() }}">{{ ai.name.upper() }}</div>
+      <div class="round-actor {{ ai.name.lower().replace(' ', '-') }}">{{ ai.name.upper() }}</div>
       {% if ai.action == 'buy' and ai.prop %}
         <div class="round-action buy">BOUGHT</div>
         <div class="round-prop">
@@ -79,8 +79,8 @@
         Actor Positions
         <span style="float:right; font-size:11px; color:var(--dim);">
           <span style="color:#00FF88;">&#9632;</span> You &nbsp;
-          <span style="color:#FBBF24;">&#9632;</span> Conservative &nbsp;
-          <span style="color:#F87171;">&#9632;</span> Aggressive
+          <span style="color:#FBBF24;">&#9632;</span> Mr Hugh Price &nbsp;
+          <span style="color:#F87171;">&#9632;</span> Mr Max Lever
         </span>
       </div>
       <div style="display:flex; align-items:flex-end; height:48px; margin-top:6px;">
@@ -142,7 +142,7 @@
     <!-- AI portfolios -->
     {% for ai in gs.ai %}
     <div class="panel">
-      <div class="round-actor {{ ai.name.lower() }}" style="margin-bottom:6px;">{{ ai.name.upper() }}</div>
+      <div class="round-actor {{ ai.name.lower().replace(' ', '-') }}" style="margin-bottom:6px;">{{ ai.name }}</div>
       <div style="font-size:13px; color:var(--text);">
         {{ ai.props }} propert{{ 'y' if ai.props == 1 else 'ies' }}
         · Portfolio: £{{ '{:,.0f}'.format(ai.portfolio_value) }}
@@ -175,8 +175,8 @@
   min-width: 130px;
 }
 .round-actor.you { color: var(--accent); }
-.round-actor.conservative { color: var(--yellow); }
-.round-actor.aggressive { color: var(--red); }
+.round-actor.mr-hugh-price { color: var(--yellow); }
+.round-actor.mr-max-lever  { color: var(--red); }
 .round-action {
   font-size: 15px;
   font-weight: bold;
