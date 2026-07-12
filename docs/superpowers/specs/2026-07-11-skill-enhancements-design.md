@@ -223,6 +223,10 @@ score = portfolio_value + cash - leverage_penalty - concentration_penalty
 
 The game is split across three sequential pages per turn. Each page has a sticky footer with the primary action button.
 
+**Sticky footer implementation:** `body` is a flex column (`height: 100%`). The scrollable content sits in `.page-wrap` (`flex: 1; overflow-y: auto; min-height: 0`). The footer is a natural flex child (`flex-shrink: 0`) — it stays pinned without `position: fixed`, which avoids mobile browser clipping issues.
+
+**Mobile breakpoint:** `max-width: 640px`. At this width the sidebar is hidden and replaced by a compact `.mobile-stat-bar`. Non-essential table columns are hidden via `.col-hide-mobile`. The decision footer action buttons collapse to a 5-column CSS grid (`repeat(5, 1fr)`) with abbreviated labels (BUY / HOLD / RE-MTG / RENOV / SELL) at reduced height (34px).
+
 ---
 
 ### Page 1 — Turn Overview (`/turn`)
