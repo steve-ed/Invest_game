@@ -233,103 +233,18 @@
       </table>
     </div>
 
-    <!-- Portfolio -->
+    <!-- Portfolio summary -->
     <div class="panel">
-      <div class="panel-title">
-        Your Portfolio
-        <span class="accent" style="float:right; font-size:14px;">
-          {{ portfolio_value | currency }} total
-        </span>
-      </div>
+      <div class="panel-title">Your Portfolio</div>
       {% if gs.player.portfolio %}
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Region</th>
-            <th style="text-align:right;">Value</th>
-            <th style="text-align:right;" class="col-hide-mobile">Rent/mo</th>
-            <th style="text-align:right;">Yield</th>
-            <th class="col-hide-mobile">EPC</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for prop in gs.player.portfolio %}
-          <tr>
-            <td class="accent">{{ prop.id }}</td>
-            <td>{{ prop.region }}</td>
-            <td style="text-align:right;">{{ prop.value | currency }}</td>
-            <td style="text-align:right;" class="col-hide-mobile">{{ prop.rent | currency }}</td>
-            <td style="text-align:right;">{{ ((prop.rent * 12 / prop.value) * 100) | round(1) }}%</td>
-            <td class="col-hide-mobile">
-              {% if 'epc' in reg_events_fired %}
-                {% if prop.get('epc_compliant', true) %}
-                  <span class="badge badge-green" style="font-size:10px;">C</span>
-                {% else %}
-                  <span class="badge badge-red" style="font-size:10px;">!</span>
-                {% endif %}
-              {% endif %}
-            </td>
-            <td>
-              {% if prop.get('vacant', false) %}
-                <span class="badge badge-red" style="font-size:10px;">VACANT</span>
-              {% elif prop.get('renovated', false) %}
-                <span class="badge badge-green" style="font-size:10px;">RENOVATED</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div style="padding-top:10px; font-size:13px; color:var(--muted);">
-        Cash: <span style="color:var(--text); font-weight:bold;">{{ gs.player.cash | currency }}</span>
+      <div style="font-size:13px; color:var(--text);">
+        {{ gs.player.portfolio | length }} propert{{ 'y' if gs.player.portfolio | length == 1 else 'ies' }}
+        &nbsp;·&nbsp; Portfolio: <span style="font-weight:bold;">{{ portfolio_value | currency }}</span>
+        &nbsp;·&nbsp; Cash: <span style="font-weight:bold; color:var(--accent);">{{ gs.player.cash | currency }}</span>
         {% if gs.player.mortgages %}
-        &nbsp;&nbsp;
-        <span style="color:var(--red);">
-          Monthly mortgage: £{{ '{:,.0f}'.format(gs.player.mortgages | sum(attribute='monthly_payment')) }}
-        </span>
+        &nbsp;·&nbsp; <span style="color:var(--red);">Mortgage: £{{ '{:,.0f}'.format(gs.player.mortgages | sum(attribute='monthly_payment')) }}/mo</span>
         {% endif %}
       </div>
-      {% if gs.player.mortgages %}
-      <div style="margin-top:10px;">
-        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">MORTGAGES</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Property</th>
-              <th>Rate</th>
-              <th style="text-align:right;">Loan</th>
-              <th style="text-align:right;">Monthly</th>
-              <th style="text-align:right;" class="col-hide-mobile">Per Turn</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for m in gs.player.mortgages %}
-            <tr>
-              <td class="accent">{{ m.prop_id }}</td>
-              <td style="font-size:12px;">
-                {% if m.rate_type == 'variable' %}
-                  <span class="badge badge-dim">VAR {{ m.rate | round(2) }}%</span>
-                {% elif m.rate_type == 'fixed_2yr' %}
-                  <span class="badge badge-green">FIX2 {{ m.fixed_rate | round(2) }}%</span>
-                  <span class="muted" style="font-size:10px;">→T{{ m.fix_expires_tick }}</span>
-                {% elif m.rate_type == 'fixed_5yr' %}
-                  <span class="badge badge-green">FIX5 {{ m.fixed_rate | round(2) }}%</span>
-                  <span class="muted" style="font-size:10px;">→T{{ m.fix_expires_tick }}</span>
-                {% else %}
-                  <span class="badge badge-dim">{{ m.rate | default(0) | round(2) }}%</span>
-                {% endif %}
-              </td>
-              <td style="text-align:right;">£{{ '{:,.0f}'.format(m.loan) }}</td>
-              <td style="text-align:right; color:var(--red);">£{{ '{:,.0f}'.format(m.monthly_payment) }}</td>
-              <td style="text-align:right; color:var(--red);" class="col-hide-mobile">£{{ '{:,.0f}'.format(m.monthly_payment * 6) }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% endif %}
       {% else %}
       <p class="muted">No properties owned.</p>
       {% endif %}
