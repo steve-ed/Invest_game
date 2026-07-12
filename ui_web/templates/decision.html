@@ -1,0 +1,895 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="layout-sidebar">
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+
+    <div class="panel">
+      <div class="panel-title">Progress</div>
+      <div style="font-size:28px; font-weight:bold; color:var(--accent);">T{{ gs.tick }}</div>
+      <div class="muted" style="font-size:13px;">of {{ gs.total_ticks }} turns</div>
+      <div style="margin-top:10px;">
+        <div style="height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+          <div style="height:100%; width:{{ ((gs.tick / gs.total_ticks) * 100) | round(0) }}%; background:var(--accent); border-radius:3px;"></div>
+        </div>
+      </div>
+      <div class="muted" style="font-size:12px; margin-top:6px;">{{ gs.scenario }}</div>
+      <div class="muted" style="font-size:11px; margin-top:2px; line-height:1.3;">{{ scenario_desc }}</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Macro</div>
+      <div class="macro-row">
+        <span class="muted">PRICES</span>
+        <span>
+          <span class="macro-val">{{ gs.macro.price_index }}</span>
+          <span class="trend-{{ 'up' if trend.price_index == '^' else ('down' if trend.price_index == 'v' else 'flat') }}">&nbsp;{{ trend.price_index }}</span>
+        </span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">INT. RATE</span>
+        <span>
+          <span class="macro-val">{{ gs.macro.rate }}%</span>
+          <span class="trend-{{ 'up' if trend.rate == '^' else ('down' if trend.rate == 'v' else 'flat') }}">&nbsp;{{ trend.rate }}</span>
+        </span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">RENT GROWTH</span>
+        <span>
+          <span class="macro-val">{{ gs.macro.rent_growth }}%</span>
+          <span class="trend-{{ 'up' if trend.rent_growth == '^' else ('down' if trend.rent_growth == 'v' else 'flat') }}">&nbsp;{{ trend.rent_growth }}</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Your Rank</div>
+      <div style="font-size:32px; font-weight:bold; color:var(--accent);">#{{ rank }}</div>
+      <div class="muted" style="font-size:13px;">Score</div>
+      <div style="font-size:17px; font-weight:bold;">{{ player_score | currency }}</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Cash Available</div>
+      <div style="font-size:22px; font-weight:bold; color:var(--accent);">
+        {{ gs.player.cash | currency }}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Main area ── -->
+  <div class="main-area" style="padding-bottom: 180px;">
+
+    <div class="mobile-stat-bar">
+      <span class="accent" style="font-weight:bold;">T{{ gs.tick + 1 }}/{{ gs.total_ticks }}</span>
+      <span>#{{ rank }}</span>
+      <span>{{ gs.player.cash | currency }}</span>
+      <span style="color:{{ archetype_meta.color }};">{{ archetype_meta.short }}</span>
+    </div>
+
+    <h2 style="margin-bottom:16px;">YOUR DECISION — Turn {{ gs.tick + 1 }}</h2>
+
+    <form method="POST" action="/decision/confirm" id="decision-form">
+      <input type="hidden" name="action"       id="action-field"    value="hold">
+      <input type="hidden" name="buy_prop_id"  id="buy-prop-field"  value="">
+      <input type="hidden" name="sell_prop_id" id="sell-prop-field" value="">
+      <input type="hidden" name="rate_type"    id="rate-type-field" value="variable">
+      <input type="hidden" name="auction_prop_id" id="auction-prop-field" value="">
+      <input type="hidden" name="auction_bid"     id="auction-bid-field"  value="0">
+
+      {% if auction_props %}
+      {% set ap = auction_props[0] %}
+      <div class="panel" style="border:1px solid var(--yellow);">
+        <div class="panel-title" style="color:var(--yellow);">
+          AUCTION — {{ ap.region }} &nbsp;
+          <span class="badge badge-yellow" style="font-size:11px;">THIS TURN ONLY</span>
+        </div>
+        <div style="display:flex; gap:24px; flex-wrap:wrap; margin-bottom:12px;">
+          <div>
+            <div class="muted" style="font-size:11px;">ID</div>
+            <div class="accent" style="font-weight:bold;">{{ ap.id }}</div>
+          </div>
+          <div>
+            <div class="muted" style="font-size:11px;">ASKING</div>
+            <div style="font-weight:bold;">{{ ap.value | currency }}</div>
+          </div>
+          <div>
+            <div class="muted" style="font-size:11px;">RENT/MO</div>
+            <div>{{ ap.rent | currency }}</div>
+          </div>
+          <div>
+            <div class="muted" style="font-size:11px;">YIELD</div>
+            <div>{{ ((ap.rent * 12 / ap.value) * 100) | round(1) }}%</div>
+          </div>
+        </div>
+        <div style="font-size:12px; color:var(--dim); margin-bottom:10px;">
+          AI bids: Conservative £{{ ap.value | int | currency }}  &nbsp;·&nbsp;
+          Aggressive £{{ (ap.value * 1.05) | int | currency }}  &nbsp;·&nbsp;
+          Ties go to you.
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div>
+            <div class="muted" style="font-size:11px; margin-bottom:4px;">YOUR BID (£)</div>
+            <input type="number" id="auction-bid-input" min="{{ ap.value }}" step="1000"
+                   value="{{ ap.value }}"
+                   style="background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:3px; padding:6px 10px; font-size:14px; width:140px;"
+                   oninput="document.getElementById('auction-bid-field').value=this.value;">
+          </div>
+          <div style="margin-top:16px;">
+            <button type="button" class="btn" onclick="placeAuctionBid('{{ ap.id }}')">PLACE BID</button>
+            &nbsp;
+            <button type="button" class="btn" style="opacity:0.6;" onclick="passAuction()">PASS</button>
+          </div>
+        </div>
+        <div id="auction-hint" style="margin-top:8px; font-size:13px; color:var(--dim);"></div>
+
+        <!-- LTV + rate type for auction (shown when bid placed) -->
+        <div id="auction-ltv-panel" style="display:none; margin-top:14px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">FINANCING</div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <label style="cursor:pointer;"><input type="radio" name="auction_ltv" value="0" checked onchange="updateAuctionHint()"><span class="badge badge-dim" style="margin-left:4px;">CASH</span></label>
+            <label style="cursor:pointer;"><input type="radio" name="auction_ltv" value="0.5" onchange="updateAuctionHint()"><span class="badge badge-dim" style="margin-left:4px;">50% LTV</span></label>
+            <label style="cursor:pointer;"><input type="radio" name="auction_ltv" value="0.75" onchange="updateAuctionHint()"><span class="badge badge-dim" style="margin-left:4px;">75% LTV</span></label>
+          </div>
+          <div style="margin-top:8px; font-size:13px; color:var(--dim);" id="auction-calc"></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Market properties -->
+      <div class="panel">
+        <div class="panel-title">Market Properties — click to select for BUY</div>
+        {% if market %}
+        <div class="scroll-list">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Region</th>
+                <th style="text-align:right;">Value</th>
+                <th style="text-align:right;" class="col-hide-mobile">Rent/mo</th>
+                <th style="text-align:right;">Yield</th>
+                <th style="text-align:right;" class="col-hide-mobile">SDLT</th>
+                <th class="col-hide-mobile">Status</th>
+              </tr>
+            </thead>
+            <tbody id="market-table">
+              {% for prop in market %}
+              <tr class="prop-row"
+                  data-id="{{ prop.id }}"
+                  data-value="{{ prop.value }}"
+                  data-sdlt="{{ prop.sdlt }}"
+                  data-type="market"
+                  onclick="selectMarketProp(this)">
+                <td class="accent">{{ prop.id }}</td>
+                <td>{{ prop.region }}</td>
+                <td style="text-align:right;">{{ prop.value | currency }}</td>
+                <td style="text-align:right;" class="col-hide-mobile">{{ prop.rent | currency }}</td>
+                <td style="text-align:right;">{{ prop.yield_pct | round(1) }}%</td>
+                <td style="text-align:right; color:var(--red);" class="col-hide-mobile">{{ prop.sdlt | currency }}</td>
+                <td class="col-hide-mobile">
+                  {% if prop.get('auction') %}
+                    <span class="badge badge-yellow" style="font-size:10px;">AUCTION</span>
+                  {% elif gs.player.cash >= prop.value + prop.sdlt %}
+                    <span class="badge badge-green">AFFORDABLE</span>
+                  {% elif gs.player.cash >= prop.value * 0.25 + prop.sdlt %}
+                    <span class="badge badge-dim">MORTGAGEABLE</span>
+                  {% else %}
+                    <span class="badge badge-red">TOO EXPENSIVE</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="muted">No properties available in market.</p>
+        {% endif %}
+      </div>
+
+      <!-- Portfolio properties -->
+      <div class="panel">
+        <div class="panel-title">Your Portfolio — click to select for SELL</div>
+        {% if portfolio %}
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Region</th>
+              <th style="text-align:right;">Value</th>
+              <th style="text-align:right;" class="col-hide-mobile">Rent/mo</th>
+              <th style="text-align:right;">Yield</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="portfolio-table">
+            {% for prop in portfolio %}
+            <tr class="prop-row"
+                data-id="{{ prop.id }}"
+                data-type="portfolio"
+                onclick="selectPortfolioProp(this)">
+              <td class="accent">{{ prop.id }}</td>
+              <td>{{ prop.region }}</td>
+              <td style="text-align:right;">{{ prop.value | currency }}</td>
+              <td style="text-align:right;" class="col-hide-mobile">{{ prop.rent | currency }}</td>
+              <td style="text-align:right;">{{ prop.yield_pct | round(1) }}%</td>
+              <td>
+                {% if prop.get('vacant', false) %}
+                  <span class="badge badge-red" style="font-size:10px;">VACANT</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="muted">No properties in portfolio.</p>
+        {% endif %}
+      </div>
+
+      <!-- Remortgage panel -->
+      {% if gs.player.portfolio %}
+      <div class="panel">
+        <div class="panel-title">
+          Remortgage / Refinance
+          {% if refinance_cooldown == 0 %}
+            <span class="badge badge-green" style="float:right; font-size:11px;">REFINANCE AVAILABLE</span>
+          {% else %}
+            <span class="badge badge-dim" style="float:right; font-size:11px;">COOLDOWN: {{ refinance_cooldown }} turns</span>
+          {% endif %}
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Region</th>
+              <th style="text-align:right;">Value</th>
+              <th style="text-align:right;">Current loan</th>
+              <th style="text-align:right;">Max equity release</th>
+            </tr>
+          </thead>
+          <tbody id="remortgage-table">
+            {% for prop in portfolio %}
+            {% set existing_loan = 0 %}
+            {% for m in gs.player.mortgages %}
+              {% if m.prop_id == prop.id %}{% set existing_loan = m.loan %}{% endif %}
+            {% endfor %}
+            {% set max_loan = (prop.value * 0.75) | int %}
+            {% set max_release = max_loan - existing_loan %}
+            <tr class="prop-row"
+                data-id="{{ prop.id }}"
+                data-value="{{ prop.value }}"
+                data-existing-loan="{{ existing_loan }}"
+                data-type="remortgage"
+                onclick="selectRemortgageProp(this)"
+                {% if max_release <= 0 %}style="opacity:0.45; cursor:default;"{% endif %}>
+              <td class="accent">{{ prop.id }}</td>
+              <td>{{ prop.region }}</td>
+              <td style="text-align:right;">{{ prop.value | currency }}</td>
+              <td style="text-align:right; color:var(--red);">
+                {% if existing_loan > 0 %}{{ existing_loan | currency }}{% else %}<span class="muted">none</span>{% endif %}
+              </td>
+              <td style="text-align:right; color:{{ 'var(--accent)' if max_release > 0 else 'var(--dim)' }}; font-weight:bold;">
+                {% if max_release > 0 %}{{ max_release | currency }}{% else %}<span class="muted">fully drawn</span>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div id="remortgage-hint" style="margin-top:10px; font-size:13px; color:var(--dim);"></div>
+
+        <!-- LTV + rate type for remortgage (shown when property selected) -->
+        <div id="remortgage-ltv-panel" style="display:none; margin-top:14px;">
+          <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">NEW LTV</div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <label style="cursor:pointer;">
+              <input type="radio" name="refi_ltv" value="0.50" onchange="updateRemortgageHint()">
+              <span class="badge badge-dim" style="margin-left:4px;">50% LTV</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="refi_ltv" value="0.75" onchange="updateRemortgageHint()">
+              <span class="badge badge-dim" style="margin-left:4px;">75% LTV</span>
+            </label>
+          </div>
+          <div style="font-size:13px; color:var(--muted); margin-top:10px; margin-bottom:8px;">RATE TYPE</div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <label style="cursor:pointer;">
+              <input type="radio" name="refi_rate_type" value="variable" checked onchange="updateRemortgageHint()">
+              <span class="badge badge-dim" style="margin-left:4px;">VARIABLE ({{ gs.macro.rate }}%)</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="refi_rate_type" value="fixed_2yr" onchange="updateRemortgageHint()">
+              <span class="badge badge-dim" style="margin-left:4px;">FIX 2yr · {{ (gs.macro.rate + fix_premiums.fixed_2yr) | round(2) }}%</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="refi_rate_type" value="fixed_5yr" onchange="updateRemortgageHint()">
+              <span class="badge badge-dim" style="margin-left:4px;">FIX 5yr · {{ (gs.macro.rate + fix_premiums.fixed_5yr) | round(2) }}%</span>
+            </label>
+          </div>
+          <div id="remortgage-calc" style="margin-top:10px; font-size:13px; color:var(--dim);"></div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- EPC compliance panel -->
+      {% if 'epc' in reg_events_fired %}
+      {% set noncompliant = gs.player.portfolio | selectattr('epc_compliant', 'equalto', false) | list %}
+      {% if noncompliant %}
+      <div class="panel" style="border:1px solid var(--yellow);">
+        <div class="panel-title" style="color:var(--yellow);">EPC Compliance — Upgrade Required</div>
+        <p class="muted" style="font-size:12px; margin-bottom:10px;">
+          Non-compliant properties earn 15% less rent until upgraded. Cost: £{{ EPC_UPGRADE_COST | currency }} per property.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Region</th>
+              <th style="text-align:right;">Rent/mo (reduced)</th>
+              <th style="text-align:right;">Full rent</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for prop in noncompliant %}
+            <tr>
+              <td class="accent">{{ prop.id }}</td>
+              <td>{{ prop.region }}</td>
+              <td style="text-align:right; color:var(--red);">{{ (prop.rent * 0.85) | int | currency }}</td>
+              <td style="text-align:right;">{{ prop.rent | currency }}</td>
+              <td>
+                {% if gs.player.cash >= EPC_UPGRADE_COST %}
+                <button type="button" class="btn" style="font-size:11px; padding:4px 10px;"
+                        onclick="selectEpcUpgrade('{{ prop.id }}')">Upgrade £5,000</button>
+                {% else %}
+                <span class="muted" style="font-size:11px;">insufficient cash</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+      {% endif %}
+
+    </form>
+
+    <!-- Regional guide -->
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-title">Regional Guide</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Region</th>
+            <th style="text-align:right;">Yield</th>
+            <th style="text-align:right;">Growth factor</th>
+            <th style="text-align:right;">Risk profile</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for region, p in region_profiles.items() %}
+          <tr>
+            <td>{{ region }}</td>
+            <td style="text-align:right; color:var(--accent);">{{ (p.annual_yield * 100) | round(1) }}%</td>
+            <td style="text-align:right;
+              {% if p.growth_factor > 1.1 %}color:var(--accent);
+              {% elif p.growth_factor < 0.85 %}color:var(--muted);
+              {% endif %}">
+              {{ p.growth_factor }}x
+            </td>
+            <td style="text-align:right; font-size:12px; color:var(--dim);">
+              {% if p.growth_factor >= 1.3 %}High vol — amplifies booms & crashes
+              {% elif p.growth_factor >= 1.1 %}Medium vol
+              {% elif p.growth_factor >= 0.9 %}Low vol
+              {% else %}Very low vol — stable income
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="muted" style="font-size:11px; margin-top:8px;">
+        Growth factor multiplies the national price movement each turn. A London property grows (or falls) 1.4× the national rate. A Wales property moves 0.75×.
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_footer %}
+<!-- ── Sticky action footer ── -->
+<div class="decision-footer">
+  <div class="decision-footer-inner">
+    <div class="decision-footer-left">
+      <!-- LTV panel (expands upward, hidden by default) -->
+      <div id="ltv-panel" style="display:none; margin-bottom:10px;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">FINANCING</div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;" id="ltv-options">
+          <label style="cursor:pointer;">
+            <input type="radio" name="ltv" form="decision-form" value="0" checked onchange="updateLtvDisplay()">
+            <span class="badge badge-dim" style="margin-left:4px; cursor:pointer;">CASH (0% LTV)</span>
+          </label>
+          <label style="cursor:pointer;">
+            <input type="radio" name="ltv" form="decision-form" value="0.5" onchange="updateLtvDisplay()">
+            <span class="badge badge-dim" style="margin-left:4px; cursor:pointer;">50% LTV</span>
+          </label>
+          <label style="cursor:pointer;">
+            <input type="radio" name="ltv" form="decision-form" value="0.75" onchange="updateLtvDisplay()">
+            <span class="badge badge-dim" style="margin-left:4px; cursor:pointer;">75% LTV</span>
+          </label>
+        </div>
+        <div id="rate-type-panel" style="display:none; margin-top:10px;">
+          <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">RATE TYPE</div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <label style="cursor:pointer;">
+              <input type="radio" name="rate_type_radio" form="decision-form" value="variable" checked onchange="setRateType('variable'); updateLtvHint();">
+              <span class="badge badge-dim" style="margin-left:4px;">VARIABLE ({{ gs.macro.rate }}%)</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="rate_type_radio" form="decision-form" value="fixed_2yr" onchange="setRateType('fixed_2yr'); updateLtvHint();">
+              <span class="badge badge-dim" style="margin-left:4px;">FIX 2yr · {{ (gs.macro.rate + fix_premiums.fixed_2yr) | round(2) }}% · 4 turns</span>
+            </label>
+            <label style="cursor:pointer;">
+              <input type="radio" name="rate_type_radio" form="decision-form" value="fixed_5yr" onchange="setRateType('fixed_5yr'); updateLtvHint();">
+              <span class="badge badge-dim" style="margin-left:4px;">FIX 5yr · {{ (gs.macro.rate + fix_premiums.fixed_5yr) | round(2) }}% · 10 turns</span>
+            </label>
+          </div>
+        </div>
+        <div style="margin-top:6px; font-size:13px; color:var(--dim);" id="ltv-hint"></div>
+      </div>
+      <!-- Renovate panel (expands upward, hidden by default) -->
+      <div id="renovate-panel" style="display:none; margin-bottom:10px;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">SELECT PROPERTY TO RENOVATE</div>
+        <div style="overflow-x:auto;">
+          <table style="min-width:400px;">
+            <thead>
+              <tr>
+                <th>ID</th><th>Region</th>
+                <th style="text-align:right;">Value</th>
+                <th style="text-align:right;">Cost (10%)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="renovate-table">
+              {% for prop in portfolio %}
+              <tr class="prop-row"
+                  data-id="{{ prop.id }}"
+                  data-type="renovate"
+                  onclick="selectRenovateProp(this)"
+                  {% if prop.get('renovated') or gs.player.cash < prop.value * 0.1 %}
+                    style="opacity:0.4; cursor:default;"
+                  {% endif %}>
+                <td class="accent">{{ prop.id }}</td>
+                <td>{{ prop.region }}</td>
+                <td style="text-align:right;">{{ prop.value | currency }}</td>
+                <td style="text-align:right; color:var(--red);">{{ (prop.value * 0.1) | int | currency }}</td>
+                <td>
+                  {% if prop.get('renovated') %}
+                    <span class="badge badge-green" style="font-size:10px;">DONE</span>
+                  {% elif gs.player.cash < prop.value * 0.1 %}
+                    <span class="badge badge-dim" style="font-size:10px;">NO CASH</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div id="renovate-hint" style="margin-top:6px; font-size:13px; color:var(--dim);"></div>
+      </div>
+      <!-- Action buttons + hint -->
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="action-row">
+          <button type="button" class="btn btn-large" id="btn-buy"        onclick="setAction('buy')">BUY</button>
+          <button type="button" class="btn btn-large active" id="btn-hold" onclick="setAction('hold')">HOLD</button>
+          <button type="button" class="btn btn-large" id="btn-remortgage" onclick="setAction('remortgage')">REMORTGAGE</button>
+          <button type="button" class="btn btn-large" id="btn-renovate"   onclick="setAction('renovate')">RENOVATE</button>
+          <button type="button" class="btn btn-large btn-red" id="btn-sell" onclick="setAction('sell')">SELL</button>
+        </div>
+        <div style="font-size:13px; color:var(--muted);" id="action-hint">HOLD selected — no property action this turn.</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; flex-shrink:0;">
+      <div style="text-align:center;">
+        <div style="font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; margin-bottom:2px;">Time</div>
+        <div id="turn-timer" style="font-size:32px; font-weight:bold; font-family:'Courier New',monospace; color:var(--accent); letter-spacing:0.08em; min-width:64px;">0:20</div>
+      </div>
+      <button type="submit" form="decision-form" class="btn btn-large" id="confirm-btn">&gt;&gt; CONFIRM</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  var currentAction   = 'hold';
+  var selectedBuyId   = '';
+  var selectedSellId  = '';
+  var selectedPropValue = 0;
+  var selectedPropSdlt  = 0;
+  var playerCash      = {{ gs.player.cash }};
+  var annualRate      = {{ gs.macro.rate }};
+  var currentYear     = {{ current_year }};
+  var FIX_PREMIUMS    = { 'variable': 0, 'fixed_2yr': 0.5, 'fixed_5yr': 0.25 };
+  var currentRateType = 'variable';
+
+  function calcSdlt(value, year) {
+    if (year >= 2016) {
+      if (value <= 125000) return Math.round(value * 0.03);
+      if (value <= 250000) return Math.round(125000 * 0.03 + (value - 125000) * 0.05);
+      if (value <= 925000) return Math.round(125000 * 0.03 + 125000 * 0.05 + (value - 250000) * 0.08);
+      return Math.round(125000 * 0.03 + 125000 * 0.05 + 675000 * 0.08 + (value - 925000) * 0.13);
+    } else {
+      if (value <= 125000) return 0;
+      if (value <= 250000) return Math.round((value - 125000) * 0.02);
+      if (value <= 500000) return Math.round(125000 * 0.02 + (value - 250000) * 0.05);
+      return Math.round(125000 * 0.02 + 250000 * 0.05 + (value - 500000) * 0.07);
+    }
+  }
+
+  function setRateType(rt) {
+    currentRateType = rt;
+    document.getElementById('rate-type-field').value = rt;
+  }
+
+  function clearMarketSelection() {
+    document.querySelectorAll('#market-table tr.prop-row').forEach(function(r) {
+      r.classList.remove('selected-buy');
+    });
+    selectedBuyId = '';
+    selectedPropValue = 0;
+    selectedPropSdlt = 0;
+    document.getElementById('buy-prop-field').value = '';
+    showLtvPanel(false);
+    document.getElementById('ltv-hint').textContent = '';
+  }
+
+  function clearPortfolioSelection() {
+    document.querySelectorAll('#portfolio-table tr.prop-row').forEach(function(r) {
+      r.classList.remove('selected-sell');
+    });
+    selectedSellId = '';
+    document.getElementById('sell-prop-field').value = '';
+  }
+
+  function selectMarketProp(row) {
+    if (row.classList.contains('selected-buy')) {
+      clearMarketSelection();
+      if (currentAction === 'buy') setAction('hold');
+      return;
+    }
+    clearMarketSelection();
+    row.classList.add('selected-buy');
+    selectedBuyId = row.getAttribute('data-id');
+    selectedPropValue = parseInt(row.getAttribute('data-value'));
+    selectedPropSdlt  = parseInt(row.getAttribute('data-sdlt'));
+    document.getElementById('buy-prop-field').value = selectedBuyId;
+    setAction('buy');
+    showLtvPanel(true);
+    updateLtvHint();
+  }
+
+  function selectPortfolioProp(row) {
+    if (row.classList.contains('selected-sell')) {
+      clearPortfolioSelection();
+      if (currentAction === 'sell') setAction('hold');
+      return;
+    }
+    clearPortfolioSelection();
+    row.classList.add('selected-sell');
+    selectedSellId = row.getAttribute('data-id');
+    document.getElementById('sell-prop-field').value = selectedSellId;
+    setAction('sell');
+  }
+
+  var selectedRemortgageId   = '';
+  var selectedRemortgageValue = 0;
+  var selectedRemortgageExistingLoan = 0;
+
+  function clearRemortgageSelection() {
+    document.querySelectorAll('#remortgage-table tr.prop-row').forEach(function(r) {
+      r.classList.remove('selected-buy');
+    });
+    selectedRemortgageId = '';
+    selectedRemortgageValue = 0;
+    selectedRemortgageExistingLoan = 0;
+    document.getElementById('buy-prop-field').value = '';
+    var p = document.getElementById('remortgage-ltv-panel');
+    if (p) p.style.display = 'none';
+    var h = document.getElementById('remortgage-hint');
+    if (h) h.textContent = '';
+  }
+
+  function selectRemortgageProp(row) {
+    var maxRelease = parseInt(row.getAttribute('data-value')) * 0.75 - parseInt(row.getAttribute('data-existing-loan'));
+    if (maxRelease <= 0) return;
+    if (row.classList.contains('selected-buy')) {
+      clearRemortgageSelection();
+      if (currentAction === 'remortgage') setAction('hold');
+      return;
+    }
+    clearRemortgageSelection();
+    clearMarketSelection();
+    clearPortfolioSelection();
+    row.classList.add('selected-buy');
+    selectedRemortgageId   = row.getAttribute('data-id');
+    selectedRemortgageValue = parseInt(row.getAttribute('data-value'));
+    selectedRemortgageExistingLoan = parseInt(row.getAttribute('data-existing-loan'));
+    document.getElementById('buy-prop-field').value = selectedRemortgageId;
+    setAction('remortgage');
+    var p = document.getElementById('remortgage-ltv-panel');
+    if (p) p.style.display = 'block';
+    updateRemortgageHint();
+  }
+
+  function updateRemortgageHint() {
+    if (!selectedRemortgageId) return;
+    var ltvEl = document.querySelector('input[name="refi_ltv"]:checked');
+    if (!ltvEl) {
+      document.getElementById('remortgage-calc').textContent = 'Select a new LTV above.';
+      return;
+    }
+    var ltv = parseFloat(ltvEl.value);
+    var rtEl = document.querySelector('input[name="refi_rate_type"]:checked');
+    var rt = rtEl ? rtEl.value : 'variable';
+    var premium = FIX_PREMIUMS[rt] || 0;
+    var newLoan = Math.round(selectedRemortgageValue * ltv);
+    var cashReleased = newLoan - selectedRemortgageExistingLoan;
+    var effectiveRate = annualRate + premium;
+    var monthly = Math.round((newLoan * effectiveRate / 100) / 12);
+    document.getElementById('rate-type-field').value = rt;
+    var hint = cashReleased > 0
+      ? 'New loan: £' + newLoan.toLocaleString()
+        + '  |  Cash released: £' + cashReleased.toLocaleString()
+        + '  |  New monthly: £' + monthly.toLocaleString()
+        + '  |  Rate: ' + effectiveRate.toFixed(2) + '%'
+      : 'No equity to release at this LTV.';
+    document.getElementById('remortgage-calc').textContent = hint;
+    document.getElementById('action-field').value = 'remortgage';
+    // Set the LTV radio to match remortgage selection
+    var targetLtv = ltv.toString();
+    document.querySelectorAll('input[name="ltv"]').forEach(function(inp) {
+      inp.checked = (inp.value === targetLtv);
+    });
+    updateConfirmState();
+  }
+
+  function selectEpcUpgrade(propId) {
+    clearMarketSelection();
+    clearPortfolioSelection();
+    clearRemortgageSelection();
+    document.getElementById('buy-prop-field').value = propId;
+    document.getElementById('action-field').value = 'upgrade_epc';
+    document.getElementById('confirm-btn').disabled = false;
+    document.getElementById('action-hint').textContent = 'EPC UPGRADE: ' + propId + ' — £5,000. Confirm to proceed.';
+    document.getElementById('action-hint').style.color = 'var(--yellow)';
+    ['buy','hold','sell','remortgage','renovate'].forEach(function(a) {
+      var b = document.getElementById('btn-' + a);
+      if (b) b.classList.remove('active');
+    });
+  }
+
+  var selectedRenovateId = '';
+
+  function clearRenovateSelection() {
+    document.querySelectorAll('#renovate-table tr.prop-row').forEach(function(r) {
+      r.classList.remove('selected-buy');
+    });
+    selectedRenovateId = '';
+    document.getElementById('buy-prop-field').value = '';
+    document.getElementById('renovate-hint').textContent = '';
+  }
+
+  function selectRenovateProp(row) {
+    if (row.style.opacity === '0.4') return;
+    if (row.classList.contains('selected-buy')) {
+      clearRenovateSelection();
+      return;
+    }
+    clearRenovateSelection();
+    row.classList.add('selected-buy');
+    selectedRenovateId = row.getAttribute('data-id');
+    document.getElementById('buy-prop-field').value = selectedRenovateId;
+    document.getElementById('renovate-hint').textContent =
+      'RENOVATE: ' + selectedRenovateId + ' — value +8%, rent +15%. Confirm to proceed.';
+    document.getElementById('action-field').value = 'renovate';
+    updateConfirmState();
+  }
+
+  function setAction(action) {
+    if (action !== 'buy') showLtvPanel(false);
+    if (action !== 'remortgage') {
+      clearRemortgageSelection();
+    }
+    if (action !== 'renovate') {
+      clearRenovateSelection();
+      var rp = document.getElementById('renovate-panel');
+      if (rp) rp.style.display = 'none';
+    } else {
+      var rp = document.getElementById('renovate-panel');
+      if (rp) rp.style.display = 'block';
+    }
+    currentAction = action;
+    document.getElementById('action-field').value = action;
+    ['buy','hold','sell','remortgage','renovate'].forEach(function(a) {
+      var b = document.getElementById('btn-' + a);
+      if (b) b.classList.remove('active');
+    });
+    var activeBtn = document.getElementById('btn-' + action);
+    if (activeBtn) activeBtn.classList.add('active');
+    updateHint();
+    updateConfirmState();
+  }
+
+  function updateHint() {
+    var hint = document.getElementById('action-hint');
+    var action = document.getElementById('action-field').value;
+    if (action === 'buy') {
+      hint.textContent = selectedBuyId
+        ? 'BUY selected: ' + selectedBuyId + ' — confirm to purchase.'
+        : 'BUY selected — click a market property to choose.';
+      hint.style.color = selectedBuyId ? 'var(--accent)' : 'var(--yellow)';
+    } else if (action === 'sell') {
+      hint.textContent = selectedSellId
+        ? 'SELL selected: ' + selectedSellId + ' — confirm to sell (1.5% agent fee applies).'
+        : 'SELL selected — click a portfolio property to choose.';
+      hint.style.color = selectedSellId ? 'var(--red)' : 'var(--yellow)';
+    } else if (action === 'remortgage') {
+      hint.textContent = selectedRemortgageId
+        ? 'REMORTGAGE selected: ' + selectedRemortgageId + ' — select LTV and rate above, then confirm.'
+        : 'REMORTGAGE selected — click a property above to choose.';
+      hint.style.color = selectedRemortgageId ? 'var(--accent)' : 'var(--yellow)';
+    } else if (action === 'renovate') {
+      hint.textContent = selectedRenovateId
+        ? 'RENOVATE selected: ' + selectedRenovateId + ' — confirm to apply renovation.'
+        : 'RENOVATE selected — click a portfolio property above to choose.';
+      hint.style.color = selectedRenovateId ? 'var(--accent)' : 'var(--yellow)';
+    } else {
+      hint.textContent = 'HOLD selected — no property action this turn.';
+      hint.style.color = 'var(--muted)';
+    }
+  }
+
+  function updateConfirmState() {
+    var btn = document.getElementById('confirm-btn');
+    var action = document.getElementById('action-field').value;
+    var ok = !(action === 'buy' && !selectedBuyId) &&
+              !(action === 'sell' && !selectedSellId) &&
+              !(action === 'remortgage' && !selectedRemortgageId) &&
+              !(action === 'renovate' && !selectedRenovateId);
+    btn.disabled = !ok;
+  }
+
+  function updateLtvDisplay() {
+    var ltv = parseFloat(document.querySelector('input[name="ltv"]:checked').value);
+    var showRt = ltv > 0;
+    document.getElementById('rate-type-panel').style.display = showRt ? 'block' : 'none';
+    if (!showRt) {
+      setRateType('variable');
+      document.querySelector('input[name="rate_type_radio"][value="variable"]').checked = true;
+    }
+    updateLtvHint();
+  }
+
+  function updateLtvHint() {
+    if (!selectedPropValue || !selectedBuyId) {
+      document.getElementById('ltv-hint').textContent = '';
+      return;
+    }
+    var ltv = parseFloat(document.querySelector('input[name="ltv"]:checked').value);
+    var sdlt = selectedPropSdlt || calcSdlt(selectedPropValue, currentYear);
+    var loan = Math.round(selectedPropValue * ltv);
+    var deposit = selectedPropValue - loan;
+    var upfront = deposit + sdlt;
+    var premium = FIX_PREMIUMS[currentRateType] || 0;
+    var effectiveRate = annualRate + premium;
+    var monthly = loan > 0 ? Math.round((loan * effectiveRate / 100) / 12) : 0;
+    var perTurn = monthly * 6;
+    var rateNote = currentRateType === 'variable'
+      ? 'Variable — adjusts with BoE rate'
+      : currentRateType === 'fixed_2yr'
+        ? 'Fixed 2yr (' + effectiveRate.toFixed(2) + '%) — locked for 8 turns'
+        : 'Fixed 5yr (' + effectiveRate.toFixed(2) + '%) — locked for 20 turns';
+    var hint = ltv === 0
+      ? 'Cash: £' + deposit.toLocaleString() + '  |  SDLT: £' + sdlt.toLocaleString() + '  |  Total upfront: £' + upfront.toLocaleString()
+      : 'Deposit: £' + deposit.toLocaleString()
+        + '  |  SDLT: £' + sdlt.toLocaleString()
+        + '  |  Upfront total: £' + upfront.toLocaleString()
+        + '  |  Loan: £' + loan.toLocaleString()
+        + '  |  Monthly: £' + monthly.toLocaleString()
+        + '  |  Per turn: £' + perTurn.toLocaleString()
+        + '  —  ' + rateNote;
+    document.getElementById('ltv-hint').textContent = hint;
+  }
+
+  function showLtvPanel(show) {
+    document.getElementById('ltv-panel').style.display = show ? 'block' : 'none';
+  }
+
+  setAction('hold');
+
+  function placeAuctionBid(propId) {
+    var bid = parseInt(document.getElementById('auction-bid-input').value) || 0;
+    document.getElementById('auction-prop-field').value = propId;
+    document.getElementById('auction-bid-field').value = bid;
+    document.getElementById('action-field').value = 'auction_bid';
+    var ltvEl = document.querySelector('input[name="auction_ltv"]:checked');
+    var ltv = ltvEl ? parseFloat(ltvEl.value) : 0;
+    var ltvInput = document.querySelector('input[name="ltv"][value="' + ltv + '"]');
+    if (ltvInput) ltvInput.checked = true;
+    document.getElementById('auction-ltv-panel').style.display = 'block';
+    document.getElementById('auction-hint').textContent =
+      'Bid: £' + bid.toLocaleString() + ' — confirm below to submit.';
+    document.getElementById('auction-hint').style.color = 'var(--accent)';
+    document.getElementById('confirm-btn').disabled = false;
+    updateAuctionHint();
+  }
+
+  function passAuction() {
+    document.getElementById('auction-prop-field').value = '';
+    document.getElementById('auction-bid-field').value = '0';
+    document.getElementById('action-field').value = 'hold';
+    document.getElementById('auction-hint').textContent = 'Passed — AIs will compete.';
+    document.getElementById('auction-hint').style.color = 'var(--muted)';
+    document.getElementById('auction-ltv-panel').style.display = 'none';
+  }
+
+  function updateAuctionHint() {
+    var ltvEl = document.querySelector('input[name="auction_ltv"]:checked');
+    var ltv = ltvEl ? parseFloat(ltvEl.value) : 0;
+    var bid = parseInt(document.getElementById('auction-bid-input').value) || 0;
+    if (!bid) return;
+    var loan = Math.round(bid * ltv);
+    var deposit = bid - loan;
+    var monthly = loan > 0 ? Math.round((loan * annualRate / 100) / 12) : 0;
+    document.getElementById('auction-calc').textContent =
+      'Deposit: £' + deposit.toLocaleString() +
+      (loan > 0 ? '  |  Loan: £' + loan.toLocaleString() + '  |  Monthly: £' + monthly.toLocaleString() : '');
+    var ltvInput = document.querySelector('input[name="ltv"][value="' + ltv + '"]');
+    if (ltvInput) ltvInput.checked = true;
+  }
+</script>
+
+  // Player turn timer — auto-holds at 0
+  var TURN_SECONDS = 20;
+  var timerRemaining = TURN_SECONDS;
+  var timerEl = document.getElementById('turn-timer');
+  var timerInterval = null;
+
+  function formatTimer(s) {
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function tickTimer() {
+    timerRemaining--;
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerEl.textContent = '0:00';
+      timerEl.style.color = 'var(--red)';
+      document.getElementById('action-field').value = 'hold';
+      document.getElementById('buy-prop-field').value  = '';
+      document.getElementById('sell-prop-field').value = '';
+      document.getElementById('decision-form').submit();
+      return;
+    }
+    timerEl.textContent = formatTimer(timerRemaining);
+    if (timerRemaining <= 5) {
+      timerEl.style.color = 'var(--red)';
+    } else if (timerRemaining <= 10) {
+      timerEl.style.color = 'var(--yellow)';
+    } else {
+      timerEl.style.color = 'var(--accent)';
+    }
+  }
+
+  timerInterval = setInterval(tickTimer, 1000);
+
+  document.getElementById('decision-form').addEventListener('submit', function() {
+    clearInterval(timerInterval);
+  });
+</script>
+{% endblock %}

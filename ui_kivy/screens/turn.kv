@@ -1,0 +1,146 @@
+#:import MacroSidebar widgets.macro_sidebar.MacroSidebar
+
+<TurnScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.039, 0.055, 0.102, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: '8dp'
+        spacing: '8dp'
+
+        MacroSidebar:
+            id: sidebar
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '8dp'
+
+            # Portfolio panel
+            BoxLayout:
+                size_hint_y: 0.38
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '4dp'
+                Label:
+                    text: 'YOUR PORTFOLIO'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '14sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    size_hint_y: None
+                    height: '32dp'
+                    Label:
+                        id: portfolio_value_label
+                        text: '\u00a30'
+                        color: 0, 1, 0.533, 1
+                        font_size: '22sp'
+                        bold: True
+                        halign: 'left'
+                        text_size: self.size
+                    Label:
+                        id: cash_label
+                        text: 'cash \u00a30'
+                        color: 0.900, 0.920, 0.950, 1
+                        font_size: '14sp'
+                        halign: 'right'
+                        text_size: self.size
+                GridLayout:
+                    id: portfolio_grid
+                    cols: 5
+                    spacing: '4dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    row_default_height: '28dp'
+
+            # AI positions panel
+            BoxLayout:
+                size_hint_y: 0.30
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '4dp'
+                Label:
+                    text: 'AI POSITIONS'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '14sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    id: ai_box
+                    orientation: 'vertical'
+                    spacing: '6dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+
+            # News panel
+            BoxLayout:
+                size_hint_y: 0.18
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '4dp'
+                Label:
+                    text: 'NEWS'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '14sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    id: news_box
+                    orientation: 'vertical'
+
+            Widget:
+                size_hint_y: 0.10
+
+            # Decision button
+            BoxLayout:
+                size_hint_y: None
+                height: '40dp'
+                Button:
+                    text: 'MAKE DECISION  >>'
+                    size_hint_x: None
+                    width: '210dp'
+                    pos_hint: {'right': 1}
+                    background_color: 0, 0, 0, 0
+                    canvas.before:
+                        Color:
+                            rgba: 0, 1, 0.533, 0.12
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                        Color:
+                            rgba: 0, 1, 0.533, 0.4
+                        Line:
+                            rectangle: self.x, self.y, self.width, self.height
+                            width: 1
+                    color: 0, 1, 0.533, 1
+                    font_size: '14sp'
+                    on_press: root.manager.current = 'decision'

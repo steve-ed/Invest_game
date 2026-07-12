@@ -1,0 +1,178 @@
+<OpeningScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.039, 0.055, 0.102, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '16dp'
+        spacing: '12dp'
+
+        # Title
+        BoxLayout:
+            size_hint_y: None
+            height: '52dp'
+            orientation: 'vertical'
+            Label:
+                text: 'REALESTGAME'
+                color: 0, 1, 0.533, 1
+                font_size: '28sp'
+                bold: True
+            Label:
+                text: '10-year mode  \u00b7  20 turns  \u00b7  3 actors'
+                color: 0.580, 0.608, 0.660, 1
+                font_size: '13sp'
+
+        # Positions + macro
+        BoxLayout:
+            size_hint_y: None
+            height: '180dp'
+            spacing: '12dp'
+
+            BoxLayout:
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '4dp'
+                Label:
+                    text: 'STARTING POSITIONS'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '13sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                GridLayout:
+                    id: actors_grid
+                    cols: 4
+                    spacing: '4dp'
+                    row_default_height: '26dp'
+
+            BoxLayout:
+                size_hint_x: 0.38
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '4dp'
+                Label:
+                    text: 'STARTING MACRO'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '13sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    size_hint_y: None
+                    height: '28dp'
+                    Label:
+                        text: 'Price Index'
+                        color: 0.580, 0.608, 0.660, 1
+                        font_size: '14sp'
+                        halign: 'left'
+                        text_size: self.size
+                    Label:
+                        id: macro_price
+                        text: '100.0'
+                        color: 0.976, 0.980, 0.984, 1
+                        font_size: '14sp'
+                        halign: 'right'
+                        text_size: self.size
+                BoxLayout:
+                    size_hint_y: None
+                    height: '28dp'
+                    Label:
+                        text: 'Interest Rate'
+                        color: 0.580, 0.608, 0.660, 1
+                        font_size: '14sp'
+                        halign: 'left'
+                        text_size: self.size
+                    Label:
+                        id: macro_rate
+                        text: '5.0%'
+                        color: 0.976, 0.980, 0.984, 1
+                        font_size: '14sp'
+                        halign: 'right'
+                        text_size: self.size
+                BoxLayout:
+                    size_hint_y: None
+                    height: '28dp'
+                    Label:
+                        text: 'Rent Growth'
+                        color: 0.580, 0.608, 0.660, 1
+                        font_size: '14sp'
+                        halign: 'left'
+                        text_size: self.size
+                    Label:
+                        id: macro_rent
+                        text: '2.5%'
+                        color: 0.976, 0.980, 0.984, 1
+                        font_size: '14sp'
+                        halign: 'right'
+                        text_size: self.size
+
+        # Market table (scrollable)
+        BoxLayout:
+            orientation: 'vertical'
+            canvas.before:
+                Color:
+                    rgba: 0.067, 0.094, 0.153, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            padding: '8dp'
+            spacing: '4dp'
+            Label:
+                text: 'AVAILABLE MARKET (10 properties)'
+                color: 0.580, 0.608, 0.660, 1
+                font_size: '13sp'
+                size_hint_y: None
+                height: '21dp'
+                halign: 'left'
+                text_size: self.size
+            ScrollView:
+                GridLayout:
+                    id: market_grid
+                    cols: 5
+                    spacing: '4dp'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    row_default_height: '26dp'
+
+        # Start button
+        BoxLayout:
+            size_hint_y: None
+            height: '44dp'
+            Button:
+                text: 'START GAME  >>'
+                size_hint_x: None
+                width: '180dp'
+                pos_hint: {'center_x': 0.5}
+                background_color: 0, 0, 0, 0
+                canvas.before:
+                    Color:
+                        rgba: 0, 1, 0.533, 0.12
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                    Color:
+                        rgba: 0, 1, 0.533, 0.4
+                    Line:
+                        rectangle: self.x, self.y, self.width, self.height
+                        width: 1
+                color: 0, 1, 0.533, 1
+                font_size: '14sp'
+                on_press: root.start_game()

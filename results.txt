@@ -1,0 +1,1373 @@
+
+======================================================================
+GAME 1  |  20 turns  |  era: New Labour Boom — Part I
+======================================================================
+  Starting cash: £910,000
+  p11  Nottingham           £  216,000  yield=10.0%  EPC=E
+  p04  Sheffield            £  110,000  yield=7.1%  EPC=E
+  p02  Oxford               £  264,000  yield=5.2%  EPC=D
+    PLAYER  upgrade   p11  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  1  PI=100.0  Rate=5.5%  Scenario=baseline
+     Player: cash=£   938,801  equity=£   591,000  net=£ 1,529,801  props=['p11', 'p04', 'p02']
+     AI    [Mr Hugh Price       ]  buy       p01  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p08  ltv=0%  [OK]
+    PLAYER  upgrade   p04  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  2  PI=107.3  Rate=6.0%  Scenario=boom
+     Player: cash=£   971,578  equity=£   634,139  net=£ 1,605,717  props=['p11', 'p04', 'p02']
+     AI    [Mr Hugh Price       ]  buy        m1  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p09  ltv=0%  [OK]
+    PLAYER  upgrade   p02  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  3  PI=116.4  Rate=6.0%  Scenario=boom
+     Player: cash=£ 1,013,041  equity=£   688,062  net=£ 1,701,103  props=['p11', 'p04', 'p02']
+     AI    [Mr Hugh Price       ]  buy        m2  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy        m4  ltv=50%  [OK]
+    PLAYER  buy       p12  ltv=75%  [yield=10.8% rate=5.5%]
+
+  -- Tick  4  PI=125.9  Rate=5.5%  Scenario=boom
+     Player: cash=£   991,643  equity=£   803,006  net=£ 1,794,649  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy        m3  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  5  PI=135.4  Rate=4.0%  Scenario=boom
+     Player: cash=£ 1,006,433  equity=£   876,831  net=£ 1,883,264  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade    m3  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  6  PI=151.8  Rate=4.0%  Scenario=boom
+     Player: cash=£ 1,051,436  equity=£ 1,004,605  net=£ 2,056,041  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p15  ltv=50%  [OK]
+    PLAYER  hold           ltv=0%  [rate=4.0%]
+
+  -- Tick  7  PI=175.5  Rate=4.0%  Scenario=boom
+     Player: cash=£ 1,104,316  equity=£ 1,189,167  net=£ 2,293,483  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy       p05  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p15  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£84,457]
+
+  -- Tick  8  PI=186.1  Rate=3.8%  Scenario=boom
+     Player: cash=£ 1,157,717  equity=£ 1,271,510  net=£ 2,429,227  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade   p05  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p15  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£92,647]
+
+  -- Tick  9  PI=192.0  Rate=3.8%  Scenario=baseline
+     Player: cash=£ 1,214,189  equity=£ 1,316,941  net=£ 2,531,129  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p14  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£92,647]
+
+  -- Tick 10  PI=192.0  Rate=4.2%  Scenario=baseline
+     Player: cash=£ 1,274,079  equity=£ 1,316,941  net=£ 2,591,020  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy       p13  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£92,647]
+
+  -- Tick 11  PI=192.0  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,337,674  equity=£ 1,316,941  net=£ 2,654,615  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade   p13  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£91,111]
+
+  -- Tick 12  PI=190.9  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,403,102  equity=£ 1,308,422  net=£ 2,711,524  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p10  ltv=50%  [FAILED]
+    PLAYER  refi      p12  ltv=0%  [headroom=£95,718]
+
+  -- Tick 13  PI=194.2  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,469,312  equity=£ 1,333,977  net=£ 2,803,289  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy       p10  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p10  ltv=50%  [FAILED]
+    PLAYER  refi      p12  ltv=0%  [headroom=£103,908]
+
+  -- Tick 14  PI=200.0  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,537,480  equity=£ 1,379,408  net=£ 2,916,888  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade   p10  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk101  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£120,799]
+
+  -- Tick 15  PI=212.0  Rate=5.0%  Scenario=boom
+     Player: cash=£ 1,610,097  equity=£ 1,473,109  net=£ 3,083,206  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk101  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£132,060]
+
+  -- Tick 16  PI=220.1  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,687,649  equity=£ 1,535,576  net=£ 3,223,224  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk101  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£145,369]
+
+  -- Tick 17  PI=229.6  Rate=5.8%  Scenario=baseline
+     Player: cash=£ 1,769,177  equity=£ 1,609,401  net=£ 3,378,577  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy      mk102  ltv=50%  [FAILED]
+     AI    [Mr Ray Novate       ]  buy      mk103  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£137,179]
+
+  -- Tick 18  PI=223.7  Rate=5.0%  Scenario=baseline
+     Player: cash=£ 1,849,056  equity=£ 1,563,970  net=£ 3,413,026  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy       p03  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£103,908]
+
+  -- Tick 19  PI=200.0  Rate=2.0%  Scenario=downturn
+     Player: cash=£ 1,913,071  equity=£ 1,379,408  net=£ 3,292,478  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade   p03  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk102  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£79,339]
+
+  -- Tick 20  PI=182.5  Rate=0.5%  Scenario=downturn
+     Player: cash=£ 1,968,530  equity=£ 1,243,116  net=£ 3,211,646  props=['p11', 'p04', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  sell      p13  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk102  ltv=0%  [OK]
+
+  LEADERBOARD (game 1):
+    1. Mr Hugh Price           score=£   2,491,968  equity=£ 3,655,949  cash=£   336,019
+    2. You                     score=£   1,711,646  equity=£ 1,243,116  cash=£ 1,968,530 <--
+    3. Mr Ray Novate           score=£     807,755  equity=£ 1,443,051  cash=£   864,704
+
+======================================================================
+GAME 2  |  20 turns  |  era: Post-GFC Long Recovery
+======================================================================
+  Starting cash: £433,000
+  p01  London Kensington    £  675,000  yield=4.4%  EPC=C
+  p13  Cardiff              £  128,000  yield=7.5%  EPC=D
+  p02  Oxford               £  264,000  yield=5.2%  EPC=D
+    PLAYER  upgrade   p13  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  1  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£   455,979  equity=£ 1,067,500  net=£ 1,523,479  props=['p01', 'p13', 'p02']
+     AI    [Mr Hugh Price       ]  buy        m1  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+    PLAYER  upgrade   p02  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  2  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£   479,974  equity=£ 1,067,500  net=£ 1,547,474  props=['p01', 'p13', 'p02']
+     AI    [Mr Hugh Price       ]  buy        m2  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  buy       p12  ltv=75%  [yield=13.0% rate=0.5%]
+
+  -- Tick  3  PI=101.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£   455,993  equity=£ 1,126,960  net=£ 1,582,953  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy       p03  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  4  PI=103.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£   464,942  equity=£ 1,150,810  net=£ 1,615,752  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade   p03  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  5  PI=108.6  Rate=0.5%  Scenario=boom
+     Player: cash=£   503,179  equity=£ 1,219,974  net=£ 1,723,153  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy       p11  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  buy        m3  ltv=50%  [OK]
+    PLAYER  buy        m4  ltv=75%  [yield=9.5% rate=0.5%]
+
+  -- Tick  6  PI=113.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£   526,834  equity=£ 1,301,279  net=£ 1,828,113  props=['p01', 'p13', 'p02', 'p12', 'm4']
+     AI    [Mr Hugh Price       ]  upgrade   p11  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade    m3  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£21,597]
+
+  -- Tick  7  PI=116.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£   572,053  equity=£ 1,341,507  net=£ 1,913,560  props=['p01', 'p13', 'p02', 'p12', 'm4']
+     AI    [Mr Hugh Price       ]  buy       p09  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  buy       p04  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£24,264]
+
+  -- Tick  8  PI=118.4  Rate=0.5%  Scenario=baseline
+     Player: cash=£   621,830  equity=£ 1,366,649  net=£ 1,988,479  props=['p01', 'p13', 'p02', 'p12', 'm4']
+     AI    [Mr Hugh Price       ]  upgrade   p09  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade   p04  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£27,463]
+
+  -- Tick  9  PI=120.7  Rate=0.5%  Scenario=baseline
+     Player: cash=£   672,465  equity=£ 1,396,820  net=£ 2,069,285  props=['p01', 'p13', 'p02', 'p12', 'm4']
+     AI    [Mr Hugh Price       ]  buy      mk100  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  buy      mk102  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£31,996]
+
+  -- Tick 10  PI=124.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£   723,842  equity=£ 1,439,563  net=£ 2,163,405  props=['p01', 'p13', 'p02', 'p12', 'm4']
+     AI    [Mr Hugh Price       ]  upgrade  mk100  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade  mk102  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£37,062]
+
+  -- Tick 11  PI=127.6  Rate=0.2%  Scenario=baseline
+     Player: cash=£   775,542  equity=£ 1,487,334  net=£ 2,262,876  props=['p01', 'p13', 'p02', 'p12', 'm4']
+     AI    [Mr Hugh Price       ]  buy       p08  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  buy       p10  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£43,195]
+
+  -- Tick 12  PI=131.9  Rate=0.2%  Scenario=baseline
+     Player: cash=£   845,054  equity=£ 1,513,327  net=£ 2,358,381  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade   p08  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade   p10  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£43,995]
+
+  -- Tick 13  PI=132.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£   895,135  equity=£ 1,520,482  net=£ 2,415,617  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy      mk105  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  buy      mk103  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£43,995]
+
+  -- Tick 14  PI=132.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£   945,811  equity=£ 1,520,482  net=£ 2,466,293  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy      mk106  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£41,328]
+
+  -- Tick 15  PI=130.6  Rate=0.8%  Scenario=baseline
+     Player: cash=£   997,798  equity=£ 1,496,632  net=£ 2,494,430  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade  mk106  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£43,195]
+
+  -- Tick 16  PI=131.9  Rate=0.8%  Scenario=baseline
+     Player: cash=£ 1,050,570  equity=£ 1,513,327  net=£ 2,563,897  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy      mk101  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  buy        m4  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£45,595]
+
+  -- Tick 17  PI=133.7  Rate=0.8%  Scenario=baseline
+     Player: cash=£ 1,104,137  equity=£ 1,534,792  net=£ 2,638,929  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade  mk101  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£43,195]
+
+  -- Tick 18  PI=131.9  Rate=0.1%  Scenario=baseline
+     Player: cash=£ 1,155,887  equity=£ 1,513,327  net=£ 2,669,214  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy      mk107  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£68,792]
+
+  -- Tick 19  PI=150.2  Rate=0.1%  Scenario=boom
+     Player: cash=£ 1,207,920  equity=£ 1,742,285  net=£ 2,950,205  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  upgrade  mk107  ltv=0%  [OK]
+     AI    [Ms Demi Graphic     ]  buy      mk108  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£79,990]
+
+  -- Tick 20  PI=158.2  Rate=0.1%  Scenario=boom
+     Player: cash=£ 1,260,635  equity=£ 1,842,454  net=£ 3,103,089  props=['p01', 'p13', 'p02', 'p12']
+     AI    [Mr Hugh Price       ]  buy      mk109  ltv=50%  [OK]
+     AI    [Ms Demi Graphic     ]  upgrade  mk108  ltv=0%  [OK]
+
+  LEADERBOARD (game 2):
+    1. Mr Hugh Price           score=£   2,775,597  equity=£ 3,988,746  cash=£   319,724
+    2. You                     score=£   1,603,089  equity=£ 1,842,454  cash=£ 1,260,635 <--
+    3. Ms Demi Graphic         score=£     982,353  equity=£ 1,288,494  cash=£ 1,193,859
+
+======================================================================
+GAME 3  |  20 turns  |  era: New Labour Boom — Part I
+======================================================================
+  Starting cash: £852,000
+  p02  Oxford               £  264,000  yield=5.2%  EPC=D
+  p09  Manchester           £  204,000  yield=7.1%  EPC=D
+  p08  Birmingham           £  180,000  yield=6.7%  EPC=E
+    PLAYER  upgrade   p08  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  1  PI=100.0  Rate=7.5%  Scenario=baseline
+     Player: cash=£   884,515  equity=£   648,500  net=£ 1,533,015  props=['p02', 'p09', 'p08']
+     AI    [Ms Di Vidend        ]  upgrade   p04  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p12  ltv=0%  [OK]
+    PLAYER  upgrade   p02  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  2  PI=104.3  Rate=6.5%  Scenario=baseline
+     Player: cash=£   922,717  equity=£   676,453  net=£ 1,599,169  props=['p02', 'p09', 'p08']
+     AI    [Ms Di Vidend        ]  upgrade   p05  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p12  ltv=0%  [OK]
+    PLAYER  upgrade   p09  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  3  PI=109.9  Rate=5.5%  Scenario=boom
+     Player: cash=£   959,558  equity=£   712,791  net=£ 1,672,349  props=['p02', 'p09', 'p08']
+     AI    [Ms Di Vidend        ]  buy        m3  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p13  ltv=0%  [OK]
+    PLAYER  buy       p11  ltv=75%  [yield=9.2% rate=5.5%]
+
+  -- Tick  4  PI=118.1  Rate=5.5%  Scenario=boom
+     Player: cash=£   929,215  equity=£   829,677  net=£ 1,758,892  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  upgrade    m3  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  hold           ltv=0%  [OK]
+    PLAYER  upgrade   p11  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  5  PI=126.7  Rate=6.0%  Scenario=boom
+     Player: cash=£   955,730  equity=£   904,203  net=£ 1,859,933  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  buy        m4  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  hold           ltv=0%  [OK]
+    PLAYER  buy       p15  ltv=75%  [yield=7.0% rate=6.0%]
+
+  -- Tick  6  PI=137.5  Rate=6.0%  Scenario=boom
+     Player: cash=£   979,453  equity=£ 1,023,657  net=£ 2,003,110  props=['p02', 'p09', 'p08', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  hold           ltv=0%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=G cost=30,000]
+
+  -- Tick  7  PI=148.7  Rate=5.5%  Scenario=boom
+     Player: cash=£   999,022  equity=£ 1,129,114  net=£ 2,128,136  props=['p02', 'p09', 'p08', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  hold           ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£67,733]
+
+  -- Tick  8  PI=159.9  Rate=4.0%  Scenario=boom
+     Player: cash=£ 1,048,381  equity=£ 1,234,571  net=£ 2,282,951  props=['p02', 'p09', 'p08', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p01  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£99,155]
+
+  -- Tick  9  PI=179.3  Rate=4.0%  Scenario=boom
+     Player: cash=£ 1,100,692  equity=£ 1,417,092  net=£ 2,517,785  props=['p02', 'p09', 'p08', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p03  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£144,543]
+
+  -- Tick 10  PI=207.3  Rate=4.0%  Scenario=boom
+     Player: cash=£ 1,154,580  equity=£ 1,680,734  net=£ 2,835,314  props=['p02', 'p09', 'p08', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p03  ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£164,793]
+
+  -- Tick 11  PI=219.8  Rate=3.8%  Scenario=boom
+     Player: cash=£ 1,210,125  equity=£ 1,798,359  net=£ 3,008,484  props=['p02', 'p09', 'p08', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p06  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£175,966]
+
+  -- Tick 12  PI=226.7  Rate=3.8%  Scenario=baseline
+     Player: cash=£ 1,333,595  equity=£ 1,768,703  net=£ 3,102,298  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p07  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£175,966]
+
+  -- Tick 13  PI=226.7  Rate=4.2%  Scenario=baseline
+     Player: cash=£ 1,392,923  equity=£ 1,768,703  net=£ 3,161,625  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p10  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£175,966]
+
+  -- Tick 14  PI=226.7  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,456,097  equity=£ 1,768,703  net=£ 3,224,799  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p10  ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£173,871]
+
+  -- Tick 15  PI=225.4  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,521,065  equity=£ 1,757,524  net=£ 3,278,589  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p14  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£180,155]
+
+  -- Tick 16  PI=229.3  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,586,684  equity=£ 1,791,060  net=£ 3,377,744  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£191,328]
+
+  -- Tick 17  PI=236.2  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,654,214  equity=£ 1,850,681  net=£ 3,504,895  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£214,371]
+
+  -- Tick 18  PI=250.4  Rate=5.0%  Scenario=boom
+     Player: cash=£ 1,726,326  equity=£ 1,973,649  net=£ 3,699,975  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p15  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£229,733]
+
+  -- Tick 19  PI=259.9  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,803,501  equity=£ 2,055,627  net=£ 3,859,128  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p15  ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£247,888]
+
+  -- Tick 20  PI=271.1  Rate=5.8%  Scenario=baseline
+     Player: cash=£ 1,884,690  equity=£ 2,152,511  net=£ 4,037,201  props=['p02', 'p09', 'p08', 'p11']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  hold           ltv=0%  [OK]
+
+  LEADERBOARD (game 3):
+    1. You                     score=£   2,537,201  equity=£ 2,152,511  cash=£ 1,884,690 <--
+    2. Mr Mort Gage            score=£   2,167,649  equity=£ 3,129,744  cash=£   671,167
+    3. Ms Di Vidend            score=£   1,815,249  equity=£ 1,250,235  cash=£ 2,064,014
+
+======================================================================
+GAME 4  |  20 turns  |  era: The Global Financial Crisis & Austerity
+======================================================================
+  Starting cash: £877,000
+  p10  Leeds                £  144,000  yield=7.1%  EPC=E
+  p09  Manchester           £  204,000  yield=7.1%  EPC=D
+  p07  Cambridge            £  275,000  yield=5.5%  EPC=C
+    PLAYER  upgrade   p10  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  1  PI=100.0  Rate=5.8%  Scenario=baseline
+     Player: cash=£   904,106  equity=£   623,500  net=£ 1,527,606  props=['p10', 'p09', 'p07']
+     AI    [Ms Di Vidend        ]  upgrade   p04  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p12  ltv=0%  [OK]
+    PLAYER  upgrade   p09  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  2  PI=97.5  Rate=5.0%  Scenario=baseline
+     Player: cash=£   937,137  equity=£   607,640  net=£ 1,544,777  props=['p10', 'p09', 'p07']
+     AI    [Ms Di Vidend        ]  upgrade   p05  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p12  ltv=0%  [OK]
+    PLAYER  buy       p11  ltv=75%  [yield=12.1% rate=2.0%]
+
+  -- Tick  3  PI=87.1  Rate=2.0%  Scenario=downturn
+     Player: cash=£   912,364  equity=£   590,254  net=£ 1,502,618  props=['p10', 'p09', 'p07', 'p11']
+     AI    [Ms Di Vidend        ]  buy        m3  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p13  ltv=0%  [OK]
+    PLAYER  upgrade   p11  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  4  PI=79.5  Rate=0.5%  Scenario=downturn
+     Player: cash=£   921,712  equity=£   526,191  net=£ 1,447,903  props=['p10', 'p09', 'p07', 'p11']
+     AI    [Ms Di Vidend        ]  upgrade    m3  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p01  ltv=75%  [OK]
+    PLAYER  buy       p15  ltv=75%  [yield=10.7% rate=0.5%]
+
+  -- Tick  5  PI=84.6  Rate=0.5%  Scenario=boom
+     Player: cash=£   937,832  equity=£   585,076  net=£ 1,522,907  props=['p10', 'p09', 'p07', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  buy        m4  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p02  ltv=75%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=G cost=30,000]
+
+  -- Tick  6  PI=87.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£   941,981  equity=£   608,376  net=£ 1,550,357  props=['p10', 'p09', 'p07', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p02  ltv=0%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  7  PI=85.7  Rate=0.5%  Scenario=baseline
+     Player: cash=£   968,489  equity=£   595,269  net=£ 1,563,759  props=['p10', 'p09', 'p07', 'p11', 'p15']
+     AI    [Ms Di Vidend        ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p03  ltv=75%  [OK]
+    PLAYER  buy       p08  ltv=75%  [yield=8.8% rate=0.5%]
+
+  -- Tick  8  PI=84.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£   966,030  equity=£   623,136  net=£ 1,589,166  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08']
+     AI    [Ms Di Vidend        ]  buy       p14  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade   p03  ltv=0%  [OK]
+    PLAYER  upgrade   p08  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  9  PI=83.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£   994,146  equity=£   612,681  net=£ 1,606,827  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08']
+     AI    [Ms Di Vidend        ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy       p06  ltv=75%  [OK]
+    PLAYER  buy      mk101  ltv=75%  [yield=8.7% rate=0.5%]
+
+  -- Tick 10  PI=83.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,021,768  equity=£   631,340  net=£ 1,653,108  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101']
+     AI    [Ms Di Vidend        ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy        m1  ltv=75%  [OK]
+    PLAYER  upgrade  mk101  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 11  PI=84.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,061,893  equity=£   642,646  net=£ 1,704,539  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101']
+     AI    [Ms Di Vidend        ]  buy      mk103  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  buy        m2  ltv=75%  [OK]
+    PLAYER  buy      mk102  ltv=75%  [yield=7.7% rate=0.5%]
+
+  -- Tick 12  PI=86.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,098,738  equity=£   661,489  net=£ 1,760,228  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101']
+     AI    [Ms Di Vidend        ]  upgrade  mk103  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk100  ltv=75%  [FAILED]
+    PLAYER  buy      mk102  ltv=75%  [yield=7.4% rate=0.5%]
+
+  -- Tick 13  PI=90.8  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,127,662  equity=£   738,503  net=£ 1,866,166  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102']
+     AI    [Ms Di Vidend        ]  upgrade  mk103  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk100  ltv=75%  [OK]
+    PLAYER  upgrade  mk102  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 14  PI=94.9  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,172,987  equity=£   791,570  net=£ 1,964,558  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102']
+     AI    [Ms Di Vidend        ]  buy      mk107  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade  mk100  ltv=0%  [OK]
+    PLAYER  buy      mk109  ltv=75%  [yield=7.4% rate=0.5%]
+
+  -- Tick 15  PI=97.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,205,512  equity=£   847,421  net=£ 2,052,933  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102', 'mk109']
+     AI    [Ms Di Vidend        ]  upgrade  mk107  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk104  ltv=75%  [OK]
+    PLAYER  upgrade  mk109  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 16  PI=99.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,255,689  equity=£   869,345  net=£ 2,125,034  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102', 'mk109']
+     AI    [Ms Di Vidend        ]  buy      mk111  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk105  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£22,407]
+
+  -- Tick 17  PI=101.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,319,300  equity=£   895,654  net=£ 2,214,954  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102', 'mk109']
+     AI    [Ms Di Vidend        ]  upgrade  mk111  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk106  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£26,785]
+
+  -- Tick 18  PI=103.7  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,383,867  equity=£   932,924  net=£ 2,316,791  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102', 'mk109']
+     AI    [Ms Di Vidend        ]  buy      mk110  ltv=35%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk108  ltv=75%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£31,679]
+
+  -- Tick 19  PI=106.7  Rate=0.2%  Scenario=baseline
+     Player: cash=£ 1,448,639  equity=£   974,580  net=£ 2,423,219  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102', 'mk109']
+     AI    [Ms Di Vidend        ]  upgrade  mk110  ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  upgrade  mk108  ltv=0%  [OK]
+    PLAYER  refi      p11  ltv=0%  [headroom=£37,603]
+
+  -- Tick 20  PI=110.3  Rate=0.2%  Scenario=baseline
+     Player: cash=£ 1,514,245  equity=£ 1,025,004  net=£ 2,539,250  props=['p10', 'p09', 'p07', 'p11', 'p15', 'p08', 'mk101', 'mk102', 'mk109']
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+     AI    [Mr Mort Gage        ]  buy      mk112  ltv=75%  [OK]
+
+  LEADERBOARD (game 4):
+    1. Mr Mort Gage            score=£   1,888,876  equity=£ 2,096,008  cash=£ 1,292,868
+    2. You                     score=£   1,039,250  equity=£ 1,025,004  cash=£ 1,514,245 <--
+    3. Ms Di Vidend            score=£     838,967  equity=£   920,689  cash=£ 1,417,278
+
+======================================================================
+GAME 5  |  20 turns  |  era: Long Boom & The Run-Up to the GFC
+======================================================================
+  Starting cash: £810,000
+  p06  Bristol              £  299,000  yield=5.2%  EPC=C
+  p12  Liverpool            £  187,000  yield=12.5%  EPC=F
+  p09  Manchester           £  204,000  yield=7.1%  EPC=D
+    PLAYER  upgrade   p12  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  1  PI=100.0  Rate=5.0%  Scenario=baseline
+     Player: cash=£   832,355  equity=£   690,000  net=£ 1,522,355  props=['p06', 'p12', 'p09']
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p04  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  2  PI=103.8  Rate=5.5%  Scenario=baseline
+     Player: cash=£   873,447  equity=£   716,127  net=£ 1,589,574  props=['p06', 'p12', 'p09']
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p05  ltv=0%  [OK]
+    PLAYER  upgrade   p09  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  3  PI=108.3  Rate=5.8%  Scenario=baseline
+     Player: cash=£   918,146  equity=£   747,005  net=£ 1,665,152  props=['p06', 'p12', 'p09']
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy        m3  ltv=35%  [OK]
+    PLAYER  buy       p11  ltv=75%  [yield=10.2% rate=5.0%]
+
+  -- Tick  4  PI=105.5  Rate=5.0%  Scenario=baseline
+     Player: cash=£   901,674  equity=£   784,978  net=£ 1,686,652  props=['p06', 'p12', 'p09', 'p11']
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade    m3  ltv=0%  [OK]
+    PLAYER  upgrade   p11  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  5  PI=94.3  Rate=2.0%  Scenario=downturn
+     Player: cash=£   923,290  equity=£   683,618  net=£ 1,606,907  props=['p06', 'p12', 'p09', 'p11']
+     AI    [Ms Demi Graphic     ]  buy        m4  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy        m4  ltv=35%  [FAILED]
+    PLAYER  buy       p10  ltv=75%  [yield=9.0% rate=0.5%]
+
+  -- Tick  6  PI=86.1  Rate=0.5%  Scenario=downturn
+     Player: cash=£   930,385  equity=£   639,856  net=£ 1,570,241  props=['p06', 'p12', 'p09', 'p11', 'p10']
+     AI    [Ms Demi Graphic     ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p13  ltv=35%  [OK]
+    PLAYER  upgrade   p10  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  7  PI=91.6  Rate=0.5%  Scenario=boom
+     Player: cash=£   959,585  equity=£   697,715  net=£ 1,657,301  props=['p06', 'p12', 'p09', 'p11', 'p10']
+     AI    [Ms Demi Graphic     ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p13  ltv=0%  [OK]
+    PLAYER  buy        m1  ltv=75%  [yield=7.1% rate=0.5%]
+
+  -- Tick  8  PI=94.3  Rate=0.5%  Scenario=baseline
+     Player: cash=£   841,241  equity=£   860,343  net=£ 1,701,584  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1']
+     AI    [Ms Demi Graphic     ]  buy       p08  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p08  ltv=35%  [FAILED]
+    PLAYER  buy       p02  ltv=75%  [yield=6.4% rate=0.5%]
+
+  -- Tick  9  PI=92.8  Rate=0.5%  Scenario=baseline
+     Player: cash=£   817,941  equity=£   896,632  net=£ 1,714,574  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02']
+     AI    [Ms Demi Graphic     ]  upgrade   p08  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p07  ltv=35%  [OK]
+    PLAYER  upgrade   p02  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 10  PI=91.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£   886,973  equity=£   873,958  net=£ 1,760,931  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02']
+     AI    [Ms Demi Graphic     ]  buy      mk101  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk101  ltv=35%  [FAILED]
+    PLAYER  buy       p03  ltv=75%  [yield=6.8% rate=0.5%]
+
+  -- Tick 11  PI=90.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£   897,172  equity=£   911,785  net=£ 1,808,957  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03']
+     AI    [Ms Demi Graphic     ]  upgrade  mk101  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk102  ltv=35%  [OK]
+    PLAYER  upgrade   p03  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 12  PI=90.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£   976,018  equity=£   911,785  net=£ 1,887,803  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03']
+     AI    [Ms Demi Graphic     ]  upgrade  mk101  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade  mk102  ltv=0%  [OK]
+    PLAYER  buy      mk100  ltv=75%  [yield=6.4% rate=0.5%]
+
+  -- Tick 13  PI=91.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,027,848  equity=£   964,736  net=£ 1,992,585  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100']
+     AI    [Ms Demi Graphic     ]  buy      mk103  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk103  ltv=35%  [FAILED]
+    PLAYER  upgrade  mk100  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 14  PI=93.3  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,113,557  equity=£ 1,003,807  net=£ 2,117,364  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100']
+     AI    [Ms Demi Graphic     ]  upgrade  mk103  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy        m2  ltv=35%  [OK]
+    PLAYER  buy      mk108  ltv=75%  [yield=5.7% rate=0.5%]
+
+  -- Tick 15  PI=98.3  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,168,801  equity=£ 1,150,281  net=£ 2,319,082  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100', 'mk108']
+     AI    [Ms Demi Graphic     ]  buy      mk106  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk106  ltv=35%  [FAILED]
+    PLAYER  refi       m1  ltv=0%  [headroom=£35,864]
+
+  -- Tick 16  PI=102.8  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,265,405  equity=£ 1,257,906  net=£ 2,523,311  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100', 'mk108']
+     AI    [Ms Demi Graphic     ]  upgrade  mk106  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+    PLAYER  refi      p10  ltv=0%  [headroom=£21,078]
+
+  -- Tick 17  PI=105.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,363,545  equity=£ 1,324,136  net=£ 2,687,682  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100', 'mk108']
+     AI    [Ms Demi Graphic     ]  buy       p01  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  hold           ltv=0%  [OK]
+    PLAYER  refi      p10  ltv=0%  [headroom=£22,943]
+
+  -- Tick 18  PI=107.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,463,515  equity=£ 1,365,530  net=£ 2,829,046  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100', 'mk108']
+     AI    [Ms Demi Graphic     ]  buy      mk110  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk110  ltv=35%  [FAILED]
+    PLAYER  refi      p10  ltv=0%  [headroom=£25,182]
+
+  -- Tick 19  PI=109.3  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,565,343  equity=£ 1,415,203  net=£ 2,980,547  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100', 'mk108']
+     AI    [Ms Demi Graphic     ]  upgrade  mk110  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk111  ltv=35%  [OK]
+    PLAYER  refi      p10  ltv=0%  [headroom=£28,353]
+
+  -- Tick 20  PI=112.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,668,775  equity=£ 1,485,573  net=£ 3,154,348  props=['p06', 'p12', 'p09', 'p11', 'p10', 'm1', 'p02', 'p03', 'mk100', 'mk108']
+     AI    [Ms Demi Graphic     ]  buy      mk107  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade  mk111  ltv=0%  [OK]
+
+  LEADERBOARD (game 5):
+    1. You                     score=£   1,631,623  equity=£ 1,485,573  cash=£ 1,668,775 <--
+    2. Ms Di Vidend            score=£     919,575  equity=£ 1,104,230  cash=£ 1,330,774
+    3. Ms Demi Graphic         score=£     615,203  equity=£ 1,217,552  cash=£   922,278
+
+======================================================================
+GAME 6  |  20 turns  |  era: Long Boom & The Run-Up to the GFC
+======================================================================
+  Starting cash: £1,058,000
+  p15  Sunderland           £   76,000  yield=8.5%  EPC=G
+  p02  Oxford               £  264,000  yield=5.2%  EPC=D
+  p14  Newcastle            £  102,000  yield=7.1%  EPC=F
+    PLAYER  upgrade   p15  ltv=0%  [EPC=G cost=30,000]
+
+  -- Tick  1  PI=100.0  Rate=3.8%  Scenario=baseline
+     Player: cash=£ 1,056,859  equity=£   443,000  net=£ 1,499,859  props=['p15', 'p02', 'p14']
+     AI    [Mr Reid Furbish     ]  upgrade   p10  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy       p01  ltv=50%  [OK]
+    PLAYER  upgrade   p14  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  2  PI=100.0  Rate=4.2%  Scenario=baseline
+     Player: cash=£ 1,068,263  equity=£   443,000  net=£ 1,511,263  props=['p15', 'p02', 'p14']
+     AI    [Mr Reid Furbish     ]  upgrade   p11  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy        m1  ltv=50%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  3  PI=100.0  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,090,486  equity=£   443,000  net=£ 1,533,486  props=['p15', 'p02', 'p14']
+     AI    [Mr Reid Furbish     ]  buy        m4  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  buy        m2  ltv=50%  [OK]
+    PLAYER  upgrade   p02  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  4  PI=99.4  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,120,714  equity=£   440,473  net=£ 1,561,187  props=['p15', 'p02', 'p14']
+     AI    [Mr Reid Furbish     ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy       p03  ltv=50%  [OK]
+    PLAYER  upgrade   p14  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  5  PI=101.1  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,151,415  equity=£   448,053  net=£ 1,599,468  props=['p15', 'p02', 'p14']
+     AI    [Mr Reid Furbish     ]  upgrade    m4  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  upgrade   p03  ltv=0%  [OK]
+    PLAYER  buy       p12  ltv=75%  [yield=13.3% rate=4.5%]
+
+  -- Tick  6  PI=104.2  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,132,420  equity=£   510,234  net=£ 1,642,653  props=['p15', 'p02', 'p14', 'p12']
+     AI    [Mr Reid Furbish     ]  refi      p10  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  buy       p09  ltv=50%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  7  PI=110.5  Rate=5.0%  Scenario=boom
+     Player: cash=£ 1,146,877  equity=£   549,759  net=£ 1,696,635  props=['p15', 'p02', 'p14', 'p12']
+     AI    [Mr Reid Furbish     ]  refi      p11  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  upgrade   p09  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  8  PI=114.6  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,193,862  equity=£   576,108  net=£ 1,769,970  props=['p15', 'p02', 'p14', 'p12']
+     AI    [Mr Reid Furbish     ]  sell       m4  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+    PLAYER  buy        m4  ltv=75%  [yield=11.7% rate=5.8%]
+
+  -- Tick  9  PI=119.6  Rate=5.8%  Scenario=baseline
+     Player: cash=£ 1,227,330  equity=£   627,578  net=£ 1,854,908  props=['p15', 'p02', 'p14', 'p12', 'm4']
+     AI    [Mr Reid Furbish     ]  buy       p04  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  buy        m3  ltv=50%  [OK]
+    PLAYER  buy       p13  ltv=75%  [yield=7.7% rate=5.0%]
+
+  -- Tick 10  PI=116.5  Rate=5.0%  Scenario=baseline
+     Player: cash=£ 1,236,897  equity=£   643,639  net=£ 1,880,536  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13']
+     AI    [Mr Reid Furbish     ]  upgrade   p04  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  upgrade    m3  ltv=0%  [OK]
+    PLAYER  upgrade   p13  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 11  PI=104.2  Rate=2.0%  Scenario=downturn
+     Player: cash=£ 1,279,241  equity=£   541,567  net=£ 1,820,808  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13']
+     AI    [Mr Reid Furbish     ]  sell      p04  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy       p08  ltv=50%  [OK]
+    PLAYER  buy       p04  ltv=75%  [yield=9.9% rate=0.5%]
+
+  -- Tick 12  PI=95.1  Rate=0.5%  Scenario=downturn
+     Player: cash=£ 1,292,328  equity=£   492,450  net=£ 1,784,778  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04']
+     AI    [Mr Reid Furbish     ]  buy      mk101  ltv=75%  [FAILED]
+     AI    [Mr Hugh Price       ]  upgrade   p08  ltv=0%  [OK]
+    PLAYER  buy       p09  ltv=75%  [yield=9.4% rate=0.5%]
+
+  -- Tick 13  PI=101.1  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,274,905  equity=£   601,005  net=£ 1,875,910  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09']
+     AI    [Mr Reid Furbish     ]  buy      mk101  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  sell      p09  ltv=0%  [OK]
+    PLAYER  buy       p05  ltv=75%  [yield=7.9% rate=0.5%]
+
+  -- Tick 14  PI=104.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,295,541  equity=£   668,514  net=£ 1,964,056  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05']
+     AI    [Mr Reid Furbish     ]  upgrade  mk101  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy      mk104  ltv=50%  [OK]
+    PLAYER  upgrade   p05  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 15  PI=102.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,343,282  equity=£   646,844  net=£ 1,990,126  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05']
+     AI    [Mr Reid Furbish     ]  upgrade  mk101  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+    PLAYER  buy       p10  ltv=75%  [yield=9.8% rate=0.5%]
+
+  -- Tick 16  PI=101.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,368,807  equity=£   666,527  net=£ 2,035,334  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05', 'p10']
+     AI    [Mr Reid Furbish     ]  sell      p10  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy      mk105  ltv=50%  [OK]
+    PLAYER  buy      mk107  ltv=75%  [yield=11.3% rate=0.5%]
+
+  -- Tick 17  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,376,376  equity=£   701,969  net=£ 2,078,345  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05', 'p10', 'mk107']
+     AI    [Mr Reid Furbish     ]  buy      mk103  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  upgrade  mk105  ltv=0%  [OK]
+    PLAYER  upgrade  mk107  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 18  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,438,230  equity=£   701,969  net=£ 2,140,199  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05', 'p10', 'mk107']
+     AI    [Mr Reid Furbish     ]  upgrade  mk103  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  sell       m3  ltv=0%  [OK]
+    PLAYER  buy        m3  ltv=75%  [yield=17.5% rate=0.5%]
+
+  -- Tick 19  PI=101.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,470,091  equity=£   769,848  net=£ 2,239,940  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05', 'p10', 'mk107', 'm3']
+     AI    [Mr Reid Furbish     ]  sell     mk103  ltv=0%  [OK]
+     AI    [Mr Hugh Price       ]  buy      mk106  ltv=50%  [OK]
+    PLAYER  buy      mk103  ltv=75%  [yield=8.7% rate=0.5%]
+
+  -- Tick 20  PI=103.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,527,404  equity=£   831,924  net=£ 2,359,328  props=['p15', 'p02', 'p14', 'p12', 'm4', 'p13', 'p04', 'p09', 'p05', 'p10', 'mk107', 'm3', 'mk103']
+     AI    [Mr Reid Furbish     ]  buy      mk102  ltv=75%  [OK]
+     AI    [Mr Hugh Price       ]  upgrade  mk106  ltv=0%  [OK]
+
+  LEADERBOARD (game 6):
+    1. Mr Hugh Price           score=£   1,095,063  equity=£ 2,248,888  cash=£   346,175
+    2. You                     score=£     859,328  equity=£   831,924  cash=£ 1,527,404 <--
+    3. Mr Reid Furbish         score=£     490,210  equity=£   106,395  cash=£ 1,909,127
+
+======================================================================
+GAME 7  |  20 turns  |  era: Late Thatcher Boom
+======================================================================
+  Starting cash: £433,000
+  p01  London Kensington    £  675,000  yield=4.4%  EPC=C
+  p02  Oxford               £  264,000  yield=5.2%  EPC=D
+  p13  Cardiff              £  128,000  yield=7.5%  EPC=D
+    PLAYER  upgrade   p02  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  1  PI=100.0  Rate=9.5%  Scenario=baseline
+     Player: cash=£   470,793  equity=£ 1,067,500  net=£ 1,538,293  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p08  ltv=0%  [OK]
+    PLAYER  upgrade   p13  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  2  PI=112.5  Rate=9.0%  Scenario=boom
+     Player: cash=£   510,459  equity=£ 1,200,938  net=£ 1,711,397  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p09  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=8.5%]
+
+  -- Tick  3  PI=123.0  Rate=8.5%  Scenario=boom
+     Player: cash=£   556,816  equity=£ 1,313,306  net=£ 1,870,122  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy        m4  ltv=50%  [OK]
+    PLAYER  hold           ltv=0%  [rate=12.0%]
+
+  -- Tick  4  PI=133.6  Rate=12.0%  Scenario=downturn
+     Player: cash=£   612,786  equity=£ 1,425,674  net=£ 2,038,461  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=13.5%]
+
+  -- Tick  5  PI=140.1  Rate=13.5%  Scenario=baseline
+     Player: cash=£   675,649  equity=£ 1,495,905  net=£ 2,171,554  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=15.0%]
+
+  -- Tick  6  PI=140.1  Rate=15.0%  Scenario=baseline
+     Player: cash=£   746,451  equity=£ 1,495,905  net=£ 2,242,356  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p04  ltv=50%  [OK]
+    PLAYER  hold           ltv=0%  [rate=15.0%]
+
+  -- Tick  7  PI=138.2  Rate=15.0%  Scenario=baseline
+     Player: cash=£   822,137  equity=£ 1,474,836  net=£ 2,296,972  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p04  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=14.0%]
+
+  -- Tick  8  PI=131.6  Rate=14.0%  Scenario=downturn
+     Player: cash=£   899,840  equity=£ 1,404,605  net=£ 2,304,445  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p05  ltv=50%  [OK]
+    PLAYER  hold           ltv=0%  [rate=12.0%]
+
+  -- Tick  9  PI=125.0  Rate=12.0%  Scenario=downturn
+     Player: cash=£   975,650  equity=£ 1,334,375  net=£ 2,310,025  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p05  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=10.5%]
+
+  -- Tick 10  PI=121.1  Rate=10.5%  Scenario=downturn
+     Player: cash=£ 1,050,090  equity=£ 1,292,237  net=£ 2,342,327  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p10  ltv=50%  [OK]
+    PLAYER  hold           ltv=0%  [rate=10.0%]
+
+  -- Tick 11  PI=116.4  Rate=10.0%  Scenario=downturn
+     Player: cash=£ 1,126,123  equity=£ 1,243,076  net=£ 2,369,199  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p10  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=7.0%]
+
+  -- Tick 12  PI=112.5  Rate=7.0%  Scenario=downturn
+     Player: cash=£ 1,192,888  equity=£ 1,200,938  net=£ 2,393,825  props=['p01', 'p02', 'p13']
+     AI    [Ms Demi Graphic     ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p12  ltv=50%  [FAILED]
+    PLAYER  buy        m3  ltv=75%  [yield=14.6% rate=6.0%]
+
+  -- Tick 13  PI=110.5  Rate=6.0%  Scenario=baseline
+     Player: cash=£ 1,195,074  equity=£ 1,233,888  net=£ 2,428,962  props=['p01', 'p02', 'p13', 'm3']
+     AI    [Ms Demi Graphic     ]  buy       p12  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p12  ltv=50%  [FAILED]
+    PLAYER  upgrade    m3  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 14  PI=112.5  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,246,542  equity=£ 1,258,816  net=£ 2,505,358  props=['p01', 'p02', 'p13', 'm3']
+     AI    [Ms Demi Graphic     ]  upgrade   p12  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p11  ltv=50%  [OK]
+    PLAYER  buy        m1  ltv=75%  [yield=7.2% rate=5.5%]
+
+  -- Tick 15  PI=114.5  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,118,329  equity=£ 1,446,010  net=£ 2,564,339  props=['p01', 'p02', 'p13', 'm3', 'm1']
+     AI    [Ms Demi Graphic     ]  upgrade   p12  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p11  ltv=0%  [OK]
+    PLAYER  buy       p06  ltv=75%  [yield=6.3% rate=6.0%]
+
+  -- Tick 16  PI=116.4  Rate=6.0%  Scenario=baseline
+     Player: cash=£ 1,071,942  equity=£ 1,569,173  net=£ 2,641,115  props=['p01', 'p02', 'p13', 'm3', 'm1', 'p06']
+     AI    [Ms Demi Graphic     ]  buy       p07  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p03  ltv=50%  [OK]
+    PLAYER  buy        m2  ltv=75%  [yield=5.8% rate=6.5%]
+
+  -- Tick 17  PI=116.4  Rate=6.5%  Scenario=baseline
+     Player: cash=£ 1,065,889  equity=£ 1,646,174  net=£ 2,712,063  props=['p01', 'p02', 'p13', 'm3', 'm1', 'p06', 'm2']
+     AI    [Ms Demi Graphic     ]  buy      mk103  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p03  ltv=0%  [OK]
+    PLAYER  hold           ltv=0%  [rate=6.5%]
+
+  -- Tick 18  PI=119.1  Rate=6.5%  Scenario=baseline
+     Player: cash=£ 1,152,044  equity=£ 1,709,160  net=£ 2,861,204  props=['p01', 'p02', 'p13', 'm3', 'm1', 'p06', 'm2']
+     AI    [Ms Demi Graphic     ]  upgrade  mk103  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk101  ltv=50%  [OK]
+    PLAYER  refi       m1  ltv=0%  [headroom=£36,370]
+
+  -- Tick 19  PI=123.0  Rate=6.0%  Scenario=baseline
+     Player: cash=£ 1,240,631  equity=£ 1,803,641  net=£ 3,044,272  props=['p01', 'p02', 'p13', 'm3', 'm1', 'p06', 'm2']
+     AI    [Ms Demi Graphic     ]  upgrade  mk103  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk101  ltv=0%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£25,081]
+
+  -- Tick 20  PI=127.6  Rate=6.0%  Scenario=baseline
+     Player: cash=£ 1,332,126  equity=£ 1,913,868  net=£ 3,245,994  props=['p01', 'p02', 'p13', 'm3', 'm1', 'p06', 'm2']
+     AI    [Ms Demi Graphic     ]  buy      mk107  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk101  ltv=0%  [OK]
+
+  LEADERBOARD (game 7):
+    1. You                     score=£   1,745,994  equity=£ 1,913,868  cash=£ 1,332,126 <--
+    2. Mr Ray Novate           score=£   1,507,581  equity=£ 1,199,428  cash=£ 1,808,153
+    3. Ms Demi Graphic         score=£   1,494,314  equity=£   783,022  cash=£ 2,257,670
+
+======================================================================
+GAME 8  |  20 turns  |  era: Long Boom & The Run-Up to the GFC
+======================================================================
+  Starting cash: £911,000
+  p08  Birmingham           £  180,000  yield=6.7%  EPC=E
+  p06  Bristol              £  299,000  yield=5.2%  EPC=C
+  p04  Sheffield            £  110,000  yield=7.1%  EPC=E
+    PLAYER  upgrade   p08  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  1  PI=100.0  Rate=4.8%  Scenario=baseline
+     Player: cash=£   933,237  equity=£   589,500  net=£ 1,522,737  props=['p08', 'p06', 'p04']
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade   p10  ltv=0%  [OK]
+    PLAYER  upgrade   p04  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  2  PI=99.4  Rate=4.8%  Scenario=baseline
+     Player: cash=£   956,760  equity=£   586,138  net=£ 1,542,898  props=['p08', 'p06', 'p04']
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade   p11  ltv=0%  [OK]
+    PLAYER  buy       p12  ltv=75%  [yield=13.0% rate=4.5%]
+
+  -- Tick  3  PI=101.1  Rate=4.5%  Scenario=baseline
+     Player: cash=£   938,257  equity=£   643,508  net=£ 1,581,765  props=['p08', 'p06', 'p04', 'p12']
+     AI    [Ms Demi Graphic     ]  upgrade   p15  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  buy        m4  ltv=75%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  4  PI=104.2  Rate=4.5%  Scenario=baseline
+     Player: cash=£   949,557  equity=£   667,127  net=£ 1,616,684  props=['p08', 'p06', 'p04', 'p12']
+     AI    [Ms Demi Graphic     ]  upgrade   p14  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  5  PI=110.5  Rate=5.0%  Scenario=boom
+     Player: cash=£   992,143  equity=£   715,843  net=£ 1,707,987  props=['p08', 'p06', 'p04', 'p12']
+     AI    [Ms Demi Graphic     ]  buy        m3  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  buy       p13  ltv=75%  [yield=7.2% rate=5.5%]
+
+  -- Tick  6  PI=114.6  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,002,977  equity=£   785,005  net=£ 1,787,982  props=['p08', 'p06', 'p04', 'p12', 'p13']
+     AI    [Ms Demi Graphic     ]  upgrade    m3  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  refi      p10  ltv=75%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£25,864]
+
+  -- Tick  7  PI=119.6  Rate=5.8%  Scenario=baseline
+     Player: cash=£ 1,058,626  equity=£   829,714  net=£ 1,888,340  props=['p08', 'p06', 'p04', 'p12', 'p13']
+     AI    [Ms Demi Graphic     ]  buy       p09  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  refi      p11  ltv=75%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£21,597]
+
+  -- Tick  8  PI=116.5  Rate=5.0%  Scenario=baseline
+     Player: cash=£ 1,112,887  equity=£   802,201  net=£ 1,915,088  props=['p08', 'p06', 'p04', 'p12', 'p13']
+     AI    [Ms Demi Graphic     ]  upgrade   p09  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  sell      p10  ltv=0%  [OK]
+    PLAYER  upgrade   p13  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  9  PI=104.2  Rate=2.0%  Scenario=downturn
+     Player: cash=£ 1,153,422  equity=£   690,428  net=£ 1,843,850  props=['p08', 'p06', 'p04', 'p12', 'p13']
+     AI    [Ms Demi Graphic     ]  buy       p10  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  buy       p05  ltv=75%  [OK]
+    PLAYER  buy       p07  ltv=75%  [yield=6.7% rate=0.5%]
+
+  -- Tick 10  PI=95.1  Rate=0.5%  Scenario=downturn
+     Player: cash=£ 1,118,466  equity=£   673,240  net=£ 1,791,705  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07']
+     AI    [Ms Demi Graphic     ]  buy        m1  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade   p05  ltv=0%  [OK]
+    PLAYER  buy        m4  ltv=75%  [yield=14.0% rate=0.5%]
+
+  -- Tick 11  PI=101.1  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,150,161  equity=£   762,190  net=£ 1,912,351  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4']
+     AI    [Ms Demi Graphic     ]  buy       p02  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  sell       m4  ltv=0%  [OK]
+    PLAYER  buy      mk100  ltv=75%  [yield=13.1% rate=0.5%]
+
+  -- Tick 12  PI=104.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,151,997  equity=£   843,268  net=£ 1,995,265  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100']
+     AI    [Ms Demi Graphic     ]  upgrade   p02  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  buy      mk101  ltv=75%  [OK]
+    PLAYER  upgrade  mk100  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 13  PI=102.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,202,223  equity=£   819,090  net=£ 2,021,313  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100']
+     AI    [Ms Demi Graphic     ]  buy      mk102  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade  mk101  ltv=0%  [OK]
+    PLAYER  buy      mk103  ltv=75%  [yield=8.2% rate=0.5%]
+
+  -- Tick 14  PI=101.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,244,635  equity=£   824,154  net=£ 2,068,789  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103']
+     AI    [Ms Demi Graphic     ]  upgrade  mk102  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade  mk101  ltv=0%  [OK]
+    PLAYER  upgrade  mk103  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick 15  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,298,304  equity=£   806,958  net=£ 2,105,261  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103']
+     AI    [Ms Demi Graphic     ]  buy       p03  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  sell     mk101  ltv=0%  [OK]
+    PLAYER  upgrade  mk103  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 16  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,368,866  equity=£   806,958  net=£ 2,175,824  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103']
+     AI    [Ms Demi Graphic     ]  upgrade   p03  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  buy      mk105  ltv=75%  [OK]
+    PLAYER  buy        m2  ltv=75%  [yield=6.0% rate=0.5%]
+
+  -- Tick 17  PI=101.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,368,153  equity=£   891,033  net=£ 2,259,186  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103', 'm2']
+     AI    [Ms Demi Graphic     ]  buy      mk101  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade  mk105  ltv=0%  [OK]
+    PLAYER  buy       p05  ltv=75%  [yield=9.4% rate=0.5%]
+
+  -- Tick 18  PI=103.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,416,178  equity=£   957,179  net=£ 2,373,357  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103', 'm2', 'p05']
+     AI    [Ms Demi Graphic     ]  buy      mk108  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  sell      p05  ltv=0%  [OK]
+    PLAYER  refi      p07  ltv=0%  [headroom=£27,840]
+
+  -- Tick 19  PI=108.6  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,500,777  equity=£ 1,061,822  net=£ 2,562,599  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103', 'm2', 'p05']
+     AI    [Ms Demi Graphic     ]  upgrade  mk108  ltv=0%  [OK]
+     AI    [Mr Reid Furbish     ]  buy      mk109  ltv=75%  [OK]
+    PLAYER  refi      p07  ltv=0%  [headroom=£38,035]
+
+  -- Tick 20  PI=113.5  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,592,939  equity=£ 1,155,639  net=£ 2,748,578  props=['p08', 'p06', 'p04', 'p12', 'p13', 'p07', 'm4', 'mk100', 'mk103', 'm2', 'p05']
+     AI    [Ms Demi Graphic     ]  buy       p01  ltv=50%  [OK]
+     AI    [Mr Reid Furbish     ]  upgrade  mk109  ltv=0%  [OK]
+
+  LEADERBOARD (game 8):
+    1. You                     score=£   1,248,578  equity=£ 1,155,639  cash=£ 1,592,939 <--
+    2. Ms Demi Graphic         score=£   1,083,335  equity=£ 1,833,255  cash=£   750,080
+    3. Mr Reid Furbish         score=£     496,828  equity=£   214,797  cash=£ 1,828,104
+
+======================================================================
+GAME 9  |  20 turns  |  era: The Global Financial Crisis & Austerity
+======================================================================
+  Starting cash: £960,000
+  p11  Nottingham           £  216,000  yield=10.0%  EPC=E
+  p08  Birmingham           £  180,000  yield=6.7%  EPC=E
+  p10  Leeds                £  144,000  yield=7.1%  EPC=E
+    PLAYER  upgrade   p11  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  1  PI=100.0  Rate=2.0%  Scenario=baseline
+     Player: cash=£   977,429  equity=£   540,500  net=£ 1,517,928  props=['p11', 'p08', 'p10']
+     AI    [Mr Hugh Price       ]  buy       p01  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p04  ltv=0%  [OK]
+    PLAYER  upgrade   p08  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  2  PI=91.2  Rate=0.5%  Scenario=downturn
+     Player: cash=£   990,761  equity=£   493,157  net=£ 1,483,918  props=['p11', 'p08', 'p10']
+     AI    [Mr Hugh Price       ]  buy        m1  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p05  ltv=0%  [OK]
+    PLAYER  upgrade   p10  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  3  PI=97.1  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,004,913  equity=£   524,719  net=£ 1,529,632  props=['p11', 'p08', 'p10']
+     AI    [Mr Hugh Price       ]  buy       p02  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p12  ltv=35%  [OK]
+    PLAYER  buy        m3  ltv=75%  [yield=12.5% rate=0.5%]
+
+  -- Tick  4  PI=100.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£   975,776  equity=£   589,375  net=£ 1,565,151  props=['p11', 'p08', 'p10', 'm3']
+     AI    [Mr Hugh Price       ]  upgrade   p02  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p12  ltv=0%  [OK]
+    PLAYER  upgrade    m3  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  5  PI=98.4  Rate=0.5%  Scenario=baseline
+     Player: cash=£   996,364  equity=£   577,287  net=£ 1,573,651  props=['p11', 'p08', 'p10', 'm3']
+     AI    [Mr Hugh Price       ]  buy        m2  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p12  ltv=0%  [OK]
+    PLAYER  buy       p15  ltv=75%  [yield=9.4% rate=0.5%]
+
+  -- Tick  6  PI=97.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,015,471  equity=£   586,453  net=£ 1,601,924  props=['p11', 'p08', 'p10', 'm3', 'p15']
+     AI    [Mr Hugh Price       ]  buy       p03  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy        m4  ltv=35%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=G cost=30,000]
+
+  -- Tick  7  PI=96.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,025,464  equity=£   577,557  net=£ 1,603,021  props=['p11', 'p08', 'p10', 'm3', 'p15']
+     AI    [Mr Hugh Price       ]  upgrade   p03  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  8  PI=96.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,058,148  equity=£   577,557  net=£ 1,635,705  props=['p11', 'p08', 'p10', 'm3', 'p15']
+     AI    [Mr Hugh Price       ]  sell      p07  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  buy       p09  ltv=75%  [yield=8.2% rate=0.5%]
+
+  -- Tick  9  PI=97.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,047,173  equity=£   635,964  net=£ 1,683,136  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  buy       p07  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p13  ltv=35%  [OK]
+    PLAYER  upgrade   p09  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 10  PI=98.9  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,095,214  equity=£   654,513  net=£ 1,749,726  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p13  ltv=0%  [OK]
+    PLAYER  buy      mk101  ltv=75%  [yield=7.3% rate=0.5%]
+
+  -- Tick 11  PI=104.2  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,120,110  equity=£   734,876  net=£ 1,854,986  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09', 'mk101']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p14  ltv=35%  [OK]
+    PLAYER  upgrade  mk101  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick 12  PI=108.9  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,171,865  equity=£   756,534  net=£ 1,928,398  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  buy      mk104  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p14  ltv=0%  [OK (force-sold after upgrade)]
+    PLAYER  refi      p09  ltv=0%  [headroom=£22,615]
+
+  -- Tick 13  PI=111.9  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,228,088  equity=£   786,213  net=£ 2,014,301  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  buy      mk105  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy       p14  ltv=35%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£20,067]
+
+  -- Tick 14  PI=113.7  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,285,289  equity=£   804,762  net=£ 2,090,050  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  upgrade  mk105  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£23,278]
+
+  -- Tick 15  PI=115.9  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,343,480  equity=£   827,021  net=£ 2,170,501  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  buy      mk106  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk101  ltv=35%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£27,827]
+
+  -- Tick 16  PI=119.0  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,402,528  equity=£   858,555  net=£ 2,261,083  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  upgrade  mk106  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade  mk101  ltv=0%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£32,910]
+
+  -- Tick 17  PI=122.4  Rate=0.2%  Scenario=baseline
+     Player: cash=£ 1,461,568  equity=£   893,798  net=£ 2,355,366  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  buy      mk107  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk103  ltv=35%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£39,064]
+
+  -- Tick 18  PI=126.6  Rate=0.2%  Scenario=baseline
+     Player: cash=£ 1,521,276  equity=£   936,462  net=£ 2,457,738  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  upgrade  mk107  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£39,867]
+
+  -- Tick 19  PI=127.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,582,647  equity=£   942,026  net=£ 2,524,673  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  buy      mk108  ltv=50%  [OK]
+     AI    [Ms Di Vidend        ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  refi       m3  ltv=0%  [headroom=£39,867]
+
+  -- Tick 20  PI=127.2  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,644,759  equity=£   942,026  net=£ 2,586,785  props=['p11', 'p08', 'p10', 'm3', 'p15', 'p09']
+     AI    [Mr Hugh Price       ]  upgrade  mk108  ltv=0%  [OK]
+     AI    [Ms Di Vidend        ]  buy      mk111  ltv=35%  [OK]
+
+  LEADERBOARD (game 9):
+    1. Mr Hugh Price           score=£   2,003,894  equity=£ 3,210,676  cash=£   293,218
+    2. You                     score=£   1,086,785  equity=£   942,026  cash=£ 1,644,759 <--
+    3. Ms Di Vidend            score=£     714,528  equity=£   994,974  cash=£ 1,236,564
+
+======================================================================
+GAME 10  |  20 turns  |  era: Long Boom & The Run-Up to the GFC
+======================================================================
+  Starting cash: £1,043,000
+  p15  Sunderland           £   76,000  yield=8.5%  EPC=G
+  p03  Brighton             £  253,000  yield=5.2%  EPC=D
+  p13  Cardiff              £  128,000  yield=7.5%  EPC=D
+    PLAYER  upgrade   p15  ltv=0%  [EPC=G cost=30,000]
+
+  -- Tick  1  PI=100.0  Rate=4.0%  Scenario=baseline
+     Player: cash=£ 1,043,541  equity=£   457,500  net=£ 1,501,041  props=['p15', 'p03', 'p13']
+     AI    [Mr Hugh Price       ]  buy       p01  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p08  ltv=0%  [OK]
+    PLAYER  upgrade   p15  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  2  PI=106.0  Rate=3.8%  Scenario=boom
+     Player: cash=£ 1,061,708  equity=£   485,083  net=£ 1,546,791  props=['p15', 'p03', 'p13']
+     AI    [Mr Hugh Price       ]  buy        m1  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p09  ltv=0%  [OK]
+    PLAYER  upgrade   p03  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  3  PI=109.4  Rate=3.8%  Scenario=baseline
+     Player: cash=£ 1,087,777  equity=£   500,301  net=£ 1,588,079  props=['p15', 'p03', 'p13']
+     AI    [Mr Hugh Price       ]  buy       p02  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy        m4  ltv=50%  [OK]
+    PLAYER  upgrade   p13  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  4  PI=109.4  Rate=4.2%  Scenario=baseline
+     Player: cash=£ 1,117,243  equity=£   500,301  net=£ 1,617,544  props=['p15', 'p03', 'p13']
+     AI    [Mr Hugh Price       ]  upgrade   p02  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  buy       p12  ltv=75%  [yield=12.5% rate=4.8%]
+
+  -- Tick  5  PI=109.4  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,096,247  equity=£   551,425  net=£ 1,647,672  props=['p15', 'p03', 'p13', 'p12']
+     AI    [Mr Hugh Price       ]  buy        m2  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade    m4  ltv=0%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick  6  PI=108.7  Rate=4.8%  Scenario=baseline
+     Player: cash=£ 1,108,972  equity=£   547,405  net=£ 1,656,378  props=['p15', 'p03', 'p13', 'p12']
+     AI    [Mr Hugh Price       ]  hold           ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p14  ltv=50%  [OK]
+    PLAYER  upgrade   p12  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick  7  PI=110.6  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,150,618  equity=£   559,465  net=£ 1,710,083  props=['p15', 'p03', 'p13', 'p12']
+     AI    [Mr Hugh Price       ]  buy        m3  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  buy       p11  ltv=75%  [yield=10.0% rate=4.5%]
+
+  -- Tick  8  PI=113.9  Rate=4.5%  Scenario=baseline
+     Player: cash=£ 1,128,689  equity=£   642,425  net=£ 1,771,114  props=['p15', 'p03', 'p13', 'p12', 'p11']
+     AI    [Mr Hugh Price       ]  upgrade    m3  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p14  ltv=0%  [OK]
+    PLAYER  upgrade   p11  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick  9  PI=120.8  Rate=5.0%  Scenario=boom
+     Player: cash=£ 1,162,631  equity=£   701,462  net=£ 1,864,093  props=['p15', 'p03', 'p13', 'p12', 'p11']
+     AI    [Mr Hugh Price       ]  buy      mk101  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p04  ltv=50%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£22,452]
+
+  -- Tick 10  PI=125.4  Rate=5.5%  Scenario=baseline
+     Player: cash=£ 1,225,622  equity=£   740,819  net=£ 1,966,441  props=['p15', 'p03', 'p13', 'p12', 'p11']
+     AI    [Mr Hugh Price       ]  upgrade  mk101  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade   p04  ltv=0%  [OK]
+    PLAYER  refi      p12  ltv=0%  [headroom=£30,033]
+
+  -- Tick 11  PI=130.8  Rate=5.8%  Scenario=baseline
+     Player: cash=£ 1,291,878  equity=£   787,333  net=£ 2,079,211  props=['p15', 'p03', 'p13', 'p12', 'p11']
+     AI    [Mr Hugh Price       ]  buy       p05  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy       p05  ltv=50%  [FAILED]
+    PLAYER  refi      p12  ltv=0%  [headroom=£25,367]
+
+  -- Tick 12  PI=127.4  Rate=5.0%  Scenario=baseline
+     Player: cash=£ 1,357,405  equity=£   758,709  net=£ 2,116,114  props=['p15', 'p03', 'p13', 'p12', 'p11']
+     AI    [Mr Hugh Price       ]  upgrade   p05  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk103  ltv=50%  [OK]
+    PLAYER  buy       p10  ltv=75%  [yield=7.7% rate=2.0%]
+
+  -- Tick 13  PI=113.9  Rate=2.0%  Scenario=downturn
+     Player: cash=£ 1,367,394  equity=£   683,582  net=£ 2,050,976  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10']
+     AI    [Mr Hugh Price       ]  buy      mk102  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  upgrade   p10  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 14  PI=104.0  Rate=0.5%  Scenario=downturn
+     Player: cash=£ 1,405,241  equity=£   583,291  net=£ 1,988,532  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10']
+     AI    [Mr Hugh Price       ]  upgrade  mk102  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk103  ltv=0%  [OK]
+    PLAYER  buy        m3  ltv=75%  [yield=15.1% rate=0.5%]
+
+  -- Tick 15  PI=110.6  Rate=0.5%  Scenario=boom
+     Player: cash=£ 1,400,310  equity=£   704,209  net=£ 2,104,519  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10', 'm3']
+     AI    [Mr Hugh Price       ]  sell       m3  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk107  ltv=50%  [OK]
+    PLAYER  buy      mk100  ltv=75%  [yield=6.0% rate=0.5%]
+
+  -- Tick 16  PI=113.9  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,409,918  equity=£   785,157  net=£ 2,195,075  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10', 'm3', 'mk100']
+     AI    [Mr Hugh Price       ]  buy      mk105  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk107  ltv=0%  [OK]
+    PLAYER  upgrade  mk100  ltv=0%  [EPC=E cost=12,000]
+
+  -- Tick 17  PI=112.1  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,475,362  equity=£   760,000  net=£ 2,235,362  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10', 'm3', 'mk100']
+     AI    [Mr Hugh Price       ]  buy      mk106  ltv=50%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk111  ltv=50%  [OK]
+    PLAYER  buy      mk109  ltv=75%  [yield=6.6% rate=0.5%]
+
+  -- Tick 18  PI=110.6  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,518,572  equity=£   773,573  net=£ 2,292,145  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10', 'm3', 'mk100', 'mk109']
+     AI    [Mr Hugh Price       ]  upgrade  mk106  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk111  ltv=0%  [OK]
+    PLAYER  upgrade  mk109  ltv=0%  [EPC=F cost=20,000]
+
+  -- Tick 19  PI=109.4  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,583,931  equity=£   755,307  net=£ 2,339,238  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10', 'm3', 'mk100', 'mk109']
+     AI    [Mr Hugh Price       ]  sell     mk101  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  upgrade  mk111  ltv=0%  [OK]
+    PLAYER  upgrade  mk109  ltv=0%  [EPC=D cost=5,000]
+
+  -- Tick 20  PI=109.4  Rate=0.5%  Scenario=baseline
+     Player: cash=£ 1,666,478  equity=£   755,307  net=£ 2,421,785  props=['p15', 'p03', 'p13', 'p12', 'p11', 'p10', 'm3', 'mk100', 'mk109']
+     AI    [Mr Hugh Price       ]  sell     mk102  ltv=0%  [OK]
+     AI    [Mr Ray Novate       ]  buy      mk110  ltv=50%  [OK]
+
+  LEADERBOARD (game 10):
+    1. Mr Hugh Price           score=£   1,096,430  equity=£ 2,098,029  cash=£   498,400
+    2. You                     score=£     921,785  equity=£   755,307  cash=£ 1,666,478 <--
+    3. Mr Ray Novate           score=£     625,938  equity=£   816,419  cash=£ 1,331,171
+
+
+======================================================================
+SUMMARY — 10 games x 20 turns
+======================================================================
+
+Per-game results (Claude / player):
+  Game   Era                                      Rank            Score
+  1      New Labour Boom — Part I                 2      £   1,711,646
+  2      Post-GFC Long Recovery                   2      £   1,603,089
+  3      New Labour Boom — Part I                 1      £   2,537,201
+  4      The Global Financial Crisis & Austerity  2      £   1,039,250
+  5      Long Boom & The Run-Up to the GFC        1      £   1,631,623
+  6      Long Boom & The Run-Up to the GFC        2      £     859,328
+  7      Late Thatcher Boom                       1      £   1,745,994
+  8      Long Boom & The Run-Up to the GFC        1      £   1,248,578
+  9      The Global Financial Crisis & Austerity  2      £   1,086,785
+  10     Long Boom & The Run-Up to the GFC        2      £     921,785
+
+  Avg score: £1,438,528   Avg rank: 1.6/3   Wins: 4/10
+
+Action coverage — all actors across all games:
+  Actor                          buy      sell   upgrade      refi      hold
+  ai1                             79         9        80         2        30
+  ai2                             87         6        96         2         9
+  player                          51         0        71        66        12
+
+Action success/failure breakdown:
+  Actor+Action                         OK   FAILED
+  ai1/buy                              77        2
+  ai1/hold                             30        0
+  ai1/refi                              2        0
+  ai1/sell                              9        0
+  ai1/upgrade                          80        0
+  ai2/buy                              75       12
+  ai2/hold                              9        0
+  ai2/refi                              2        0
+  ai2/sell                              6        0
+  ai2/upgrade                          96        0
+  player/buy                           50        1
+  player/hold                          12        0
+  player/refi                          66        0
+  player/upgrade                       71        0

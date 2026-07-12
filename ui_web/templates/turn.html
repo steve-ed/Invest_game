@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block content %}
+{% set sparklines = sparklines | default({}) %}
+{% set score_bars = score_bars | default([]) %}
+
+<div class="layout-sidebar">
+
+  <!-- ── Sidebar ── -->
+  <div class="sidebar">
+
+    <div class="panel">
+      <div class="panel-title">Progress</div>
+      <div style="font-size:28px; font-weight:bold; color:var(--accent);">
+        T{{ gs.tick }}
+      </div>
+      <div class="muted" style="font-size:13px;">of {{ gs.total_ticks }} turns</div>
+      <div style="margin-top:10px;">
+        <div style="height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+          <div style="height:100%; width:{{ ((gs.tick / gs.total_ticks) * 100) | round(0) }}%; background:var(--accent); border-radius:3px;"></div>
+        </div>
+      </div>
+      <div class="muted" style="font-size:12px; margin-top:6px;">
+        {{ gs.scenario }}
+      </div>
+      <div class="muted" style="font-size:11px; margin-top:2px; line-height:1.3;">{{ scenario_desc }}</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Macro</div>
+
+      <div class="macro-row">
+        <span class="muted">PRICES</span>
+        <span>
+          <span class="macro-val">{{ gs.macro.price_index }}</span>
+          <span class="trend-{{ 'up' if trend.price_index == '^' else ('down' if trend.price_index == 'v' else 'flat') }}">&nbsp;{{ trend.price_index }}</span>
+        </span>
+      </div>
+      {% if sparklines.price %}
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" width="100%" height="28" style="display:block; margin:2px 0 8px;">
+        <polyline points="{{ sparklines.price }}" fill="none" stroke="#00FF88" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+      {% endif %}
+
+      <div class="macro-row">
+        <span class="muted">INT. RATE</span>
+        <span>
+          <span class="macro-val">{{ gs.macro.rate }}%</span>
+          <span class="trend-{{ 'up' if trend.rate == '^' else ('down' if trend.rate == 'v' else 'flat') }}">&nbsp;{{ trend.rate }}</span>
+        </span>
+      </div>
+      {% if sparklines.rate %}
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" width="100%" height="28" style="display:block; margin:2px 0 8px;">
+        <polyline points="{{ sparklines.rate }}" fill="none" stroke="#F87171" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+      {% endif %}
+
+      <div class="macro-row">
+        <span class="muted">RENT GROWTH</span>
+        <span>
+          <span class="macro-val">{{ gs.macro.rent_growth }}%</span>
+          <span class="trend-{{ 'up' if trend.rent_growth == '^' else ('down' if trend.rent_growth == 'v' else 'flat') }}">&nbsp;{{ trend.rent_growth }}</span>
+        </span>
+      </div>
+      {% if sparklines.rent %}
+      <svg viewBox="0 0 100 30" preserveAspectRatio="none" width="100%" height="28" style="display:block; margin:2px 0 0;">
+        <polyline points="{{ sparklines.rent }}" fill="none" stroke="#FBBF24" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
+      </svg>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Regional Growth This Quarter</div>
+      <style>
+        .heatmap-table { width:100%; border-collapse:collapse; font-size:0.82em; }
+        .heatmap-table th, .heatmap-table td { padding:3px 6px; text-align:left; }
+        .heatmap-table th { color:var(--muted); font-weight:normal; }
+        .heat-hot  { background:rgba(220,38,38,0.15); }
+        .heat-cold { background:rgba(37,99,235,0.15); }
+      </style>
+      <table class="heatmap-table">
+        <tr><th>Region</th><th>Growth</th><th>vs Nat.</th></tr>
+        {% for region, growth in regional_growths.items() | sort(attribute='1', reverse=True) %}
+        {% set diff = (growth - national_growth) | round(2) %}
+        <tr class="{% if diff > 0.3 %}heat-hot{% elif diff < -0.3 %}heat-cold{% endif %}">
+          <td>{{ region }}</td>
+          <td>{{ growth }}%</td>
+          <td>{% if diff > 0 %}+{% endif %}{{ diff }}%</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Your Rank</div>
+      <div style="font-size:32px; font-weight:bold; color:var(--accent);">#{{ rank }}</div>
+      <div class="muted" style="font-size:13px;">Score</div>
+      <div style="font-size:17px; font-weight:bold;">{{ player_score | currency }}</div>
+      {% if leverage_pen > 0 %}
+      <div class="muted" style="font-size:11px; margin-top:4px;">
+        Leverage penalty: <span style="color:var(--red);">-{{ leverage_pen | currency }}</span>
+      </div>
+      {% endif %}
+      {% if concentration_pen > 0 %}
+      <div class="muted" style="font-size:11px; margin-top:2px;">
+        Concentration penalty: <span style="color:var(--red);">-{{ concentration_pen | currency }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <div style="font-size:11px; font-weight:bold; letter-spacing:0.1em; color:{{ archetype_meta.color }}; margin-bottom:6px;">
+        {{ archetype_meta.short }}
+      </div>
+      <div class="muted" style="font-size:11px; margin-bottom:8px;">{{ archetype_meta.metric }}</div>
+      {% if gs.archetype == 'income' %}
+        <div style="font-size:16px; font-weight:bold; color:{{ archetype_meta.color }};">
+          {{ gs.player.cumulative_rent | currency }}
+        </div>
+      {% elif gs.archetype == 'growth' %}
+        <div style="font-size:16px; font-weight:bold; color:{{ archetype_meta.color }};">
+          {{ portfolio_value | currency }}
+        </div>
+      {% else %}
+        <div style="font-size:16px; font-weight:bold; color:{{ archetype_meta.color }};">
+          {{ (portfolio_value + gs.player.cash + (gs.player.cumulative_rent * 0.4) | int) | currency }}
+        </div>
+      {% endif %}
+      <div class="muted" style="font-size:10px; margin-top:6px; line-height:1.3;">{{ archetype_meta.hint }}</div>
+    </div>
+
+  </div>
+
+  <!-- ── Main area ── -->
+  <div class="main-area" style="padding-bottom: 100px;">
+
+    <div class="mobile-stat-bar">
+      <span class="accent" style="font-weight:bold;">T{{ gs.tick }}/{{ gs.total_ticks }}</span>
+      <span>#{{ rank }}</span>
+      <span>{{ gs.player.cash | currency }}</span>
+      <span style="color:{{ archetype_meta.color }};">{{ archetype_meta.short }}</span>
+    </div>
+
+    <!-- Actor position history -->
+    <div class="panel">
+      <div class="panel-title">
+        Actor Positions
+        <span style="float:right; font-size:12px; color:var(--dim);">
+          <span style="color:#00FF88;">&#9632;</span> You &nbsp;
+          <span style="color:#FBBF24;">&#9632;</span> Conservative &nbsp;
+          <span style="color:#F87171;">&#9632;</span> Aggressive
+        </span>
+      </div>
+      <div style="display:flex; align-items:flex-end; height:80px; margin-top:8px;">
+        {% set col_w = 'calc(' ~ '100% / ' ~ gs.total_ticks ~ ')' %}
+        {% for t in range(1, gs.total_ticks + 1) %}
+        {% set bar = score_bars[t - 1] if t <= score_bars|length else none %}
+        <div style="width:{{ col_w }}; padding:0 1px; box-sizing:border-box; height:100%; display:flex; flex-direction:column-reverse;">
+          {% if bar %}
+          {% for seg in bar.segments %}
+          <div style="background:{{ seg.color }}; flex:{{ seg.pct }}; opacity:0.85; min-height:1px;"
+               title="{{ seg.name }}: ${{ '{:,.0f}'.format(seg.score) }}"></div>
+          {% endfor %}
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <div style="display:flex; margin-top:4px;">
+        {% set col_w = 'calc(' ~ '100% / ' ~ gs.total_ticks ~ ')' %}
+        {% for t in range(1, gs.total_ticks + 1) %}
+        <div style="width:{{ col_w }}; text-align:center; font-size:10px; color:var(--dim);">T{{ t }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Portfolio -->
+    <div class="panel">
+      <div class="panel-title">
+        Your Portfolio
+        <span class="accent" style="float:right; font-size:14px;">
+          {{ portfolio_value | currency }} total
+        </span>
+      </div>
+      {% if gs.player.portfolio %}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Region</th>
+            <th style="text-align:right;">Value</th>
+            <th style="text-align:right;" class="col-hide-mobile">Rent/mo</th>
+            <th style="text-align:right;">Yield</th>
+            <th class="col-hide-mobile">EPC</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prop in gs.player.portfolio %}
+          <tr>
+            <td class="accent">{{ prop.id }}</td>
+            <td>{{ prop.region }}</td>
+            <td style="text-align:right;">{{ prop.value | currency }}</td>
+            <td style="text-align:right;" class="col-hide-mobile">{{ prop.rent | currency }}</td>
+            <td style="text-align:right;">{{ ((prop.rent * 12 / prop.value) * 100) | round(1) }}%</td>
+            <td class="col-hide-mobile">
+              {% if 'epc' in reg_events_fired %}
+                {% if prop.get('epc_compliant', true) %}
+                  <span class="badge badge-green" style="font-size:10px;">C</span>
+                {% else %}
+                  <span class="badge badge-red" style="font-size:10px;">!</span>
+                {% endif %}
+              {% endif %}
+            </td>
+            <td>
+              {% if prop.get('vacant', false) %}
+                <span class="badge badge-red" style="font-size:10px;">VACANT</span>
+              {% elif prop.get('renovated', false) %}
+                <span class="badge badge-green" style="font-size:10px;">RENOVATED</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div style="padding-top:10px; font-size:13px; color:var(--muted);">
+        Cash: <span style="color:var(--text); font-weight:bold;">{{ gs.player.cash | currency }}</span>
+        {% if gs.player.mortgages %}
+        &nbsp;&nbsp;
+        <span style="color:var(--red);">
+          Monthly mortgage: £{{ '{:,.0f}'.format(gs.player.mortgages | sum(attribute='monthly_payment')) }}
+        </span>
+        {% endif %}
+      </div>
+      {% if gs.player.mortgages %}
+      <div style="margin-top:10px;">
+        <div style="font-size:12px; color:var(--muted); margin-bottom:4px;">MORTGAGES</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Rate</th>
+              <th style="text-align:right;">Loan</th>
+              <th style="text-align:right;">Monthly</th>
+              <th style="text-align:right;" class="col-hide-mobile">Per Turn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in gs.player.mortgages %}
+            <tr>
+              <td class="accent">{{ m.prop_id }}</td>
+              <td style="font-size:12px;">
+                {% if m.rate_type == 'variable' %}
+                  <span class="badge badge-dim">VAR {{ m.rate | round(2) }}%</span>
+                {% elif m.rate_type == 'fixed_2yr' %}
+                  <span class="badge badge-green">FIX2 {{ m.fixed_rate | round(2) }}%</span>
+                  <span class="muted" style="font-size:10px;">→T{{ m.fix_expires_tick }}</span>
+                {% elif m.rate_type == 'fixed_5yr' %}
+                  <span class="badge badge-green">FIX5 {{ m.fixed_rate | round(2) }}%</span>
+                  <span class="muted" style="font-size:10px;">→T{{ m.fix_expires_tick }}</span>
+                {% else %}
+                  <span class="badge badge-dim">{{ m.rate | default(0) | round(2) }}%</span>
+                {% endif %}
+              </td>
+              <td style="text-align:right;">£{{ '{:,.0f}'.format(m.loan) }}</td>
+              <td style="text-align:right; color:var(--red);">£{{ '{:,.0f}'.format(m.monthly_payment) }}</td>
+              <td style="text-align:right; color:var(--red);" class="col-hide-mobile">£{{ '{:,.0f}'.format(m.monthly_payment * 6) }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+      {% else %}
+      <p class="muted">No properties owned.</p>
+      {% endif %}
+    </div>
+
+    {% if rent_freeze or ('epc' in reg_events_fired) %}
+    <div class="panel" style="border:1px solid var(--yellow);">
+      <div class="panel-title" style="color:var(--yellow);">Active Regulatory Alerts</div>
+      {% if 'epc' in reg_events_fired %}
+      {% set noncompliant_count = namespace(value=0) %}
+      {% for prop in gs.player.portfolio %}
+        {% if not prop.get('epc_compliant', true) %}
+          {% set noncompliant_count.value = noncompliant_count.value + 1 %}
+        {% endif %}
+      {% endfor %}
+      {% if noncompliant_count.value > 0 %}
+      <div style="padding:6px 0; font-size:13px;">
+        <span class="badge badge-red">EPC</span>
+        &nbsp;{{ noncompliant_count.value }} properties non-compliant — 15% rent reduction. Upgrade on the decision screen.
+      </div>
+      {% endif %}
+      {% endif %}
+      {% for region, turns_left in rent_freeze.items() %}
+      <div style="padding:6px 0; border-top:1px solid var(--border); font-size:13px;">
+        <span class="badge badge-dim">FREEZE</span>
+        &nbsp;Rent freeze {{ 'national' if region == 'ALL' else 'in ' + region }} — {{ turns_left }} turn{{ 's' if turns_left != 1 }} remaining.
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- AI Positions -->
+    <div class="panel">
+      <div class="panel-title">AI Positions</div>
+      {% for ai in gs.ai %}
+      <div style="padding: 10px 0; border-bottom: 1px solid var(--border);">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:bold;
+            {% if ai.name == 'Conservative' %}color:var(--yellow);
+            {% else %}color:var(--red);{% endif %}">
+            {{ ai.name }}
+          </span>
+          <span class="muted" style="font-size:13px;">
+            {{ ai.props }} props &nbsp;|&nbsp;
+            <span style="color:var(--text);">{{ ai.portfolio_value | currency }}</span>
+          </span>
+        </div>
+        <div style="margin-top:4px; font-size:13px; color:var(--dim);">
+          {% if ai.last_action == 'buy' %}
+            <span class="badge badge-green">BUY</span>
+          {% elif ai.last_action == 'sell' %}
+            <span class="badge badge-red">SELL</span>
+          {% else %}
+            <span class="badge badge-dim">HOLD</span>
+          {% endif %}
+          {% if ai.last_property %}
+            &nbsp;{{ ai.last_property }}
+          {% endif %}
+          &nbsp;&mdash;&nbsp;{{ ai.rationale }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- News -->
+    <div class="panel">
+      <div class="panel-title">News</div>
+      {% if news %}
+        {% for item in news %}
+        <div class="news-item">{{ item }}</div>
+        {% endfor %}
+      {% else %}
+        <div class="muted">No news this turn.</div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block page_footer %}
+<div class="decision-footer">
+  <div class="decision-footer-inner">
+    <div class="decision-footer-left">
+      <div style="font-size:13px; color:var(--muted);">Review the market data above, then make your decision before time runs out.</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; flex-shrink:0;">
+      <div style="text-align:center;">
+        <div style="font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; margin-bottom:2px;">Time</div>
+        <div id="turn-timer" style="font-size:32px; font-weight:bold; font-family:'Courier New',monospace; color:var(--accent); letter-spacing:0.08em; min-width:64px;">0:20</div>
+      </div>
+      <a href="/decision" class="btn btn-large" id="decision-btn">&gt;&gt; MAKE DECISION</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  var TURN_SECONDS = 20;
+  var timerRemaining = TURN_SECONDS;
+  var timerEl = document.getElementById('turn-timer');
+  var timerInterval = null;
+
+  function formatTimer(s) {
+    return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2);
+  }
+
+  function tickTimer() {
+    timerRemaining--;
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerEl.textContent = '0:00';
+      timerEl.style.color = 'var(--red)';
+      window.location.href = '/decision';
+      return;
+    }
+    timerEl.textContent = formatTimer(timerRemaining);
+    if (timerRemaining <= 5) {
+      timerEl.style.color = 'var(--red)';
+    } else if (timerRemaining <= 10) {
+      timerEl.style.color = 'var(--yellow)';
+    } else {
+      timerEl.style.color = 'var(--accent)';
+    }
+  }
+
+  timerInterval = setInterval(tickTimer, 1000);
+
+  document.getElementById('decision-btn').addEventListener('click', function() {
+    clearInterval(timerInterval);
+  });
+</script>
+{% endblock %}

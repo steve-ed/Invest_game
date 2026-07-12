@@ -1,0 +1,114 @@
+<EndScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.039, 0.055, 0.102, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: '16dp'
+        spacing: '12dp'
+
+        # Header
+        BoxLayout:
+            size_hint_y: None
+            height: '54dp'
+            orientation: 'vertical'
+            Label:
+                text: 'GAME OVER'
+                color: 0.984, 0.749, 0.141, 1
+                font_size: '26sp'
+                bold: True
+            Label:
+                text: '20 turns  \u00b7  10 years  \u00b7  3 actors'
+                color: 0.580, 0.608, 0.660, 1
+                font_size: '13sp'
+
+        # Leaderboard
+        BoxLayout:
+            size_hint_y: None
+            height: '150dp'
+            orientation: 'vertical'
+            canvas.before:
+                Color:
+                    rgba: 0.067, 0.094, 0.153, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            padding: '10dp'
+            spacing: '4dp'
+            Label:
+                text: 'FINAL LEADERBOARD'
+                color: 0.580, 0.608, 0.660, 1
+                font_size: '13sp'
+                size_hint_y: None
+                height: '21dp'
+                halign: 'left'
+                text_size: self.size
+            BoxLayout:
+                id: leaderboard_box
+                orientation: 'vertical'
+
+        # Breakdown + events
+        BoxLayout:
+            spacing: '12dp'
+
+            BoxLayout:
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '10dp'
+                spacing: '4dp'
+                Label:
+                    text: 'YOUR BREAKDOWN'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '13sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    id: breakdown_box
+                    orientation: 'vertical'
+
+            BoxLayout:
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '10dp'
+                spacing: '4dp'
+                Label:
+                    text: 'KEY EVENTS'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '13sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    id: events_box
+                    orientation: 'vertical'
+
+        # Play again
+        BoxLayout:
+            size_hint_y: None
+            height: '44dp'
+            Button:
+                text: 'PLAY AGAIN'
+                size_hint_x: None
+                width: '160dp'
+                pos_hint: {'center_x': 0.5}
+                background_color: 0.122, 0.161, 0.216, 1
+                color: 0.580, 0.608, 0.660, 1
+                font_size: '14sp'
+                on_press: root.play_again()

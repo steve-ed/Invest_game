@@ -1,0 +1,134 @@
+#:import MacroSidebar widgets.macro_sidebar.MacroSidebar
+
+<DecisionScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.039, 0.055, 0.102, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: '8dp'
+        spacing: '8dp'
+
+        MacroSidebar:
+            id: sidebar
+
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: '8dp'
+
+            # Actor turn header
+            Label:
+                id: turn_header
+                text: 'YOUR DECISION'
+                color: 0, 1, 0.533, 1
+                font_size: '16sp'
+                bold: True
+                size_hint_y: None
+                height: '28dp'
+                halign: 'left'
+                text_size: self.size
+
+            # Property selection panel
+            BoxLayout:
+                size_hint_y: 0.5
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '4dp'
+                Label:
+                    text: 'SELECT PROPERTY'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '14sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                ScrollView:
+                    BoxLayout:
+                        id: market_box
+                        orientation: 'vertical'
+                        size_hint_y: None
+                        height: self.minimum_height
+                        spacing: '2dp'
+
+            # Action panel
+            BoxLayout:
+                orientation: 'vertical'
+                canvas.before:
+                    Color:
+                        rgba: 0.067, 0.094, 0.153, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                padding: '8dp'
+                spacing: '8dp'
+                Label:
+                    text: 'YOUR ACTION'
+                    color: 0.580, 0.608, 0.660, 1
+                    font_size: '14sp'
+                    size_hint_y: None
+                    height: '21dp'
+                    halign: 'left'
+                    text_size: self.size
+                BoxLayout:
+                    size_hint_y: None
+                    height: '60dp'
+                    spacing: '8dp'
+                    Button:
+                        id: btn_buy
+                        text: 'BUY'
+                        background_normal: ''
+                        background_color: 0.122, 0.161, 0.216, 1
+                        color: 0, 1, 0.533, 1
+                        font_size: '22sp'
+                        bold: True
+                        on_press: root.select_action('buy')
+                    Button:
+                        id: btn_hold
+                        text: 'HOLD'
+                        background_normal: ''
+                        background_color: 0.122, 0.161, 0.216, 1
+                        color: 0.580, 0.608, 0.660, 1
+                        font_size: '22sp'
+                        on_press: root.select_action('hold')
+                    Button:
+                        id: btn_sell
+                        text: 'SELL'
+                        background_normal: ''
+                        background_color: 0.122, 0.161, 0.216, 1
+                        color: 0.580, 0.608, 0.660, 1
+                        font_size: '22sp'
+                        on_press: root.select_action('sell')
+                BoxLayout:
+                    size_hint_y: None
+                    height: '40dp'
+                    Button:
+                        id: btn_confirm
+                        text: 'CONFIRM  >>'
+                        size_hint_x: None
+                        width: '160dp'
+                        pos_hint: {'right': 1}
+                        background_color: 0, 0, 0, 0
+                        canvas.before:
+                            Color:
+                                rgba: 0, 1, 0.533, 0.12
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+                            Color:
+                                rgba: 0, 1, 0.533, 0.4
+                            Line:
+                                rectangle: self.x, self.y, self.width, self.height
+                                width: 1
+                        color: 0, 1, 0.533, 1
+                        font_size: '14sp'
+                        on_press: root.confirm()

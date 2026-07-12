@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="415" height="135" viewBox="0 0 415 135">
+
+  <defs>
+    <!-- Crescent mask: white rect makes outer circle fully visible,      -->
+    <!-- black inner circle cuts the left side to form the crescent shape -->
+    <mask id="cm">
+      <rect width="415" height="135" fill="white"/>
+      <circle cx="336" cy="66" r="26" fill="black"/>
+    </mask>
+  </defs>
+
+  <!-- Wordmark: Dylan Consult, 44px bold, baseline y=82 -->
+  <text x="195" y="82"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="44" font-weight="700" fill="#ffffff"
+        text-anchor="middle">
+    <tspan>Dylan</tspan><tspan dx="10">Consult</tspan>
+  </text>
+
+  <!-- Crescent symbol -->
+  <circle cx="350" cy="66" r="32" fill="#ffffff" mask="url(#cm)"/>
+
+  <!-- Tagline -->
+  <text x="125" y="108"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="14" font-style="italic" fill="#aaaaaa"
+        letter-spacing="0.5" text-anchor="start">Certitudo et Qualitas</text>
+
+</svg>

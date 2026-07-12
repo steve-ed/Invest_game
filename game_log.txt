@@ -1,0 +1,52 @@
+============================================================
+CLAUDE PLAYER  —  6 turns  |  era: Sustained Growth, Brexit & COVID
+============================================================
+
+Starting cash: £1,109,000
+Starting portfolio:
+  p15  Sunderland           £   76,000  yield 8.5%  EPC G
+  p13  Cardiff              £  128,000  yield 7.5%  EPC D
+  p12  Liverpool            £  187,000  yield 12.5%  EPC F
+  CLAUDE DECISION -> upgrade p15 LTV=0%  [EPC G upgrade cost=30,000]
+
+── Tick  1 ─────────────────────────────────────────
+  Macro:  PI=100.0  Rate=0.5%  Scenario=baseline
+  Player: cash=£ 1,101,066  equity=£   391,500  net=£ 1,492,566
+  Props:  ['p15', 'p13', 'p12']
+  CLAUDE DECISION -> upgrade p12 LTV=0%  [EPC F upgrade cost=20,000]
+
+── Tick  2 ─────────────────────────────────────────
+  Macro:  PI=101.6  Rate=0.5%  Scenario=baseline
+  Player: cash=£ 1,103,750  equity=£   397,887  net=£ 1,501,637
+  Props:  ['p15', 'p13', 'p12']
+  CLAUDE DECISION -> upgrade p15 LTV=0%  [EPC E upgrade cost=12,000]
+
+── Tick  3 ─────────────────────────────────────────
+  Macro:  PI=103.6  Rate=0.5%  Scenario=baseline
+  Player: cash=£ 1,115,969  equity=£   405,551  net=£ 1,521,519
+  Props:  ['p15', 'p13'  CLAUDE DECISION -> hold  [rate 12.0% no action]
+
+── Tick  4 ─────────────────────────────────────────
+  Macro:  PI=112.6  Rate=12.0%  Scenario=boom
+  Player: cash=£ 1,313,409  equity=£   448,796  net=£ 1,762,205
+  Props:  ['p10', 'p13', 'p05']
+  CLAUDE DECISION -> hold  [rate 11.5% no action]
+
+── Tick  5 ─────────────────────────────────────────
+  Macro:  PI=115.5  Rate=11.5%  Scenario=baseline
+  Player: cash=£ 1,387,006  equity=£   460,403  net=£ 1,847,409
+  Props:  ['p10', 'p13', 'p05']
+  CLAUDE DECISION -> hold  [rate 11.0% no action]
+
+── Tick  6 ─────────────────────────────────────────
+  Macro:  PI=125.2  Rate=11.0%  Scenario=boom
+  Player: cash=£ 1,461,559  equity=£   499,092  net=£ 1,960,651
+  Props:  ['p10', 'p13', 'p05']
+
+============================================================
+FINAL LEADERBOARD
+============================================================
+  1. You                    score=£     460,651  equity=£   499,092  cash=£ 1,461,559
+  2. Mr Ray Novate          score=£     422,813  equity=£   598,983  cash=£ 1,344,589
+  3. Ms Demi Graphic        score=£     365,591  equity=£   223,558  cash=£ 1,642,033
+ You                    score=£     104,285  equity=£   472,101  cash=£ 1,149,506

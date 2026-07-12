@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="text-align:center; padding: 32px 0 24px;">
+  <h1 style="font-size:44px; color:var(--yellow); letter-spacing:0.12em;">GAME OVER</h1>
+  <p class="muted" style="margin-top:8px; font-size:15px;">
+    {{ gs.total_ticks }} turns complete &nbsp;&middot;&nbsp; {{ gs.scenario }}
+  </p>
+</div>
+
+<!-- Final Leaderboard -->
+<div class="panel" style="max-width:520px; margin:0 auto 20px;">
+  <div class="panel-title">Final Leaderboard</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Actor</th>
+        <th style="text-align:right;">Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in gs.leaderboard %}
+      <tr>
+        <td>
+          {% if loop.index == 1 %}
+            <span class="accent" style="font-weight:bold;">#1</span>
+          {% else %}
+            <span class="muted">#{{ loop.index }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if loop.index == 1 %}
+            <span class="accent" style="font-weight:bold;">{{ entry.name }}</span>
+          {% elif entry.name == 'Conservative' %}
+            <span class="yellow">{{ entry.name }}</span>
+          {% elif entry.name == 'Aggressive' %}
+            <span class="red">{{ entry.name }}</span>
+          {% else %}
+            {{ entry.name }}
+          {% endif %}
+        </td>
+        <td style="text-align:right; font-weight:bold;">
+          {% if loop.index == 1 %}
+            <span class="accent">{{ entry.score | currency }}</span>
+          {% else %}
+            {{ entry.score | currency }}
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Breakdown + Key Events -->
+<div class="row">
+  <div class="col">
+    <div class="panel">
+      {% set bd = gs.end.player_breakdown %}
+      <div class="panel-title">
+        Your Breakdown
+        <span style="float:right; font-size:11px; font-weight:bold; letter-spacing:0.08em;
+          {% if bd.archetype == 'income' %}color:#FBBF24;
+          {% elif bd.archetype == 'growth' %}color:#00FF88;
+          {% else %}color:#F87171;{% endif %}">
+          {{ bd.archetype_label | upper }}
+        </span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">Portfolio Value</span>
+        <span style="font-weight:bold;">{{ bd.portfolio | currency }}</span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">Cash</span>
+        <span style="font-weight:bold;">{{ bd.cash | currency }}</span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">Rent Collected</span>
+        <span style="font-weight:bold;">{{ bd.rent | currency }}</span>
+      </div>
+      <div class="muted" style="font-size:11px; margin-top:8px; padding-bottom:10px; border-bottom:1px solid var(--border);">
+        {{ bd.archetype_desc }}
+      </div>
+      <div style="margin-top:12px;">
+        <div class="muted" style="font-size:12px; text-transform:uppercase; letter-spacing:0.08em;">Final Score</div>
+        <div style="font-size:26px; font-weight:bold; color:var(--accent); margin-top:4px;">
+          {{ bd.final_score | currency }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="panel">
+      <div class="panel-title">Key Events</div>
+      {% if gs.end.key_events %}
+        {% for event in gs.end.key_events %}
+        <div style="display:flex; gap:12px; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px;">
+          <span class="badge badge-dim" style="flex-shrink:0;">T{{ event.tick }}</span>
+          <span class="muted">{{ event.text }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">No key events recorded.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Era Reveal -->
+{% if gs.end.era_reveal %}
+{% set era = gs.end.era_reveal %}
+<div class="panel" style="border:1px solid var(--accent); margin-bottom:24px;">
+  <div class="panel-title" style="font-size:16px; letter-spacing:0.12em;">THE REVEAL</div>
+  <div style="text-align:center; padding:16px 0 8px;">
+    <div class="muted" style="font-size:13px; margin-bottom:6px;">You were playing through real UK market data:</div>
+    <div style="font-size:36px; font-weight:bold; color:var(--accent); letter-spacing:0.08em;">
+      {{ era.start_year }} H{{ era.start_half }} &mdash; {{ era.end_year }} H{{ era.end_half }}
+    </div>
+    <div style="font-size:18px; color:var(--text); margin-top:8px;">{{ era.era_label }}</div>
+    <div class="muted" style="font-size:12px; margin-top:10px;">
+      Start year was randomly selected from {{ era.limits[0] }}&ndash;{{ era.limits[1] }}.
+      Approximate / illustrative data — see sources in <code>data/uk_macro_history.py</code>.
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Play again -->
+<div style="text-align:center; padding: 12px 0 28px;">
+  <form method="POST" action="/play-again" id="play-again-form">
+    <button type="submit" class="btn btn-large btn-yellow">&gt;&gt; PLAY AGAIN</button>
+  </form>
+  <div style="margin-top:16px; font-size:15px; color:var(--muted);">
+    Auto-restarting in <span id="countdown" style="color:var(--yellow); font-weight:bold; font-size:20px;">30</span>s
+  </div>
+</div>
+
+<script type="text/javascript">
+  window.onload = function() {
+    var secs = 30;
+    var el = document.getElementById('countdown');
+    if (!el) return;
+    var timer = setInterval(function() {
+      secs--;
+      el.textContent = secs;
+      if (secs <= 0) {
+        clearInterval(timer);
+        document.getElementById('play-again-form').submit();
+      }
+    }, 1000);
+  };
+</script>
+
+{% endblock %}

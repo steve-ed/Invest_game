@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="text-align:center; padding: 32px 0 24px;">
+  <h1 style="letter-spacing:0.15em;">Investment Challenge</h1>
+  <p class="muted" style="margin-top:8px; font-size:16px; letter-spacing:0.1em;">
+    3 ACTORS &nbsp;&middot;&nbsp; PROPERTY INVESTMENT SIMULATION
+  </p>
+</div>
+
+<!-- Starting Positions + Macro side by side -->
+<div class="row">
+  <div class="col">
+    <div class="panel">
+      <div class="panel-title">Starting Positions</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Actor</th>
+            <th>Props</th>
+            <th style="text-align:right;">Portfolio</th>
+            <th style="text-align:right;">Cash</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for actor in actors %}
+          <tr>
+            <td>
+              {% if actor.name == 'You' %}
+                <span class="accent" style="font-weight:bold;">{{ actor.name }}</span>
+              {% elif actor.name == 'Conservative' %}
+                <span class="yellow" style="font-weight:bold;">{{ actor.name }}</span>
+              {% else %}
+                <span class="red" style="font-weight:bold;">{{ actor.name }}</span>
+              {% endif %}
+            </td>
+            <td>{{ actor.props }}</td>
+            <td style="text-align:right;">{{ actor.portfolio_value | currency }}</td>
+            <td style="text-align:right;">{{ actor.cash | currency }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="panel">
+      <div class="panel-title">Starting Macro</div>
+      <div class="macro-row">
+        <span class="muted">Price Index</span>
+        <span class="macro-val">{{ macro.price_index }}</span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">Interest Rate</span>
+        <span class="macro-val">{{ macro.rate }}%</span>
+      </div>
+      <div class="macro-row">
+        <span class="muted">Rent Growth</span>
+        <span class="macro-val">{{ macro.rent_growth }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Market table -->
+<div class="panel">
+  <div class="panel-title">Available Market ({{ market | length }} properties)</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Region</th>
+        <th style="text-align:right;">Value</th>
+        <th style="text-align:right;">Rent/mo</th>
+        <th style="text-align:right;">Yield %</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for prop in market %}
+      <tr>
+        <td class="accent">{{ prop.id }}</td>
+        <td>{{ prop.region }}</td>
+        <td style="text-align:right;">{{ prop.value | currency }}</td>
+        <td style="text-align:right;">{{ prop.rent | currency }}</td>
+        <td style="text-align:right;">{{ ((prop.rent * 12 / prop.value) * 100) | round(1) }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Mode selector + Start -->
+<div style="text-align:center; padding: 8px 0 24px;">
+  <form method="POST" action="/start">
+
+    <!-- Archetype selector -->
+    <div class="muted" style="font-size:13px; letter-spacing:0.08em; margin-bottom:12px;">YOUR OBJECTIVE</div>
+    <div style="display:inline-flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; justify-content:center;">
+
+      <label style="cursor:pointer; border:1px solid var(--border); border-radius:4px; padding:14px 22px; display:block; min-width:160px; transition:border-color 0.15s; text-align:left;"
+             id="label-income" onclick="selectArchetype('income')">
+        <input type="radio" name="archetype" value="income" style="display:none;" id="arch-income">
+        <div style="font-size:15px; font-weight:bold; color:#FBBF24; margin-bottom:4px;">INCOME</div>
+        <div class="muted" style="font-size:12px; line-height:1.4;">Score: rent + cash<br>Strategy: high-yield North &amp; Wales</div>
+      </label>
+
+      <label style="cursor:pointer; border:1px solid var(--accent); border-radius:4px; padding:14px 22px; display:block; min-width:160px; transition:border-color 0.15s; text-align:left;"
+             id="label-balanced" onclick="selectArchetype('balanced')">
+        <input type="radio" name="archetype" value="balanced" checked style="display:none;" id="arch-balanced">
+        <div style="font-size:15px; font-weight:bold; color:#F87171; margin-bottom:4px;">BALANCED</div>
+        <div class="muted" style="font-size:12px; line-height:1.4;">Score: portfolio + cash + rent<br>Strategy: diversify across regions</div>
+      </label>
+
+      <label style="cursor:pointer; border:1px solid var(--border); border-radius:4px; padding:14px 22px; display:block; min-width:160px; transition:border-color 0.15s; text-align:left;"
+             id="label-growth" onclick="selectArchetype('growth')">
+        <input type="radio" name="archetype" value="growth" style="display:none;" id="arch-growth">
+        <div style="font-size:15px; font-weight:bold; color:#00FF88; margin-bottom:4px;">GROWTH</div>
+        <div class="muted" style="font-size:12px; line-height:1.4;">Score: portfolio + cash<br>Strategy: London &amp; South, use leverage</div>
+      </label>
+
+    </div>
+
+    <!-- Duration selector -->
+    <div class="muted" style="font-size:13px; letter-spacing:0.08em; margin-bottom:12px;">GAME LENGTH</div>
+    <div style="display:inline-flex; gap:16px; margin-bottom:20px;">
+      <label style="cursor:pointer; border:1px solid var(--border); border-radius:4px; padding:16px 32px; display:block; transition:border-color 0.15s;"
+             id="label-40" onclick="selectMode(40)">
+        <input type="radio" name="total_ticks" value="40" checked style="display:none;" id="mode-40">
+        <div style="font-size:22px; font-weight:bold; color:var(--accent);">40 TURNS</div>
+        <div class="muted" style="font-size:13px; margin-top:4px;">10 years &nbsp;&middot;&nbsp; quarterly decisions</div>
+      </label>
+      <label style="cursor:pointer; border:1px solid var(--border); border-radius:4px; padding:16px 32px; display:block; transition:border-color 0.15s;"
+             id="label-80" onclick="selectMode(80)">
+        <input type="radio" name="total_ticks" value="80" style="display:none;" id="mode-80">
+        <div style="font-size:22px; font-weight:bold; color:var(--text);">80 TURNS</div>
+        <div class="muted" style="font-size:13px; margin-top:4px;">20 years &nbsp;&middot;&nbsp; 2 macro cycles</div>
+      </label>
+    </div>
+    <div>
+      <button type="submit" class="btn btn-large">&gt;&gt; START GAME</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  var ARCHETYPE_COLORS = { income: '#FBBF24', balanced: '#F87171', growth: '#00FF88' };
+
+  function selectArchetype(a) {
+    ['income', 'balanced', 'growth'].forEach(function(id) {
+      document.getElementById('arch-' + id).checked = (id === a);
+      document.getElementById('label-' + id).style.borderColor =
+        (id === a) ? ARCHETYPE_COLORS[id] : 'var(--border)';
+    });
+  }
+
+  function selectMode(n) {
+    document.getElementById('mode-40').checked = (n === 40);
+    document.getElementById('mode-80').checked = (n === 80);
+    document.getElementById('label-40').style.borderColor = (n === 40) ? 'var(--accent)' : 'var(--border)';
+    document.getElementById('label-80').style.borderColor = (n === 80) ? 'var(--accent)' : 'var(--border)';
+  }
+
+  selectArchetype('balanced');
+  selectMode(40);
+</script>
+
+{% endblock %}

@@ -1,0 +1,162 @@
+<MacroSidebar>:
+    orientation: 'vertical'
+    size_hint_x: None
+    width: '140dp'
+    spacing: '4dp'
+    padding: '4dp'
+    canvas.before:
+        Color:
+            rgba: 0.039, 0.055, 0.102, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    # Tick panel
+    BoxLayout:
+        size_hint_y: None
+        height: '84dp'
+        orientation: 'vertical'
+        canvas.before:
+            Color:
+                rgba: 0.067, 0.094, 0.153, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: 0, 1, 0.533, 0.2
+            Line:
+                rectangle: self.x, self.y, self.width, self.height
+                width: 1
+        Label:
+            text: 'TICK'
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '18dp'
+        Label:
+            text: str(root.tick)
+            color: 0, 1, 0.533, 1
+            font_size: '34sp'
+            bold: True
+        Label:
+            text: 'of ' + str(root.total_ticks)
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '18dp'
+
+    # Macro panel
+    BoxLayout:
+        size_hint_y: None
+        height: '176dp'
+        orientation: 'vertical'
+        padding: '6dp'
+        spacing: '1dp'
+        canvas.before:
+            Color:
+                rgba: 0.067, 0.094, 0.153, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: root.scenario.upper()
+            color: 0.976, 0.980, 0.984, 1
+            font_size: '16sp'
+            size_hint_y: None
+            height: '22dp'
+        Label:
+            text: 'PRICES'
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '16dp'
+        Label:
+            text: '{:.1f} {}'.format(root.price_index, '^' if root.price_trend == 'up' else ('v' if root.price_trend == 'down' else '-'))
+            color: (0, 1, 0.533, 1) if root.price_trend == 'up' else ((0.973, 0.443, 0.443, 1) if root.price_trend == 'down' else (0.580, 0.608, 0.660, 1))
+            font_size: '17sp'
+            bold: True
+            size_hint_y: None
+            height: '22dp'
+        Label:
+            text: 'INT. RATE'
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '16dp'
+        Label:
+            text: '{:.1f}% {}'.format(root.rate, '^' if root.rate_trend == 'up' else ('v' if root.rate_trend == 'down' else '-'))
+            color: (0, 1, 0.533, 1) if root.rate_trend == 'up' else ((0.973, 0.443, 0.443, 1) if root.rate_trend == 'down' else (0.580, 0.608, 0.660, 1))
+            font_size: '17sp'
+            bold: True
+            size_hint_y: None
+            height: '22dp'
+        Label:
+            text: 'RENT GROWTH'
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '16dp'
+        Label:
+            text: '{:.1f}% {}'.format(root.rent_growth, '^' if root.rent_trend == 'up' else ('v' if root.rent_trend == 'down' else '-'))
+            color: (0, 1, 0.533, 1) if root.rent_trend == 'up' else ((0.973, 0.443, 0.443, 1) if root.rent_trend == 'down' else (0.580, 0.608, 0.660, 1))
+            font_size: '17sp'
+            bold: True
+            size_hint_y: None
+            height: '22dp'
+
+    # Rank/score panel
+    BoxLayout:
+        size_hint_y: None
+        height: '84dp'
+        orientation: 'vertical'
+        padding: '6dp'
+        canvas.before:
+            Color:
+                rgba: 0.067, 0.094, 0.153, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'RANK'
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '18dp'
+        Label:
+            text: '#' + str(root.rank)
+            color: 0, 1, 0.533, 1
+            font_size: '26sp'
+            bold: True
+        Label:
+            text: '\u00a3{:,.0f}'.format(root.score)
+            color: 0.976, 0.980, 0.984, 1
+            font_size: '16sp'
+            size_hint_y: None
+            height: '22dp'
+
+    # Cash panel — Decision screen only
+    BoxLayout:
+        size_hint_y: None
+        height: '58dp' if root.show_cash else '0dp'
+        opacity: root.show_cash
+        orientation: 'vertical'
+        padding: '6dp'
+        canvas.before:
+            Color:
+                rgba: 0.067, 0.094, 0.153, 1
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        Label:
+            text: 'CASH'
+            color: 0.580, 0.608, 0.660, 1
+            font_size: '13sp'
+            size_hint_y: None
+            height: '18dp'
+        Label:
+            text: '\u00a3{:,.0f}'.format(root.cash)
+            color: 0, 1, 0.533, 1
+            font_size: '16sp'
+            bold: True
+
+    Widget:

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="panel tick-panel">
+      <div class="label">TICK</div>
+      <div class="tick-num">{{ gs.tick }}</div>
+      <div class="label">of {{ gs.total_ticks }}</div>
+    </div>
+    <div class="panel">
+      <div class="scenario-name">{{ gs.scenario.upper() }}</div>
+      <div class="label">PRICES</div>
+      <div class="macro-val {% if gs.macro.price_index > gs.macro.prev.price_index %}up{% elif gs.macro.price_index < gs.macro.prev.price_index %}down{% endif %}">
+        {{ gs.macro.price_index }} {{ '^' if gs.macro.price_index > gs.macro.prev.price_index else ('v' if gs.macro.price_index < gs.macro.prev.price_index else '-') }}
+      </div>
+      <div class="label">INT. RATE</div>
+      <div class="macro-val">{{ gs.macro.rate }}%  -</div>
+      <div class="label">RENT GROWTH</div>
+      <div class="macro-val">{{ gs.macro.rent_growth }}%  -</div>
+    </div>
+    <div class="panel">
+      <div class="label">RANK</div>
+      <div class="rank-num">#{{ rank }}</div>
+      <div class="score-val">£{{ '{:,.0f}'.format(player_score) }}</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-title">ROUND {{ round.tick }} — DECISIONS</div>
+
+    <!-- Your decision -->
+    <div class="panel round-card">
+      <div class="round-actor you">YOU</div>
+      {% set a = round.player %}
+      {% if a.action == 'buy' and a.prop %}
+        <div class="round-action buy">BOUGHT</div>
+        <div class="round-prop">
+          {{ a.prop.id }}  {{ a.prop.region }}  £{{ '{:,.0f}'.format(a.prop.value) }}  £{{ '{:,.0f}'.format(a.prop.rent) }}/mo
+        </div>
+      {% elif a.action == 'sell' and a.prop %}
+        <div class="round-action sell">SOLD</div>
+        <div class="round-prop">
+          {{ a.prop.id }}  {{ a.prop.region }}  £{{ '{:,.0f}'.format(a.prop.value) }}
+        </div>
+      {% else %}
+        <div class="round-action hold">HELD</div>
+        <div class="round-prop muted">no transaction</div>
+      {% endif %}
+    </div>
+
+    <!-- AI decisions -->
+    {% for ai in round.ai %}
+    <div class="panel round-card">
+      <div class="round-actor {{ ai.name.lower() }}">{{ ai.name.upper() }}</div>
+      {% if ai.action == 'buy' and ai.prop %}
+        <div class="round-action buy">BOUGHT</div>
+        <div class="round-prop">
+          {{ ai.prop.id }}  {{ ai.prop.region }}  £{{ '{:,.0f}'.format(ai.prop.value) }}  £{{ '{:,.0f}'.format(ai.prop.rent) }}/mo
+        </div>
+      {% elif ai.action == 'sell' %}
+        <div class="round-action sell">SOLD</div>
+        <div class="round-prop">
+          {% if ai.prop %}£{{ '{:,.0f}'.format(ai.prop.value) }}{% else %}position reduced{% endif %}
+        </div>
+      {% else %}
+        <div class="round-action hold">HELD</div>
+        <div class="round-prop muted">no transaction</div>
+      {% endif %}
+      <div class="round-rationale">-- {{ ai.rationale }}</div>
+    </div>
+    {% endfor %}
+
+    <!-- Continue -->
+    <div class="action-row">
+      {% if next_url %}
+        <a href="{{ next_url }}" class="btn btn-accent">SEE FINAL RESULTS  >></a>
+      {% else %}
+        <a href="/turn" class="btn btn-accent">CONTINUE TO TURN {{ gs.tick }}  >></a>
+      {% endif %}
+    </div>
+
+  </main>
+</div>
+
+<style>
+.page-title {
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+.round-card {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.round-actor {
+  font-size: 15px;
+  font-weight: bold;
+  min-width: 130px;
+}
+.round-actor.you { color: var(--accent); }
+.round-actor.conservative { color: var(--yellow); }
+.round-actor.aggressive { color: var(--red); }
+.round-action {
+  font-size: 15px;
+  font-weight: bold;
+  min-width: 70px;
+}
+.round-action.buy  { color: var(--accent); }
+.round-action.sell { color: var(--red); }
+.round-action.hold { color: var(--muted); }
+.round-prop {
+  font-size: 14px;
+  color: var(--text);
+  flex: 1;
+}
+.round-prop.muted { color: var(--dim); }
+.round-rationale {
+  font-size: 13px;
+  color: var(--dim);
+}
+.action-row {
+  margin-top: 24px;
+}
+</style>
+{% endblock %}

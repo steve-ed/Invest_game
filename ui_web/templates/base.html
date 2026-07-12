@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Challenge</title>
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Palette ── */
+  :root {
+    --bg:     #0A0E1A;
+    --panel:  #111827;
+    --accent: #00FF88;
+    --text:   #C7CCCC;
+    --muted:  #939AB0;
+    --dim:    #7A8196;
+    --red:    #F87171;
+    --yellow: #FBBF24;
+    --border: #1E2A3A;
+    --panel2: #0D1526;
+  }
+
+  /* ── Base ── */
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Layout helpers ── */
+  .page-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  .row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .col { flex: 1; }
+
+  /* ── Panels ── */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 8px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  /* ── Typography ── */
+  h1 { font-size: 36px; font-weight: bold; color: var(--accent); letter-spacing: 0.05em; }
+  h2 { font-size: 20px; font-weight: bold; color: var(--accent); margin-bottom: 12px; }
+  h3 { font-size: 15px; font-weight: bold; color: var(--text); }
+
+  .muted  { color: var(--muted); }
+  .dim    { color: var(--dim); }
+  .accent { color: var(--accent); }
+  .red    { color: var(--red); }
+  .yellow { color: var(--yellow); }
+  .num    { font-size: 20px; font-weight: bold; }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  th {
+    text-align: left;
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr.prop-row {
+    cursor: pointer;
+    height: 42px;
+    transition: background 0.1s;
+  }
+
+  tr.prop-row:hover { background: var(--panel2); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-block;
+    padding: 0 28px;
+    height: 52px;
+    line-height: 52px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 2px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    border-radius: 3px;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn:hover, .btn.active {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  .btn-red {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .btn-red:hover, .btn-red.active {
+    background: var(--red);
+    color: var(--bg);
+  }
+
+  .btn-yellow {
+    border-color: var(--yellow);
+    color: var(--yellow);
+  }
+  .btn-yellow:hover, .btn-yellow.active {
+    background: var(--yellow);
+    color: var(--bg);
+  }
+
+  .btn-large {
+    height: 60px;
+    line-height: 60px;
+    font-size: 16px;
+    padding: 0 36px;
+  }
+
+  .btn:disabled, .btn[disabled] {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* ── Sidebar layout ── */
+  .layout-sidebar {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+  }
+
+  .main-area { flex: 1; min-width: 0; }
+
+  /* ── Macro row ── */
+  .macro-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .macro-row:last-child { border-bottom: none; }
+  .macro-val { font-weight: bold; color: var(--text); }
+  .trend-up   { color: var(--accent); }
+  .trend-down { color: var(--red); }
+  .trend-flat { color: var(--muted); }
+
+  /* ── Badges ── */
+  .badge {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+  .badge-green  { background: rgba(0,255,136,0.15); color: var(--accent); border: 1px solid rgba(0,255,136,0.3); }
+  .badge-red    { background: rgba(248,113,113,0.15); color: var(--red);    border: 1px solid rgba(248,113,113,0.3); }
+  .badge-yellow { background: rgba(251,191,36,0.15);  color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .badge-dim    { background: rgba(122,129,150,0.12); color: var(--muted);  border: 1px solid rgba(122,129,150,0.2); }
+
+  /* ── News ── */
+  .news-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .news-item:last-child { border-bottom: none; }
+
+  /* ── Scrollable list ── */
+  .scroll-list {
+    max-height: 260px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  /* ── Selection states ── */
+  tr.selected-buy  { background: rgba(0,255,136,0.12) !important; outline: 1px solid var(--accent); }
+  tr.selected-sell { background: rgba(248,113,113,0.12) !important; outline: 1px solid var(--red); }
+
+  /* ── Action button row ── */
+  .action-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ── Decision footer ── */
+  .decision-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    z-index: 100;
+    padding: 12px 20px;
+  }
+  .decision-footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .decision-footer-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── Mobile stat bar (hidden on desktop, shown on mobile) ── */
+  .mobile-stat-bar { display: none; }
+
+  /* ── Mobile responsive ── */
+  @media (max-width: 640px) {
+    .page-wrap { padding: 12px; }
+
+    /* Stack sidebar below, then hide it — replaced by .mobile-stat-bar */
+    .layout-sidebar { flex-direction: column; }
+    .sidebar { display: none; }
+
+    /* Compact stat bar */
+    .mobile-stat-bar {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 8px 0 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .mobile-stat-bar span { white-space: nowrap; }
+
+    /* Hide non-essential table columns */
+    .col-hide-mobile { display: none; }
+
+    /* Footer — action buttons wrap, timer+confirm stack */
+    .decision-footer { padding: 10px 12px; }
+    .decision-footer-inner { flex-wrap: wrap; gap: 10px; }
+    .decision-footer-left { width: 100%; }
+    .action-row { flex-wrap: wrap; }
+    .action-row .btn { flex: 1 1 calc(50% - 6px); text-align: center; padding: 0 8px; }
+
+    /* Opening page — stack two columns */
+    .row { flex-direction: column; }
+    h1 { font-size: 28px; }
+  }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+<div class="page-wrap">
+  {% block content %}{% endblock %}
+</div>
+{% block page_footer %}{% endblock %}
+</body>
+</html>
