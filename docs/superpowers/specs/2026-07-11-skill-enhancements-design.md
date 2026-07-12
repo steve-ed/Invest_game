@@ -219,6 +219,69 @@ score = portfolio_value + cash - leverage_penalty - concentration_penalty
 
 ---
 
+## UI Structure
+
+The game is split across three sequential pages per turn. Each page has a sticky footer with the primary action button.
+
+---
+
+### Page 1 — Turn Overview (`/turn`)
+
+Shown at the start of each turn. Player reviews the market environment before committing to a decision.
+
+**Sidebar (desktop):**
+- Progress bar (current tick / total ticks)
+- Scenario label and description
+- Macro indicators: price index, interest rate, rent growth with trend arrows and sparklines
+- Player rank and score
+- Archetype metric (rent collected / portfolio value / combined)
+
+**Main content:**
+- Mobile stat bar (mobile only): tick, rank, cash, archetype
+- Macro indicators canvas chart — full game timeline with fixed y-axes (price index auto-scaled to game range; rate and rent growth fixed 0–15%)
+- Regional growth heatmap — one row per region, growth % vs national, heat-coloured for outliers
+- Player portfolio table: ID, region, value, rent/mo, yield, EPC status, vacancy/renovation status
+- Mortgage table (if any): property, rate type, loan, monthly payment
+- Regulatory alerts panel (if EPC or rent freeze active)
+- AI positions: each AI's last action, rationale, property count, portfolio value
+- News: last 2 news items
+
+**Footer:** Countdown timer (20 seconds) + **MAKE DECISION** button → navigates to `/decision`
+
+---
+
+### Page 2 — Decision (`/decision`)
+
+Player makes their action for the turn. One action only per turn.
+
+**Sidebar (desktop):**
+- Progress, scenario, macro values, rank, cash available
+
+**Main content:**
+- Mobile stat bar (mobile only)
+- Auction panel (if auction property available this turn): property details, bid input, LTV/rate selector
+- Market properties table: ID, region, value, rent/mo, yield, SDLT — click to select for BUY
+- Player portfolio table: ID, region, value, yield, mortgage badge — click to select for SELL/REMORTGAGE/RENOVATE/EPC UPGRADE
+
+**Footer (sticky):** Action hint label + countdown timer + action buttons (BUY / HOLD / REMORTGAGE / RENOVATE / SELL) + **CONFIRM** button → submits to `/decision/confirm`
+
+---
+
+### Page 3 — Round Summary (`/round-summary`)
+
+Shown after the player confirms their decision. Displays what everyone did this turn.
+
+**Main content:**
+- Round number and turn label
+- Player decision card: action taken (BOUGHT / SOLD / HELD) with property details
+- AI decision cards: each AI's action and rationale
+- Actor positions chart: stacked bar chart showing relative scores across all turns to date (48px height)
+- Portfolio positions: full property table for the player; aggregate summary (count, portfolio value, cash) for each AI
+
+**Footer (sticky):** **CONTINUE TO TURN N** button → navigates to `/turn` (or **SEE FINAL RESULTS** on last turn)
+
+---
+
 ## Data Model Changes Summary
 
 | Field | Added to | Phase |
