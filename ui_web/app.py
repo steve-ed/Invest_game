@@ -61,8 +61,9 @@ def gross_yield(prop):
 
 
 def _void_chance(prop):
-    y = prop['rent'] * 12 / prop['value'] * 100
-    return max(0.0, (y - 3.0) / 100.0)
+    # Flat 5% per 6-month tick ≈ 10% annual vacancy, consistent with UK BTL averages.
+    # Previously tied to yield (backwards — high yield ≠ low void).
+    return 0.05
 
 
 def _apply_void_risk(gs):
@@ -85,14 +86,17 @@ def player_net_worth(gs):
     return portfolio_val + gs['player']['cash'] - total_debt
 
 
-AGENT_FEE_RATE = 0.015          # 1.5% of sale price charged by selling agent
-FIX_PREMIUMS   = {'variable': 2.0, 'fixed_2yr': 2.5, 'fixed_5yr': 2.25}
-FIX_DURATIONS  = {'fixed_2yr': 8, 'fixed_5yr': 20}   # ticks (quarterly periods)
+AGENT_FEE_RATE      = 0.015  # 1.5% of sale price charged by selling agent
+FIX_PREMIUMS        = {'variable': 2.0, 'fixed_2yr': 2.5, 'fixed_5yr': 2.25}
+FIX_DURATIONS       = {'fixed_2yr': 8, 'fixed_5yr': 20}   # ticks (6-month periods)
 
 EPC_UPGRADE_COST    = 5000
 EPC_RENT_PENALTY    = 0.15   # fraction of rent lost for non-compliant properties
 LICENSING_COST_PROP = 1500
 RENT_FREEZE_TURNS   = 4
+CGT_RATE            = 0.24   # capital gains tax: higher-rate BTL investor
+MGMT_COST_RATE      = 0.20   # management + maintenance as fraction of gross rent
+STARTING_LTV        = 0.65   # starting mortgage LTV applied to portfolio value
 
 
 def calc_sdlt(value, year):
@@ -154,15 +158,6 @@ ARCHETYPE_META = {
 # Approximate annual yield rates used for AI cumulative-rent estimation
 # Mr Hugh Price targets high-value/lower-yield capital growth properties
 # Mr Max Lever uses high leverage — income yield net of costs is modest
-
-
-def leverage_penalty(portfolio_value, total_debt):
-    """Penalty for leverage above 50% LTV: 10% of excess debt."""
-    if portfolio_value <= 0 or total_debt <= 0:
-        return 0
-    safe_debt = portfolio_value * 0.5
-    excess = max(0, total_debt - safe_debt)
-    return int(excess * 0.10)
 
 
 def concentration_penalty(portfolio):
@@ -420,22 +415,21 @@ def _derive_scenario(price_index, prev_price_index, rate):
     return 'Baseline'
 
 
-def _build_starting_mortgages(portfolio, rate, target_debt=200_000):
-    """Create variable-rate mortgages distributed proportionally across starting properties."""
-    total_value = sum(p['value'] for p in portfolio)
+def _build_starting_mortgages(portfolio, rate):
+    """Create variable-rate mortgages at STARTING_LTV of each property's value."""
     effective_rate = round(rate + FIX_PREMIUMS['variable'], 2)
     mortgages = []
     for prop in portfolio:
-        loan = int(prop['value'] / total_value * target_debt)
+        loan = int(prop['value'] * STARTING_LTV)
         if loan > 0:
             mortgages.append({
-                'prop_id':        prop['id'],
-                'loan':           loan,
-                'rate_type':      'variable',
-                'rate':           effective_rate,
-                'fixed_rate':     None,
+                'prop_id':          prop['id'],
+                'loan':             loan,
+                'rate_type':        'variable',
+                'rate':             effective_rate,
+                'fixed_rate':       None,
                 'fix_expires_tick': None,
-                'monthly_payment': round(loan * effective_rate / 100 / 12, 2),
+                'monthly_payment':  round(loan * effective_rate / 100 / 12, 2),
             })
     return mortgages
 
@@ -491,9 +485,7 @@ def init_game_state(total_ticks=20, archetype='balanced'):
             'name': a['name'],
             'cash': a['cash'],
             'portfolio': ai_portfolio,
-            'mortgages': _build_starting_mortgages(
-                ai_portfolio, starting_rate, target_debt=200_000
-            ),
+            'mortgages': _build_starting_mortgages(ai_portfolio, starting_rate),
             'portfolio_value': sum(p['value'] for p in a['portfolio']),
             'props': len(a['portfolio']),
             'last_action': 'hold',
@@ -524,9 +516,7 @@ def init_game_state(total_ticks=20, archetype='balanced'):
         'player': {
             'cash': player_actor['cash'],
             'portfolio': player_portfolio,
-            'mortgages': _build_starting_mortgages(
-                player_portfolio, starting_rate, target_debt=200_000
-            ),
+            'mortgages': _build_starting_mortgages(player_portfolio, starting_rate),
             'cumulative_rent': 0,
         },
         'ai': [_make_ai_entry(a) for a in ai_actors],
@@ -585,7 +575,9 @@ def apply_player_action(gs, action, buy_prop_id, sell_prop_id, ltv=0.0, rate_typ
             mortgage = next((m for m in player['mortgages'] if m['prop_id'] == prop['id']), None)
             loan_repaid = mortgage['loan'] if mortgage else 0
             agent_fee = int(prop['value'] * AGENT_FEE_RATE)
-            net_proceeds = max(0, prop['value'] - loan_repaid - agent_fee)
+            gain = max(0, prop['value'] - prop.get('purchase_price', prop['value']) - agent_fee)
+            cgt = int(gain * CGT_RATE)
+            net_proceeds = max(0, prop['value'] - loan_repaid - agent_fee - cgt)
             player['cash'] += net_proceeds
             if mortgage:
                 player['mortgages'].remove(mortgage)
@@ -660,7 +652,10 @@ def _ai_sell_one(gs, ai):
     prop = min(portfolio, key=lambda p: abs(p['value'] - avg))
     mortgage = next((m for m in ai.get('mortgages', []) if m['prop_id'] == prop['id']), None)
     loan = mortgage['loan'] if mortgage else 0
-    net_proceeds = max(0, prop['value'] - loan)
+    agent_fee = int(prop['value'] * AGENT_FEE_RATE)
+    gain = max(0, prop['value'] - prop.get('purchase_price', prop['value']) - agent_fee)
+    cgt = int(gain * CGT_RATE)
+    net_proceeds = max(0, prop['value'] - loan - agent_fee - cgt)
     portfolio.remove(prop)
     if mortgage:
         ai['mortgages'].remove(mortgage)
@@ -856,11 +851,12 @@ def advance_tick(gs):
 
     # Player: rent income for 3 months (quarterly)
     _apply_void_risk(gs)
-    rent_income = sum(
+    gross_rent = sum(
         int(p['rent'] * (1 - EPC_RENT_PENALTY) if not p.get('epc_compliant', True) else p['rent'])
         for p in player['portfolio']
         if not p.get('vacant', False)
     ) * 6
+    rent_income = int(gross_rent * (1 - MGMT_COST_RATE))
     player['cash'] += rent_income
     player['cumulative_rent'] = player.get('cumulative_rent', 0) + rent_income
 
@@ -900,8 +896,9 @@ def advance_tick(gs):
                 mortgage['rate'] = var_rate
                 mortgage['monthly_payment'] = round(mortgage['loan'] * var_rate / 100 / 12, 2)
 
-        # Rent income (6 months)
-        ai_rent = sum(p['rent'] * 6 for p in ai.get('portfolio', []))
+        # Rent income (6 months), net of management + maintenance costs
+        ai_gross_rent = sum(p['rent'] * 6 for p in ai.get('portfolio', []))
+        ai_rent = int(ai_gross_rent * (1 - MGMT_COST_RATE))
         ai['cash'] += ai_rent
         ai['cumulative_rent'] = ai.get('cumulative_rent', 0) + ai_rent
 
@@ -918,7 +915,7 @@ def advance_tick(gs):
         ai['total_debt'] = sum(m['loan'] for m in ai.get('mortgages', []))
 
         # Mortgage interest payments (6 months)
-        ai['cash'] -= int(sum(m['monthly_payment'] * 6 for m in ai.get('mortgages', [])))
+        ai['cash'] -= round(sum(m['monthly_payment'] * 6 for m in ai.get('mortgages', [])), 2)
 
     # Macro: advance to next entry's values
     prev = {
@@ -1154,7 +1151,6 @@ def turn():
     portfolio_value = sum(p['value'] for p in gs['player']['portfolio'])
     player = gs['player']
     total_debt = sum(m['loan'] for m in player.get('mortgages', []))
-    lev_pen = leverage_penalty(portfolio_value, total_debt)
     con_pen = concentration_penalty(player['portfolio'])
     rank = get_player_rank(gs)
     player_score_val = next(
@@ -1188,7 +1184,6 @@ def turn():
         portfolio_value=portfolio_value,
         rank=rank,
         player_score=player_score_val,
-        leverage_pen=lev_pen,
         concentration_pen=con_pen,
         news=news,
         scenario_desc=scenario_desc,

@@ -73,11 +73,6 @@
       <div style="font-size:32px; font-weight:bold; color:var(--accent);">#{{ rank }}</div>
       <div class="muted" style="font-size:13px;">Score</div>
       <div style="font-size:17px; font-weight:bold;">{{ player_score | currency }}</div>
-      {% if leverage_pen > 0 %}
-      <div class="muted" style="font-size:11px; margin-top:4px;">
-        Leverage penalty: <span style="color:var(--red);">-{{ leverage_pen | currency }}</span>
-      </div>
-      {% endif %}
       {% if concentration_pen > 0 %}
       <div class="muted" style="font-size:11px; margin-top:2px;">
         Concentration penalty: <span style="color:var(--red);">-{{ concentration_pen | currency }}</span>
