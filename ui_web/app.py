@@ -685,6 +685,7 @@ def ai_decide(gs, ai):
     macro = gs['macro']
     rate = macro['rate']
     history = gs.get('macro_history', [])
+    year = current_real_year(gs)
 
     if name == 'Mr Max Lever':
         # Sell when rates are critically high
@@ -693,7 +694,8 @@ def ai_decide(gs, ai):
         # Buy at max leverage when rate is acceptable
         if rate <= _LEVERAGE_BUY_RATE:
             ltv = 0.75
-            affordable = [p for p in market if not p.get('auction') and p['value'] * (1 - ltv) <= ai['cash']]
+            affordable = [p for p in market if not p.get('auction')
+                          and p['value'] * (1 - ltv) + calc_sdlt(p['value'], year) <= ai['cash']]
             if affordable:
                 prop = max(affordable, key=lambda p: p['value'])
                 return 'buy', prop, f'max leverage at {rate}% rate — highest value target', ltv
@@ -714,7 +716,8 @@ def ai_decide(gs, ai):
             return 'hold', None, f'holding — rate {rate}% above capital strategy threshold', 0.0
         ltv = 0.60
         # Target higher-value properties (capital growth focus)
-        candidates = [p for p in market if not p.get('auction') and p['value'] * (1 - ltv) <= ai['cash']]
+        candidates = [p for p in market if not p.get('auction')
+                      and p['value'] * (1 - ltv) + calc_sdlt(p['value'], year) <= ai['cash']]
         if candidates:
             prop = max(candidates, key=lambda p: p['value'])
             return 'buy', prop, 'targeting highest value property for capital growth (60% LTV)', ltv
@@ -733,8 +736,9 @@ def apply_ai_actions(gs):
         if action == 'buy' and prop:
             deposit = int(prop['value'] * (1 - ltv))
             loan = int(prop['value'] * ltv)
+            sdlt = calc_sdlt(prop['value'], current_real_year(gs))
             effective_rate = round(gs['macro']['rate'] + FIX_PREMIUMS['variable'], 2)
-            ai['cash'] -= deposit
+            ai['cash'] -= deposit + sdlt
             ai['total_debt'] = ai.get('total_debt', 0) + loan
             ai['portfolio_value'] += prop['value']
             ai['props'] += 1
