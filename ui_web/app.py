@@ -212,6 +212,70 @@ def update_leaderboard(gs):
     gs['leaderboard'] = entries
 
 
+def _actor_analytics(portfolio, mortgages, cash):
+    """Compute all 9 analytics metrics for one actor."""
+    if not portfolio:
+        return {
+            'gross_yield': 0.0, 'unrealised': 0, 'roe': 0.0,
+            'coc_return': 0.0, 'avg_cap_gr': 0.0, 'refi_headrm': 0.0,
+            'epc_count': 0, 'epc_value': 0, 'region_conc': 0.0, 'cash': cash,
+        }
+
+    portfolio_value = sum(p['value'] for p in portfolio)
+    annual_rent = sum(p['rent'] * 12 for p in portfolio)
+    total_debt = sum(m['loan'] for m in mortgages)
+    equity = portfolio_value - total_debt
+
+    gross_yield = round(annual_rent / portfolio_value * 100, 1) if portfolio_value else 0.0
+    unrealised = sum(p['value'] - p.get('purchase_price', p['value']) for p in portfolio)
+    roe = round(annual_rent / equity * 100, 1) if equity > 0 else 0.0
+    total_deposits = sum(p.get('purchase_price', p['value']) * 0.25 for p in portfolio)
+    coc_return = round(annual_rent / total_deposits * 100, 1) if total_deposits > 0 else 0.0
+    cap_growths = [
+        (p['value'] - p.get('purchase_price', p['value'])) / p.get('purchase_price', p['value']) * 100
+        for p in portfolio
+        if p.get('purchase_price', p['value']) > 0
+    ]
+    avg_cap_gr = round(sum(cap_growths) / len(cap_growths), 1) if cap_growths else 0.0
+    refi_headrm = portfolio_value * 0.75 - total_debt
+    non_compliant = [p for p in portfolio if not p.get('epc_compliant', True)]
+    epc_count = len(non_compliant)
+    epc_value = sum(p['value'] for p in non_compliant)
+    region_totals = {}
+    for p in portfolio:
+        r = p.get('region', 'West')
+        region_totals[r] = region_totals.get(r, 0) + p['value']
+    region_conc = round(max(region_totals.values()) / portfolio_value * 100, 1) if region_totals else 0.0
+
+    return {
+        'gross_yield': gross_yield,
+        'unrealised': int(unrealised),
+        'roe': roe,
+        'coc_return': coc_return,
+        'avg_cap_gr': avg_cap_gr,
+        'refi_headrm': refi_headrm,
+        'epc_count': epc_count,
+        'epc_value': epc_value,
+        'region_conc': region_conc,
+        'cash': cash,
+    }
+
+
+def compute_analytics(gs):
+    """Return analytics dict keyed by actor name for player and all AIs."""
+    player = gs['player']
+    result = {
+        'You': _actor_analytics(
+            player['portfolio'], player.get('mortgages', []), player['cash']
+        )
+    }
+    for ai in gs['ai']:
+        result[ai['name']] = _actor_analytics(
+            ai.get('portfolio', []), ai.get('mortgages', []), ai['cash']
+        )
+    return result
+
+
 def trend_symbol(current, previous):
     if current > previous:
         return '^'

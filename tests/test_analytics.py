@@ -45,3 +45,82 @@ def test_ai_buy_stamps_purchase_price():
     assert len(bought_props) > 0, "Expected Mr Max Lever to buy at least one property"
     for p in bought_props:
         assert 'purchase_price' in p, f"AI bought property {p['id']} missing purchase_price"
+
+
+def test_compute_analytics_returns_all_actors():
+    gs = _make_gs()
+    result = web_app.compute_analytics(gs)
+    assert 'You' in result
+    for ai in gs['ai']:
+        assert ai['name'] in result
+
+
+def test_compute_analytics_gross_yield():
+    gs = _make_gs()
+    result = web_app.compute_analytics(gs)
+    player = gs['player']
+    portfolio = player['portfolio']
+    if not portfolio:
+        return
+    annual_rent = sum(p['rent'] * 12 for p in portfolio)
+    portfolio_value = sum(p['value'] for p in portfolio)
+    expected = round(annual_rent / portfolio_value * 100, 1)
+    assert result['You']['gross_yield'] == expected
+
+
+def test_compute_analytics_unrealised():
+    gs = _make_gs()
+    p = gs['player']['portfolio'][0]
+    p['purchase_price'] = p['value']
+    p['value'] = p['value'] + 10_000
+    result = web_app.compute_analytics(gs)
+    assert result['You']['unrealised'] >= 10_000
+
+
+def test_compute_analytics_refi_headroom():
+    gs = _make_gs()
+    result = web_app.compute_analytics(gs)
+    player = gs['player']
+    portfolio_value = sum(p['value'] for p in player['portfolio'])
+    total_debt = sum(m['loan'] for m in player.get('mortgages', []))
+    expected = portfolio_value * 0.75 - total_debt
+    assert abs(result['You']['refi_headrm'] - expected) < 1
+
+
+def test_compute_analytics_epc_risk_none_when_all_compliant():
+    gs = _make_gs()
+    for p in gs['player']['portfolio']:
+        p['epc_compliant'] = True
+    result = web_app.compute_analytics(gs)
+    assert result['You']['epc_count'] == 0
+    assert result['You']['epc_value'] == 0
+
+
+def test_compute_analytics_epc_risk_counts_non_compliant():
+    gs = _make_gs()
+    if gs['player']['portfolio']:
+        gs['player']['portfolio'][0]['epc_compliant'] = False
+        prop_value = gs['player']['portfolio'][0]['value']
+        result = web_app.compute_analytics(gs)
+        assert result['You']['epc_count'] == 1
+        assert result['You']['epc_value'] == prop_value
+
+
+def test_compute_analytics_region_conc():
+    gs = _make_gs()
+    result = web_app.compute_analytics(gs)
+    conc = result['You']['region_conc']
+    assert 0.0 <= conc <= 100.0
+
+
+def test_compute_analytics_empty_portfolio():
+    gs = _make_gs()
+    gs['player']['portfolio'] = []
+    gs['player']['mortgages'] = []
+    result = web_app.compute_analytics(gs)
+    you = result['You']
+    assert you['gross_yield'] == 0.0
+    assert you['unrealised'] == 0
+    assert you['refi_headrm'] == 0.0
+    assert you['epc_count'] == 0
+    assert you['region_conc'] == 0.0
