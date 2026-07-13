@@ -245,6 +245,89 @@
       </table>
     </div>
 
+    <!-- Analytics Dashboard -->
+    <div class="panel analytics-panel">
+      <div class="panel-title">ANALYTICS</div>
+      {% set actors = ['You'] + (gs.ai | map(attribute='name') | list) %}
+      {% set actor_colours = {
+          'You': '#00FF88',
+          'Mr Hugh Price': '#FBBF24',
+          'Mr Max Lever': '#F87171'
+      } %}
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th></th>
+            {% for actor in actors %}
+            <th style="color: {{ actor_colours.get(actor, 'var(--text)') }};">{{ actor }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GROSS YIELD</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="val-green">{{ a.gross_yield }}%</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>UNREALISED</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="{{ 'val-green' if a.unrealised >= 0 else 'val-red' }}">
+              {% if a.unrealised >= 0 %}+{% endif %}{{ (a.unrealised | abs) | currency if a.unrealised != 0 else '£0' }}
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>ROE</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="val-green">{{ a.roe }}%</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>COC RETURN</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="val-green">{{ a.coc_return }}%</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>AVG CAP GR</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="{{ 'val-green' if a.avg_cap_gr >= 0 else 'val-red' }}">
+              {% if a.avg_cap_gr >= 0 %}+{% endif %}{{ a.avg_cap_gr }}%
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>REFI HEADRM</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="val-neutral">{{ a.refi_headrm | int | currency }}</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>EPC RISK</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="{{ 'val-red' if a.epc_count > 0 else 'val-green' }}">
+              {% if a.epc_count > 0 %}{{ a.epc_count }} &middot; {{ a.epc_value | currency }}{% else %}None{% endif %}
+            </td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>REGION CONC</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="val-neutral">{{ a.region_conc }}%</td>
+            {% endfor %}
+          </tr>
+          <tr>
+            <td>CASH</td>
+            {% for actor in actors %}{% set a = analytics[actor] %}
+            <td class="val-neutral">{{ a.cash | currency }}</td>
+            {% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
     <!-- Portfolio summary -->
     <div class="panel">
       <div class="panel-title">Your Portfolio</div>
@@ -349,88 +432,6 @@
         <div style="font-size:10px; letter-spacing:0.12em; color:var(--muted); text-transform:uppercase; margin-bottom:2px;">Time</div>
         <div id="turn-timer" style="font-size:32px; font-weight:bold; font-family:'Courier New',monospace; color:var(--accent); letter-spacing:0.08em; min-width:64px;">0:20</div>
       </div>
-    <!-- Analytics Dashboard -->
-    <div class="panel analytics-panel">
-      <div class="panel-title">ANALYTICS</div>
-      {% set actors = ['You'] + (gs.ai | map(attribute='name') | list) %}
-      {% set actor_colours = {
-          'You': '#00FF88',
-          'Mr Hugh Price': '#FBBF24',
-          'Mr Max Lever': '#F87171'
-      } %}
-      <table class="analytics-table">
-        <thead>
-          <tr>
-            <th></th>
-            {% for actor in actors %}
-            <th style="color: {{ actor_colours.get(actor, 'var(--text)') }};">{{ actor }}</th>
-            {% endfor %}
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>GROSS YIELD</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="val-green">{{ a.gross_yield }}%</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>UNREALISED</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="{{ 'val-green' if a.unrealised >= 0 else 'val-red' }}">
-              {% if a.unrealised >= 0 %}+{% endif %}{{ (a.unrealised | abs) | currency }}
-            </td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>ROE</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="val-green">{{ a.roe }}%</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>COC RETURN</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="val-green">{{ a.coc_return }}%</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>AVG CAP GR</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="{{ 'val-green' if a.avg_cap_gr >= 0 else 'val-red' }}">
-              {% if a.avg_cap_gr >= 0 %}+{% endif %}{{ a.avg_cap_gr }}%
-            </td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>REFI HEADRM</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="val-neutral">{{ a.refi_headrm | int | currency }}</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>EPC RISK</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="{{ 'val-red' if a.epc_count > 0 else 'val-green' }}">
-              {% if a.epc_count > 0 %}{{ a.epc_count }} &middot; {{ a.epc_value | currency }}{% else %}None{% endif %}
-            </td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>REGION CONC</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="val-neutral">{{ a.region_conc }}%</td>
-            {% endfor %}
-          </tr>
-          <tr>
-            <td>CASH</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
-            <td class="val-neutral">{{ a.cash | currency }}</td>
-            {% endfor %}
-          </tr>
-        </tbody>
-      </table>
-    </div>
       <a href="/decision" class="btn btn-large" id="decision-btn">&gt;&gt; MAKE DECISION</a>
     </div>
   </div>
