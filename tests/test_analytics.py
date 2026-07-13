@@ -60,8 +60,7 @@ def test_compute_analytics_gross_yield():
     result = web_app.compute_analytics(gs)
     player = gs['player']
     portfolio = player['portfolio']
-    if not portfolio:
-        return
+    assert portfolio, "test requires at least one starting property"
     annual_rent = sum(p['rent'] * 12 for p in portfolio)
     portfolio_value = sum(p['value'] for p in portfolio)
     expected = round(annual_rent / portfolio_value * 100, 1)
@@ -98,12 +97,12 @@ def test_compute_analytics_epc_risk_none_when_all_compliant():
 
 def test_compute_analytics_epc_risk_counts_non_compliant():
     gs = _make_gs()
-    if gs['player']['portfolio']:
-        gs['player']['portfolio'][0]['epc_compliant'] = False
-        prop_value = gs['player']['portfolio'][0]['value']
-        result = web_app.compute_analytics(gs)
-        assert result['You']['epc_count'] == 1
-        assert result['You']['epc_value'] == prop_value
+    assert gs['player']['portfolio'], "test requires at least one starting property"
+    gs['player']['portfolio'][0]['epc_compliant'] = False
+    prop_value = gs['player']['portfolio'][0]['value']
+    result = web_app.compute_analytics(gs)
+    assert result['You']['epc_count'] == 1
+    assert result['You']['epc_value'] == prop_value
 
 
 def test_compute_analytics_region_conc():
