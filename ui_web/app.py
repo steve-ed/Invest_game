@@ -1174,6 +1174,8 @@ def turn():
         for r in ['London', 'South', 'East', 'West', 'Midlands', 'North', 'Scotland', 'Wales']
     }
 
+    analytics = compute_analytics(gs)
+
     return render_template(
         'turn.html',
         gs=gs,
@@ -1196,6 +1198,7 @@ def turn():
         macro_history=gs.get('macro_history', []),
         price_chart_min=gs.get('price_chart_min', 80),
         price_chart_max=gs.get('price_chart_max', 120),
+        analytics=analytics,
     )
 
 
