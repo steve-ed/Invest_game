@@ -266,13 +266,13 @@
         <tbody>
           <tr>
             <td>GROSS YIELD</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="val-green">{{ a.gross_yield }}%</td>
             {% endfor %}
           </tr>
           <tr>
             <td>UNREALISED</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="{{ 'val-green' if a.unrealised >= 0 else 'val-red' }}">
               {% if a.unrealised > 0 %}+{% endif %}{{ (a.unrealised | abs) | currency if a.unrealised != 0 else '£0' }}
             </td>
@@ -280,19 +280,19 @@
           </tr>
           <tr>
             <td>ROE</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="val-green">{{ a.roe }}%</td>
             {% endfor %}
           </tr>
           <tr>
             <td>COC RETURN</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="val-green">{{ a.coc_return }}%</td>
             {% endfor %}
           </tr>
           <tr>
             <td>AVG CAP GR</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="{{ 'val-green' if a.avg_cap_gr >= 0 else 'val-red' }}">
               {% if a.avg_cap_gr >= 0 %}+{% endif %}{{ a.avg_cap_gr }}%
             </td>
@@ -300,13 +300,13 @@
           </tr>
           <tr>
             <td>REFI HEADRM</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="val-neutral">{{ a.refi_headrm | int | currency }}</td>
             {% endfor %}
           </tr>
           <tr>
             <td>EPC RISK</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="{{ 'val-red' if a.epc_count > 0 else 'val-green' }}">
               {% if a.epc_count > 0 %}{{ a.epc_count }} &middot; {{ a.epc_value | currency }}{% else %}None{% endif %}
             </td>
@@ -314,13 +314,13 @@
           </tr>
           <tr>
             <td>REGION CONC</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="val-neutral">{{ a.region_conc }}%</td>
             {% endfor %}
           </tr>
           <tr>
             <td>CASH</td>
-            {% for actor in actors %}{% set a = analytics[actor] %}
+            {% for actor in actors %}{% set a = (analytics.get(actor, {}) if analytics else {}) %}
             <td class="val-neutral">{{ a.cash | currency }}</td>
             {% endfor %}
           </tr>

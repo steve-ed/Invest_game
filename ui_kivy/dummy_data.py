@@ -22,7 +22,7 @@ START_STATE = {
             ],
         },
         {
-            "name": "Mr Hugh Price", "cash": 190000,
+            "name": "Mr Hugh Price", "cash": 190000, "props": 5, "portfolio_value": 1010000,
             # Capital growth focus: London/South heavy, lower yield
             "portfolio": [
                 {"id": "P-H01", "region": "London",  "value": 330000, "rent": 963},
@@ -33,7 +33,7 @@ START_STATE = {
             ],
         },
         {
-            "name": "Mr Max Lever", "cash": 190000,
+            "name": "Mr Max Lever", "cash": 190000, "props": 5, "portfolio_value": 1010000,
             # Leverage/income focus: high-yield regions, more properties
             "portfolio": [
                 {"id": "P-M01", "region": "North",    "value": 220000, "rent": 1100},
