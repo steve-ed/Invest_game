@@ -376,6 +376,13 @@ def _build_starting_mortgages(portfolio, rate, target_debt=200_000):
     return mortgages
 
 
+def _stamped_portfolio(portfolio):
+    """Set purchase_price = value on each property if not already set."""
+    for p in portfolio:
+        p.setdefault('purchase_price', p['value'])
+    return portfolio
+
+
 def init_game_state(total_ticks=20, archetype='balanced'):
     """Build a fresh GAME_STATE from START_STATE."""
     ss = dd.START_STATE
@@ -412,6 +419,26 @@ def init_game_state(total_ticks=20, archetype='balanced'):
 
     arc = SCENARIO_ARCS.get(total_ticks, SCENARIO_ARC_40)  # kept for advance_signal only
 
+    player_portfolio = _stamped_portfolio(copy.deepcopy(player_actor['portfolio']))
+
+    def _make_ai_entry(a):
+        ai_portfolio = _stamped_portfolio(copy.deepcopy(a['portfolio']))
+        return {
+            'name': a['name'],
+            'cash': a['cash'],
+            'portfolio': ai_portfolio,
+            'mortgages': _build_starting_mortgages(
+                ai_portfolio, starting_rate, target_debt=200_000
+            ),
+            'portfolio_value': sum(p['value'] for p in a['portfolio']),
+            'props': len(a['portfolio']),
+            'last_action': 'hold',
+            'last_property': None,
+            'rationale': 'waiting to see how the market moves',
+            'total_debt': 200_000,
+            'cumulative_rent': 0,
+        }
+
     gs = {
         'tick': 0,
         'total_ticks': total_ticks,
@@ -432,30 +459,13 @@ def init_game_state(total_ticks=20, archetype='balanced'):
         # at the historical starting rate (variable, no fix).
         'player': {
             'cash': player_actor['cash'],
-            'portfolio': copy.deepcopy(player_actor['portfolio']),
+            'portfolio': player_portfolio,
             'mortgages': _build_starting_mortgages(
-                copy.deepcopy(player_actor['portfolio']), starting_rate, target_debt=200_000
+                player_portfolio, starting_rate, target_debt=200_000
             ),
             'cumulative_rent': 0,
         },
-        'ai': [
-            {
-                'name': a['name'],
-                'cash': a['cash'],
-                'portfolio': copy.deepcopy(a['portfolio']),
-                'mortgages': _build_starting_mortgages(
-                    copy.deepcopy(a['portfolio']), starting_rate, target_debt=200_000
-                ),
-                'portfolio_value': sum(p['value'] for p in a['portfolio']),
-                'props': len(a['portfolio']),
-                'last_action': 'hold',
-                'last_property': None,
-                'rationale': 'waiting to see how the market moves',
-                'total_debt': 200_000,
-                'cumulative_rent': 0,
-            }
-            for a in ai_actors
-        ],
+        'ai': [_make_ai_entry(a) for a in ai_actors],
         'market': copy.deepcopy(ss['market']),
         'news': ['Market opens. Scenario: Baseline — Steady conditions. Good time to build positions.'],
         'leaderboard': [],
@@ -501,6 +511,7 @@ def apply_player_action(gs, action, buy_prop_id, sell_prop_id, ltv=0.0, rate_typ
                         'fix_expires_tick': fix_expires,
                         'monthly_payment': monthly_payment,
                     })
+                prop['purchase_price'] = prop['value']
                 player['portfolio'].append(prop)
                 market.remove(prop)
 
@@ -664,6 +675,7 @@ def apply_ai_actions(gs):
             ai['portfolio_value'] += prop['value']
             ai['props'] += 1
             ai['last_property'] = prop['id']
+            prop['purchase_price'] = prop['value']
             ai['portfolio'].append(prop)
             if loan > 0:
                 ai['mortgages'].append({
