@@ -274,7 +274,7 @@
             <td>UNREALISED</td>
             {% for actor in actors %}{% set a = analytics[actor] %}
             <td class="{{ 'val-green' if a.unrealised >= 0 else 'val-red' }}">
-              {% if a.unrealised >= 0 %}+{% endif %}{{ (a.unrealised | abs) | currency if a.unrealised != 0 else '£0' }}
+              {% if a.unrealised > 0 %}+{% endif %}{{ (a.unrealised | abs) | currency if a.unrealised != 0 else '£0' }}
             </td>
             {% endfor %}
           </tr>
