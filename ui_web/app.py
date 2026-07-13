@@ -88,12 +88,12 @@ def player_net_worth(gs):
 
 AGENT_FEE_RATE      = 0.015  # 1.5% of sale price charged by selling agent
 FIX_PREMIUMS        = {'variable': 2.0, 'fixed_2yr': 2.5, 'fixed_5yr': 2.25}
-FIX_DURATIONS       = {'fixed_2yr': 8, 'fixed_5yr': 20}   # ticks (6-month periods)
+FIX_DURATIONS       = {'fixed_2yr': 16, 'fixed_5yr': 40}  # ticks (3-month periods)
 
 EPC_UPGRADE_COST    = 5000
 EPC_RENT_PENALTY    = 0.15   # fraction of rent lost for non-compliant properties
 LICENSING_COST_PROP = 1500
-RENT_FREEZE_TURNS   = 4
+RENT_FREEZE_TURNS   = 8   # 2 years × 4 quarters
 CGT_RATE            = 0.24   # capital gains tax: higher-rate BTL investor
 MGMT_COST_RATE      = 0.20   # management + maintenance as fraction of gross rent
 STARTING_LTV        = 0.65   # starting mortgage LTV applied to portfolio value
@@ -450,16 +450,16 @@ def init_game_state(total_ticks=20, archetype='balanced'):
     total_ticks = total_ticks or ss['total_ticks']
 
     # Pick a random historical start period (hidden from player until game end)
-    min_year, max_year = hist.get_start_limits(total_ticks)
+    min_year, max_year = hist.get_quarterly_start_limits(total_ticks)
     start_year = random.randint(min_year, max_year)
-    start_half = random.choice([1, 2])
+    start_quarter = random.choice([1, 2, 3, 4])
     # Ensure enough data remains
     while True:
         try:
-            macro_slice = hist.get_slice(start_year, start_half, total_ticks)
+            macro_slice = hist.get_quarterly_slice(start_year, start_quarter, total_ticks)
             break
         except ValueError:
-            start_half = 1
+            start_quarter = 1
             start_year -= 1
 
     first = macro_slice[0]
@@ -502,7 +502,7 @@ def init_game_state(total_ticks=20, archetype='balanced'):
         'macro_slice': macro_slice,              # historical data; one entry per tick
         'price_scale': price_scale,              # normalisation factor
         'real_start_year': start_year,
-        'real_start_half': start_half,
+        'real_start_quarter': start_quarter,
         'archetype': archetype if archetype in ARCHETYPE_META else 'balanced',
         'scenario': _derive_scenario(100.0, 100.0, starting_rate),
         'macro': {
@@ -613,7 +613,7 @@ def apply_player_action(gs, action, buy_prop_id, sell_prop_id, ltv=0.0, rate_typ
                 existing_m.update(new_m)
             else:
                 player['mortgages'].append(new_m)
-            gs['refinance_cooldown'] = 5
+            gs['refinance_cooldown'] = 10  # 10 quarters = 2.5 years
             equity_note = f', £{cash_released:,} equity released' if cash_released > 0 else ''
             gs['news'].append(
                 f"Refinanced: {prop['id']} — {rate_type} at {effective_rate}%{equity_note}."
@@ -764,9 +764,9 @@ def apply_regulatory_events(gs):
     tick = gs['tick']
     year = current_real_year(gs)
 
-    # EPC C requirement — fires when era reaches 2018 or randomly after tick 8
+    # EPC C requirement — fires when era reaches 2018 or randomly after tick 16 (4 years)
     if 'epc' not in fired:
-        if year >= 2018 or (tick >= 8 and random.random() < 0.18):
+        if year >= 2018 or (tick >= 16 and random.random() < 0.18):
             for prop in gs['player']['portfolio']:
                 prop.setdefault('epc_compliant', True)
                 prop['epc_compliant'] = False
@@ -778,8 +778,8 @@ def apply_regulatory_events(gs):
                 "! Regulation: EPC C requirement — non-compliant properties lose 15% rent until upgraded (£5,000 each)."
             )
 
-    # Licensing scheme — random, fires once after tick 5
-    if 'licensing' not in fired and tick >= 5 and random.random() < 0.08:
+    # Licensing scheme — random, fires once after tick 10 (2.5 years)
+    if 'licensing' not in fired and tick >= 10 and random.random() < 0.08:
         region = random.choice(_REGIONS)
         affected = [p for p in gs['player']['portfolio'] if p.get('region') == region]
         cost = len(affected) * LICENSING_COST_PROP
@@ -790,8 +790,8 @@ def apply_regulatory_events(gs):
             f"£{LICENSING_COST_PROP:,}/property. You paid £{cost:,} for {len(affected)} properties."
         )
 
-    # Rent freeze — random, fires once after tick 6
-    if 'rent_freeze' not in fired and tick >= 6 and random.random() < 0.06:
+    # Rent freeze — random, fires once after tick 12 (3 years)
+    if 'rent_freeze' not in fired and tick >= 12 and random.random() < 0.06:
         if random.random() < 0.35:
             gs['rent_freeze']['ALL'] = RENT_FREEZE_TURNS
             fired.append('rent_freeze')
@@ -855,7 +855,7 @@ def advance_tick(gs):
         int(p['rent'] * (1 - EPC_RENT_PENALTY) if not p.get('epc_compliant', True) else p['rent'])
         for p in player['portfolio']
         if not p.get('vacant', False)
-    ) * 6
+    ) * 3
     rent_income = int(gross_rent * (1 - MGMT_COST_RATE))
     player['cash'] += rent_income
     player['cumulative_rent'] = player.get('cumulative_rent', 0) + rent_income
@@ -864,10 +864,10 @@ def advance_tick(gs):
     # Surcharge: individual property LTV > 65% of current value incurs extra 1.5% annual interest
     prop_values = {p['id']: p['value'] for p in player['portfolio']}
     for mortgage in player.get('mortgages', []):
-        player['cash'] -= mortgage['monthly_payment'] * 6
+        player['cash'] -= mortgage['monthly_payment'] * 3
         prop_val = prop_values.get(mortgage['prop_id'], 0)
         if prop_val > 0 and mortgage['loan'] / prop_val > 0.65:
-            player['cash'] -= int(mortgage['loan'] * 0.015 / 12 * 6)
+            player['cash'] -= int(mortgage['loan'] * 0.015 / 12 * 3)
 
     # Player: property value growth — era-aware regional rates
     year = current_real_year(gs)
@@ -897,7 +897,7 @@ def advance_tick(gs):
                 mortgage['monthly_payment'] = round(mortgage['loan'] * var_rate / 100 / 12, 2)
 
         # Rent income (6 months), net of management + maintenance costs
-        ai_gross_rent = sum(p['rent'] * 6 for p in ai.get('portfolio', []))
+        ai_gross_rent = sum(p['rent'] * 3 for p in ai.get('portfolio', []))
         ai_rent = int(ai_gross_rent * (1 - MGMT_COST_RATE))
         ai['cash'] += ai_rent
         ai['cumulative_rent'] = ai.get('cumulative_rent', 0) + ai_rent
@@ -915,7 +915,7 @@ def advance_tick(gs):
         ai['total_debt'] = sum(m['loan'] for m in ai.get('mortgages', []))
 
         # Mortgage interest payments (6 months)
-        ai['cash'] -= round(sum(m['monthly_payment'] * 6 for m in ai.get('mortgages', [])), 2)
+        ai['cash'] -= round(sum(m['monthly_payment'] * 3 for m in ai.get('mortgages', [])), 2)
 
     # Macro: advance to next entry's values
     prev = {
@@ -976,7 +976,7 @@ def advance_tick(gs):
     replenish_market(gs, count=2)
 
     # Add auction property every 8 ticks
-    if new_tick % 8 == 0 and new_tick > 0:
+    if new_tick % 16 == 0 and new_tick > 0:  # every 4 years
         _add_auction_property(gs)
 
     update_leaderboard(gs)
@@ -1012,12 +1012,12 @@ def _build_end_state(gs):
     )
 
     start_year = gs['real_start_year']
-    start_half = gs['real_start_half']
+    start_quarter = gs['real_start_quarter']
     end_entry = gs['macro_slice'][-1]
     end_year = end_entry[0]
-    end_half = end_entry[1]
+    end_quarter = end_entry[1]
     era_label = hist.get_era_label(start_year)
-    min_year, max_year = hist.get_start_limits(gs['total_ticks'])
+    min_year, max_year = hist.get_quarterly_start_limits(gs['total_ticks'])
 
     gs['end'] = {
         'player_breakdown': {
@@ -1035,9 +1035,9 @@ def _build_end_state(gs):
         ],
         'era_reveal': {
             'start_year': start_year,
-            'start_half': start_half,
+            'start_quarter': start_quarter,
             'end_year': end_year,
-            'end_half': end_half,
+            'end_quarter': end_quarter,
             'era_label': era_label,
             'limits': (min_year, max_year),
         },
