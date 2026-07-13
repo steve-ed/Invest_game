@@ -1,7 +1,6 @@
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ui_web'))
 import app as web_app
-from unittest.mock import patch
 
 
 def _make_gs():
@@ -41,8 +40,8 @@ def test_ai_buy_stamps_purchase_price():
     ai = next(a for a in gs['ai'] if a['name'] == 'Mr Max Lever')
     ai['cash'] = 500_000
     market_before = [p['id'] for p in gs['market']]
-    with patch('random.random', return_value=1.0):
-        web_app.apply_ai_actions(gs)
+    web_app.apply_ai_actions(gs)
     bought_props = [p for p in ai['portfolio'] if p['id'] in market_before]
+    assert len(bought_props) > 0, "Expected Mr Max Lever to buy at least one property"
     for p in bought_props:
         assert 'purchase_price' in p, f"AI bought property {p['id']} missing purchase_price"
