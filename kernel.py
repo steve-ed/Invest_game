@@ -530,7 +530,7 @@ class SimulationKernel:
         for p in self.state.properties:
             if p.id not in owned_all:
                 gross_yield = round((p.rent * 12) / p.current_value * 100, 1)
-                affordable = player and player.cash >= (p.current_value + _calculate_sdlt(p.current_value))
+                affordable = player and player.cash >= (p.current_value * 0.25 + _calculate_sdlt(p.current_value))
                 available_props.append({
                     "id": p.id, "region": p.region,
                     "value": round(p.current_value, 0),
