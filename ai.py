@@ -15,7 +15,7 @@ CAPITAL_FALL_TICKS    = 2       # consecutive falling price ticks before selling
 BRRR_RECYCLE_SIZE     = 4       # sell when portfolio reaches this size
 BRRR_RATE_GATE        = 0.07    # BRRR pauses buying above this rate
 BRRR_SELL_RATE        = 0.10    # BRRR force-sells at critical rates
-_BRRR_UPGRADE_COST    = {4: 5_000, 5: 12_000, 6: 20_000, 7: 30_000}
+_BRRR_UPGRADE_COST    = {4: 5_000, 5: 8_000, 6: 10_000, 7: 10_000}
 DEMO_MAX_RATE         = 0.065   # demographic pauses buying above this rate
 DEMO_SELL_RENT_TICKS  = 3       # consecutive negative rent growth ticks before selling
 

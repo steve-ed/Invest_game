@@ -32,7 +32,7 @@ BUY_CASH_RESERVE    = 150_000
 SELL_HIGH_LTV       = 0.80
 HIGH_RATE_THRESHOLD = 0.065
 EPC_UPGRADE_RESERVE = 2.0
-EPC_COST            = {4: 5_000, 5: 12_000, 6: 20_000, 7: 30_000}
+EPC_COST            = {4: 5_000, 5: 8_000, 6: 10_000, 7: 10_000}
 
 
 # ── Claude player engine ────────────────────────────────────────────────────

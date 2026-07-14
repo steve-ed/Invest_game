@@ -250,7 +250,7 @@ def _calculate_sdlt(price: float) -> float:
 
 def _epc_upgrade_cost(epc_band: int) -> float:
     """Estimated retrofit cost to bring property to EPC C."""
-    return {4: 5_000, 5: 12_000, 6: 20_000, 7: 30_000}.get(epc_band, 0.0)
+    return {4: 5_000, 5: 8_000, 6: 10_000, 7: 10_000}.get(epc_band, 0.0)
 
 
 def _select_era(turns):
@@ -1050,14 +1050,14 @@ class SimulationKernel:
                 actor.cash -= cost
                 actor.total_transaction_costs += cost
                 prop.epc_band = max(1, prop.epc_band - 2)
-                prop.rent *= 1.10
+                prop.rent *= 1.05
 
         elif action == "refi" and property_id in actor.portfolio:
             if prop.fixed_ticks_remaining == 0:
                 new_balance = prop.current_value * ltv
                 released = new_balance - prop.mortgage_balance
                 if released > 0:
-                    fee = max(500.0, new_balance * 0.005)
+                    fee = new_balance * 0.01
                     actor.cash += released - fee
                     actor.total_transaction_costs += fee
                     prop.mortgage_balance = new_balance

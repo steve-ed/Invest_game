@@ -10,7 +10,7 @@ class _QuietPlayer:
     CASH_RESERVE     = 150_000
     SELL_LTV         = 0.80
     HIGH_RATE        = 0.065
-    EPC_COST         = {4: 5_000, 5: 12_000, 6: 20_000, 7: 30_000}
+    EPC_COST         = {4: 5_000, 5: 8_000, 6: 10_000, 7: 10_000}
     EPC_RESERVE      = 2.0
 
     def __init__(self):
