@@ -893,28 +893,24 @@ class SimulationKernel:
                             "detail": f"{prop.id} (EPC {chr(64 + prop.epc_band)}) must be upgraded within {EPC_GRACE_TICKS} ticks",
                         })
 
-            # Force-sell non-compliant properties after grace period
+            # EPC void: non-compliant properties go void after grace period until upgraded
             for prop in list(self.state.properties):
                 warned_at = self._epc_warned.get(prop.id)
                 if warned_at and tick == warned_at + EPC_GRACE_TICKS and prop.epc_band >= 4:
-                    for actor in self.state.actors.values():
-                        if prop.id in actor.portfolio:
-                            sale_price = prop.current_value * 0.85
-                            agent_fee  = sale_price * 0.015
-                            net = sale_price - prop.mortgage_balance - agent_fee
-                            actor.cash += max(net, 0.0)
-                            actor.total_transaction_costs += agent_fee
-                            prop.mortgage_balance = 0.0
-                            actor.portfolio.remove(prop.id)
-                            tick_events.append({
-                                "type": "epc_force_sell",
-                                "tick": tick,
-                                "property_id": prop.id,
-                                "actor_id": actor.id,
-                                "discount": 0.15,
-                                "detail": f"{prop.id} force-sold at 15% discount — EPC non-compliance",
-                            })
-                            break
+                    if not prop.epc_void:
+                        prop.epc_void = True
+                        prop.void_ticks_remaining = 999
+                        owner = next(
+                            (aid for aid, a in self.state.actors.items() if prop.id in a.portfolio),
+                            None,
+                        )
+                        tick_events.append({
+                            "type": "epc_force_sell",
+                            "tick": tick,
+                            "property_id": prop.id,
+                            "actor_id": owner,
+                            "detail": f"{prop.id} gone void — EPC non-compliant (upgrade to re-let)",
+                        })
 
             self.state.event_log.extend(tick_events)
             self.state.macro_history.append(MacroSnapshot(
@@ -998,6 +994,8 @@ class SimulationKernel:
 
             prev_entry = curr_entry
 
+        if self._bus is not None:
+            self._bus.set_game_active(False)
         leaderboard = self.scoring.leaderboard(self.state)
         return {"trace": trace, "leaderboard": leaderboard, "era_label": self.era_label, "start_year": self.state.start_year}
 
@@ -1040,7 +1038,7 @@ class SimulationKernel:
                 prop.mortgage_balance = prop.current_value * ltv
                 prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                 prop.is_fixed_rate = True
-                prop.fixed_ticks_remaining = 4
+                prop.fixed_ticks_remaining = 8
                 prop.void_ticks_remaining = _VOID_BY_ARCHETYPE.get(prop.archetype, 0)
                 actor.portfolio.append(property_id)
 
@@ -1051,6 +1049,19 @@ class SimulationKernel:
                 actor.total_transaction_costs += cost
                 prop.epc_band = max(1, prop.epc_band - 2)
                 prop.rent *= 1.05
+                if prop.epc_void and prop.epc_band < 4:
+                    prop.epc_void = False
+                    prop.void_ticks_remaining = 0
+
+        elif action == "renovate" and property_id in actor.portfolio:
+            if not prop.renovated:
+                cost = round(prop.current_value * 0.10)
+                if actor.cash >= cost:
+                    actor.cash -= cost
+                    actor.total_transaction_costs += cost
+                    prop.rent *= 1.15
+                    prop.current_value *= 1.08
+                    prop.renovated = True
 
         elif action == "refi" and property_id in actor.portfolio:
             if prop.fixed_ticks_remaining == 0:
@@ -1063,7 +1074,7 @@ class SimulationKernel:
                     prop.mortgage_balance = new_balance
                     prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                     prop.is_fixed_rate = True
-                    prop.fixed_ticks_remaining = 4
+                    prop.fixed_ticks_remaining = 8
 
     def _replenish_market(self, count: int) -> None:
         """Add new properties to the market scaled to current price index."""
