@@ -33,6 +33,9 @@ class Property:
     is_fixed_rate: bool = False
     fixed_ticks_remaining: int = 0
     void_ticks_remaining: int = 0     # ticks of zero rent after acquisition
+    epc_void: bool = False            # permanently void until EPC upgraded to C or better
+    renovated: bool = False           # tracks whether property has been renovated (once only)
+    is_auction: bool = False          # marks property as auction listing (removed after 1 tick if unsold)
     bedrooms: int = 3
     hpi_factor: float = 1.0          # regional HPI sensitivity multiplier
 
