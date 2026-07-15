@@ -1,4 +1,5 @@
 MORTGAGE_SPREAD = 0.018  # lender margin above BoE base rate
+MGMT_FEE_RATE  = 0.12   # letting agent full management fee
 
 
 class ActorManager:
@@ -31,9 +32,11 @@ class ActorManager:
                 if prop is None:
                     continue
                 if prop.void_ticks_remaining > 0:
-                    prop.void_ticks_remaining -= 1
+                    if not prop.epc_void:
+                        prop.void_ticks_remaining -= 1
                 else:
-                    income = prop.rent * 6
+                    gross = prop.rent * 6
+                    income = gross * (1 - MGMT_FEE_RATE)
                     actor.cash += income
                     actor.total_rent_received += income
 
