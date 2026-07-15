@@ -1088,10 +1088,11 @@ class SimulationKernel:
                 actor.cash -= cost
                 actor.total_transaction_costs += cost
                 prop.epc_band = max(1, old_band - 2)
-                prop.rent *= 1.05
+                prop.rent *= 1.10
                 uplift = _EPC_VALUE_UPLIFT.get(old_band, 0)
                 if uplift:
                     prop.current_value = round(prop.current_value * (1 + uplift) / 1000) * 1000
+                prop.base_value = prop.current_value  # rebase so HPI compounds from post-upgrade value
                 if prop.epc_void and prop.epc_band < 4:
                     prop.epc_void = False
                     prop.void_ticks_remaining = 0
