@@ -178,7 +178,10 @@ def _default_properties():
     ]
     for p in props:
         p.hpi_factor = _hpi_for_city(p.region)
-        p.current_value = round(p.base_value * p.hpi_factor / 1000) * 1000
+        hpi_value = round(p.base_value * p.hpi_factor / 1000) * 1000
+        discount = _EPC_PRICE_DISCOUNT.get(p.epc_band, 0)
+        p.current_value = round(hpi_value * (1 - discount) / 1000) * 1000
+        p.base_value = p.current_value
     return props
 
 
@@ -251,6 +254,12 @@ def _calculate_sdlt(price: float) -> float:
 def _epc_upgrade_cost(epc_band: int) -> float:
     """Estimated retrofit cost to bring property to EPC C."""
     return {4: 5_000, 5: 8_000, 6: 10_000, 7: 10_000}.get(epc_band, 0.0)
+
+
+# Purchase discount and matching value uplift on upgrade for poor-EPC properties.
+# Poor EPC deters buyers, so market prices reflect the cost/risk of non-compliance.
+_EPC_PRICE_DISCOUNT = {4: 0.05, 5: 0.08, 6: 0.12, 7: 0.15}
+_EPC_VALUE_UPLIFT   = {4: 0.05, 5: 0.09, 6: 0.14, 7: 0.18}
 
 
 def _select_era(turns):
@@ -1073,12 +1082,16 @@ class SimulationKernel:
                     actor.portfolio.append(property_id)
 
         elif action == "upgrade" and property_id in actor.portfolio:
-            cost = _epc_upgrade_cost(prop.epc_band)
+            old_band = prop.epc_band
+            cost = _epc_upgrade_cost(old_band)
             if cost > 0 and actor.cash >= cost:
                 actor.cash -= cost
                 actor.total_transaction_costs += cost
-                prop.epc_band = max(1, prop.epc_band - 2)
+                prop.epc_band = max(1, old_band - 2)
                 prop.rent *= 1.05
+                uplift = _EPC_VALUE_UPLIFT.get(old_band, 0)
+                if uplift:
+                    prop.current_value = round(prop.current_value * (1 + uplift) / 1000) * 1000
                 if prop.epc_void and prop.epc_band < 4:
                     prop.epc_void = False
                     prop.void_ticks_remaining = 0
@@ -1124,6 +1137,8 @@ class SimulationKernel:
             yield_mult = _ARCHETYPE_YIELD_MULT.get(archetype, 1.0)
             rent  = round(value * profile["annual_yield"] * yield_mult / 12)
             epc_band = random.choice(profile["epc_bands"])
+            epc_discount = _EPC_PRICE_DISCOUNT.get(epc_band, 0)
+            value = round(value * (1 - epc_discount) / 1000) * 1000
             bedrooms = {"btl": 3, "value_add": 3, "hmo": 5, "short_let": 1, "new_build": 2}.get(archetype, 3)
             prop = Property(
                 id=f"mk{self._next_market_id:03d}",
@@ -1149,9 +1164,10 @@ class SimulationKernel:
         _PRICE_MULT = {"btl": 1.0, "value_add": 0.80, "hmo": 1.30}
         _YIELD_MULT = {"btl": 1.0, "value_add": 1.05, "hmo": 2.20}
         market_value = _MARKET_NATIONAL_BASE * profile["price_level"] * price_factor * _PRICE_MULT[archetype]
-        auction_value = round(market_value * 0.85 / 1000) * 1000
-        rent = round(auction_value * profile["annual_yield"] * _YIELD_MULT[archetype] / 12)
         epc_band = random.choice(profile["epc_bands"])
+        epc_discount = _EPC_PRICE_DISCOUNT.get(epc_band, 0)
+        auction_value = round(market_value * 0.85 * (1 - epc_discount) / 1000) * 1000
+        rent = round(market_value * 0.85 * profile["annual_yield"] * _YIELD_MULT[archetype] / 12)
         bedrooms = {"btl": 3, "value_add": 3, "hmo": 5}.get(archetype, 3)
         prop = Property(
             id=f"auc{self._next_market_id:03d}",
