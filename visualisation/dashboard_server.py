@@ -55,6 +55,7 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
             payload.get("action", "hold"),
             payload.get("property_id"),
             float(payload.get("ltv", 0)),
+            float(payload.get("bid_premium", 0)),
         )
         return Response('{"ok":true}', mimetype="application/json",
                         headers={"Access-Control-Allow-Origin": "*"})
@@ -99,6 +100,7 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
                 payload.get("action", "hold"),
                 payload.get("property_id"),
                 float(payload.get("ltv", 0)),
+                float(payload.get("bid_premium", 0)),
             )
         return Response('{"ok":true}', mimetype="application/json",
                         headers={"Access-Control-Allow-Origin": "*"})
@@ -106,15 +108,6 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
     @app.route("/ready", methods=["POST"])
     def ready():
         if bus is not None:
-            if bus.is_game_active():
-                s = bus.get_state()
-                import json as _j
-                return Response(
-                    _j.dumps({"ok": False, "waiting": True,
-                               "tick": s.get("tick", 0), "total": s.get("total_ticks", 20)}),
-                    mimetype="application/json",
-                    headers={"Access-Control-Allow-Origin": "*"},
-                )
             payload = request.get_json(silent=True) or {}
             name = (payload.get("name") or "").strip()[:30]
             if name:
@@ -145,9 +138,8 @@ def _find_port(start=5050, end=5059):
     return start
 
 
-def start_server(state_path=None, bus=None):
+def start_server(state_path=None, bus=None, port=5051):
     app = create_app(bus=bus, state_path=state_path)
-    port = _find_port()
     print(f"Dashboard: http://localhost:{port}", flush=True)
     t = threading.Thread(target=lambda: app.run(port=port, use_reloader=False), daemon=True)
     t.start()

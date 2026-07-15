@@ -59,9 +59,12 @@ class GameBus:
 
     # ── Player action (browser → kernel) ────────────────────────────────────
 
-    def submit_action(self, action, property_id, ltv):
+    def submit_action(self, action, property_id, ltv, bid_premium=0.0):
         with self._action_lock:
-            self._action = {"action": action, "property_id": property_id, "ltv": ltv}
+            self._action = {
+                "action": action, "property_id": property_id,
+                "ltv": ltv, "bid_premium": bid_premium,
+            }
         self._action_ev.set()
 
     def wait_action(self, timeout=60):
@@ -74,7 +77,7 @@ class GameBus:
 
     def pop_action(self):
         with self._action_lock:
-            result = self._action or {"action": "hold", "property_id": None, "ltv": 0.0}
+            result = self._action or {"action": "hold", "property_id": None, "ltv": 0.0, "bid_premium": 0.0}
             self._action = None
         return result
 
