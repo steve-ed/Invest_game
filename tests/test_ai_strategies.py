@@ -27,7 +27,7 @@ def test_yield_ai_buys_high_yield_property_at_low_rate():
     action, pid, ltv = ai._decide(state, actor, available)
     assert action == "buy"
     assert pid == "px"
-    assert ltv == 0.0   # yield AI buys cash (no leverage)
+    assert ltv == pytest.approx(0.35)  # yield AI buys with low LTV
 
 
 def test_yield_ai_holds_when_rate_high():
@@ -69,7 +69,7 @@ def test_leverage_ai_sells_on_rate_spike():
     state = _make_state(rate=0.09)
     actor = ActorState(id="ai2", name="Aggressive AI", cash=50_000,
                        risk_appetite=0.9, strategy="leverage", portfolio=["p01"])
-    prop_owned = _prop("p01", 300_000, 900)
+    prop_owned = _prop("p01", 300_000, 900, epc_band=1)
     state.actors = {"ai2": actor}
     state.properties = [prop_owned]
     ai = AIController()

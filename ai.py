@@ -279,6 +279,8 @@ class AIController:
     def _decide_balanced(self, state, actor, available):
         upg = self._check_upgrade(state, actor)
         if upg: return upg
+        if actor.risk_appetite < 0.4:
+            return "hold", None, 0.0
         rate = state.macro.interest_rate
         if rate > 0.06:
             return "hold", None, 0.0

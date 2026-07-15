@@ -16,7 +16,9 @@ def test_rent_income_collected_for_3_months():
     mortgages_before = sum(m['monthly_payment'] for m in player.get('mortgages', []))
     with patch('random.random', return_value=1.0):
         web_app.advance_tick(gs)
-    expected_net = monthly_rent * 3 - mortgages_before * 3
+    gross_rent_3m = monthly_rent * 3
+    rent_income = int(gross_rent_3m * (1 - web_app.MGMT_COST_RATE))
+    expected_net = rent_income - mortgages_before * 3
     actual_net = player['cash'] - cash_before
     assert abs(actual_net - expected_net) < 500, (
         f"Expected net ~{expected_net}, got {actual_net}"
