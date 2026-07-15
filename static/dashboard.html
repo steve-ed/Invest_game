@@ -455,6 +455,15 @@
             <button onclick="playerSelectAction('renovate')" class="mob-act-btn" style="background:#0a2a2a;color:#00bcd4;border:1px solid #00bcd4;">Reno</button>
           </div>
           <div id="prop-picker" style="display:none;max-height:160px;overflow-y:auto;border:1px solid #2a3f50;border-radius:4px;margin-bottom:6px;"></div>
+          <div id="bid-premium-picker" style="display:none;margin-bottom:6px;">
+            <div style="font-size:9px;color:#f9a825;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px;">Auction Bid Premium</div>
+            <div style="display:flex;gap:3px;">
+              <button onclick="playerSelectBidPremium(0)"    class="bid-btn" data-premium="0"    style="flex:1;padding:3px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Asking</button>
+              <button onclick="playerSelectBidPremium(0.05)" class="bid-btn" data-premium="0.05" style="flex:1;padding:3px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">+5%</button>
+              <button onclick="playerSelectBidPremium(0.10)" class="bid-btn" data-premium="0.10" style="flex:1;padding:3px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">+10%</button>
+              <button onclick="playerSelectBidPremium(0.15)" class="bid-btn" data-premium="0.15" style="flex:1;padding:3px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">+15%</button>
+            </div>
+          </div>
           <button id="btn-confirm" onclick="playerConfirm()" style="display:none;width:100%;padding:4px;font-size:10px;background:#032147;color:#209dd7;border:1px solid #209dd7;border-radius:3px;cursor:pointer;font-weight:600;margin-bottom:4px;">Confirm</button>
         </div>
 
@@ -1444,6 +1453,7 @@ function epcClass(band) {
 let _pendingAction = null;
 let _pendingPropId = null;
 let _pendingLtv    = 0;
+let _pendingBidPremium = 0.0;
 
 const TURN_SECONDS = 20;
 let _timerInterval = null;
@@ -1493,6 +1503,7 @@ function showActionBar() {
 function hideActionBar() {
   _pendingAction = null;
   _pendingLtv    = 0;
+  _pendingBidPremium = 0;
   _clearTimer();
   document.getElementById('player-action-bar').classList.remove('player-turn');
   document.getElementById('prop-picker').style.display = 'none';
@@ -1505,6 +1516,7 @@ function hideActionBar() {
   const confirmBtn = document.getElementById('btn-confirm');
   confirmBtn.style.display = 'none';
   confirmBtn.textContent = 'Confirm';
+  document.getElementById('bid-premium-picker').style.display = 'none';
   // Restore market panel heading if it was changed for sell/upgrade mode
   const heading = document.querySelector('.market-col .panel h3');
   if (heading && heading.textContent !== 'Available to Buy') heading.textContent = 'Available to Buy';
@@ -1686,6 +1698,16 @@ function playerSelectProp(id) {
     el.style.background = el.id === 'pick-' + id ? '#0f2a3a' : '';
     el.style.outline    = el.id === 'pick-' + id ? '1px solid #209dd7' : '';
   });
+  const _selProp = (_lastPs?.available || []).find(p => p.id === id);
+  const bidPicker = document.getElementById('bid-premium-picker');
+  if (_selProp?.is_auction && _pendingAction === 'buy' && bidPicker) {
+    bidPicker.style.display = 'block';
+    playerSelectBidPremium(0);
+  } else if (bidPicker) {
+    bidPicker.style.display = 'none';
+    _pendingBidPremium = 0;
+  }
+
   if (_pendingAction === 'buy') {
     document.getElementById('ltv-picker').style.display = 'block';
     playerSelectLtv(0.75); // default to 75% LTV; user can change before confirming
@@ -1712,6 +1734,16 @@ function playerSelectLtv(ltv) {
     b.style.borderColor  = selected ? '#4caf50'  : '#2a3f50';
   });
   document.getElementById('btn-confirm').style.display = 'block';
+}
+
+function playerSelectBidPremium(premium) {
+  _pendingBidPremium = premium;
+  document.querySelectorAll('.bid-btn').forEach(b => {
+    const isSelected = parseFloat(b.dataset.premium) === premium;
+    b.style.background   = isSelected ? '#1a2a1a' : '#0f1923';
+    b.style.color        = isSelected ? '#f9a825' : '#888';
+    b.style.borderColor  = isSelected ? '#f9a825' : '#2a3f50';
+  });
 }
 
 function playerConfirm() {
@@ -1759,7 +1791,7 @@ function submitAction(action, propertyId, ltv = 0) {
   fetch(`${_api}/action`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({tick, action, property_id: propertyId, ltv})
+    body: JSON.stringify({tick, action, property_id: propertyId, ltv, bid_premium: _pendingBidPremium})
   }).then(() => {
     const label = action === 'hold' ? 'Holding this turn' :
                   `${action.charAt(0).toUpperCase()+action.slice(1)}: ${propertyId}`;
@@ -1770,6 +1802,7 @@ function submitAction(action, propertyId, ltv = 0) {
     _turnActionSent = false;
     setTimeout(() => submitAction(action, propertyId, ltv), 2000);
   });
+  _pendingBidPremium = 0;
 }
 
 function renderPlayerPanel(ps, actors) {
@@ -1827,7 +1860,7 @@ function renderAvailableProps(rows) {
     ${p.affordable ? `onclick="playerSelectProp('${p.id}')"` : ''}
     style="cursor:${p.affordable ? 'pointer' : 'default'};${!p.affordable ? 'opacity:0.4;' : ''}">
     <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
-      <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
+      <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;">AUCTION</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
       <br><span style="font-size:9px;color:#888;">Void ${p.void_risk_pct}%</span><span style="font-size:9px;color:#888;"> · </span><span style="font-size:9px;color:${p.maintenance_risk==='High'?'#f44336':p.maintenance_risk==='Medium'?'#ecad0a':'#4caf50'};">Maint ${p.maintenance_risk}</span>
     </td>
     <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;">
