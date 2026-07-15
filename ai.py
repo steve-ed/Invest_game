@@ -23,7 +23,7 @@ DEMO_SELL_RENT_TICKS  = 3       # consecutive negative rent growth ticks before 
 class AIController:
     def step(self, state, tick):
         owned_all = {pid for a in state.actors.values() for pid in a.portfolio}
-        available = [p for p in state.properties if p.id not in owned_all]
+        available = [p for p in state.properties if p.id not in owned_all and not p.is_auction]
         events = []
         for actor_id, actor in state.actors.items():
             if actor_id == "player":
@@ -315,3 +315,9 @@ class AIController:
             return actor.portfolio[0]
         held.sort(key=lambda x: x[1].mortgage_balance / max(x[1].current_value, 1), reverse=True)
         return held[0][0]
+
+    def ai_bid_premium(self, actor_id: str) -> float:
+        """Return the bid premium fraction an AI actor bids on auction properties."""
+        if actor_id == "ai2":   # Aggressive AI
+            return 0.05
+        return 0.0              # Conservative AI bids at asking
