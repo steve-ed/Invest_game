@@ -1788,10 +1788,12 @@ function submitAction(action, propertyId, ltv = 0) {
   _highlightTimer = setTimeout(applyButtonHighlights, 1000);
   if (window.innerWidth <= 768) mobileTab('charts');
 
+  const bidPremium = _pendingBidPremium;
+  _pendingBidPremium = 0;
   fetch(`${_api}/action`, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({tick, action, property_id: propertyId, ltv, bid_premium: _pendingBidPremium})
+    body: JSON.stringify({tick, action, property_id: propertyId, ltv, bid_premium: bidPremium})
   }).then(() => {
     const label = action === 'hold' ? 'Holding this turn' :
                   `${action.charAt(0).toUpperCase()+action.slice(1)}: ${propertyId}`;
@@ -1802,7 +1804,6 @@ function submitAction(action, propertyId, ltv = 0) {
     _turnActionSent = false;
     setTimeout(() => submitAction(action, propertyId, ltv), 2000);
   });
-  _pendingBidPremium = 0;
 }
 
 function renderPlayerPanel(ps, actors) {
