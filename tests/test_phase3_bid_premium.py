@@ -37,3 +37,13 @@ def test_player_choice_engine_default_bid_premium():
     engine = PlayerChoiceEngine(bus=bus)
     events = engine.step(None, 1)
     assert events[0]["bid_premium"] == 0.0
+
+
+def test_server_route_converts_string_bid_premium():
+    from visualisation.dashboard_server import create_app
+    bus = GameBus()
+    app = create_app(bus=bus)
+    client = app.test_client()
+    client.post("/action", json={"action": "buy", "property_id": "p1", "ltv": 0.75, "bid_premium": "0.05"})
+    result = bus.pop_action()
+    assert result["bid_premium"] == pytest.approx(0.05)
