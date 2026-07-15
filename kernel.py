@@ -1098,7 +1098,7 @@ class SimulationKernel:
                 new_balance = prop.current_value * ltv
                 released = new_balance - prop.mortgage_balance
                 if released > 0:
-                    fee = new_balance * 0.01
+                    fee = 1_500
                     actor.cash += released - fee
                     actor.total_transaction_costs += fee
                     prop.mortgage_balance = new_balance
