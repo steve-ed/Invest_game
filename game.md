@@ -1,38 +1,38 @@
 # RealEstGame — Specification (as built)
 
-> This document describes the game as it actually runs today (`ui_web/app.py` + templates).
-> Last updated: 2026-06-30.
+> Last updated: 2026-07-15. Describes the `kernel.py` architecture.
 
 ---
 
 ## 1. Overview
 
-RealEstGame is a turn-based property investment simulation. The player and two AI actors compete to build the most valuable portfolio across a randomly selected slice of real UK macroeconomic history. The era is hidden during play and revealed only at game end.
+RealEstGame is a turn-based property investment simulation. The player and two AI actors (drawn randomly from six available strategies) compete to build the strongest risk-adjusted portfolio across a randomly selected slice of real UK macroeconomic history. The era is hidden during play and revealed only at game end.
 
-Each turn represents 6 months of simulated time. Macro conditions — house price growth, interest rates, rental growth — are driven by approximate historical UK data from 1983 to 2024.
+Each turn represents **3 months** of simulated time. Macro conditions — house price growth, interest rates, rental growth — are driven by approximate historical UK data from 1983 to 2024.
 
 ---
 
 ## 2. Time Structure
 
 ### 2.1 Game Modes
-Two modes selectable at the opening screen:
 
 | Mode | Turns | Simulated years |
 |---|---|---|
-| Short | 20 | 10 years |
-| Long | 40 | 20 years |
+| Short | 20 | 5 years |
+| Long | 40 | 10 years |
 
 ### 2.2 Turn Execution Order
 
 Each turn runs in this sequence:
 
-1. **Player decision** — buy, sell, or hold (with optional LTV choice)
-2. **AI decisions** — both AI actors decide simultaneously
-3. **Tick advance** — rent income paid, mortgage costs deducted, prices updated from historical data
-4. **Market replenishment** — 2 new properties added each turn
-5. **Leaderboard update** — scores recomputed for all actors
-6. **Round summary** — decisions and outcomes displayed before next turn
+1. **Player decision** — buy, sell, hold, upgrade, refi, renovate (with optional LTV choice)
+2. **AI decisions** — all AI actors decide simultaneously
+3. **Tick advance** — rent income paid, mortgage costs deducted, prices updated
+4. **Random events** — void periods, maintenance costs, branching narrative events
+5. **EPC mandate check** — at tick 10, non-compliant properties enter a 2-tick grace window
+6. **Market replenishment** — properties added to keep minimum available
+7. **Auction scheduling** — one auction property added every 8 ticks
+8. **Leaderboard update** — scores recomputed for all actors
 
 ---
 
@@ -40,40 +40,25 @@ Each turn runs in this sequence:
 
 ### 3.1 Historical Data Source
 
-Macro values are drawn from `data/uk_macro_history.py` — a semi-annual dataset covering 1983 H1 → 2024 H2 (82 entries). Each entry contains:
+Macro values are drawn from `data/uk_macro_history.py` — a quarterly dataset covering 1983 Q1 → 2024 Q4. Each entry contains:
 
 | Field | Description |
 |---|---|
-| `price_index` | Nationwide/Halifax-based house price index (100 = 1983 H1) |
-| `rate` | Bank of England base rate (%) |
-| `rent_growth` | Estimated annualised private rental growth (%) |
-
-Values are **approximate / illustrative** — derived from training knowledge of major trends. Authoritative sources are documented in `data/uk_macro_history.py`.
+| `price_index` | Nationwide/Halifax-based house price index (100 = game start) |
+| `interest_rate` | Bank of England base rate (decimal, e.g. 0.05 = 5%) |
+| `rent_growth` | Estimated annualised private rental growth (decimal) |
 
 ### 3.2 Hidden Era Mechanic
 
-At game start, a random start year is selected from a safe range:
-- 20-turn game: 1983–2014
-- 40-turn game: 1983–2004
+At game start, a random start year is selected. The start year is hidden from the player throughout. On the end screen it is revealed with a named era label (e.g. *"Long Boom & The Run-Up to the GFC"*).
 
-The start year is hidden from the player throughout. On the end screen it is revealed along with a named era label (e.g. *"Long Boom & The Run-Up to the GFC"*) and the selection range so the player can judge their luck.
+### 3.3 Scenario Labels
 
-### 3.3 Macro Display
-
-The UI shows three macro values each turn with trend arrows:
-- **Price Index** — normalised so game always opens at 100.0
-- **Interest Rate** — BoE base rate %
-- **Rent Growth** — annual % estimate
-
-SVG sparklines show the history of each metric as the game progresses.
-
-### 3.4 Scenario Labels
-
-A scenario label (Baseline / Boom / Recovery / Correction / Crash / High Rates) is derived each tick from the observed data:
+Derived each tick from observed data:
 
 | Condition | Label |
 |---|---|
-| Price growth > 2% per half-year | Boom |
+| Price growth > 2% per quarter | Boom |
 | Price fall > 1.5%, rate > 3% | Correction |
 | Price fall > 1.5%, rate ≤ 3% | Crash |
 | Rate > 8% | High Rates |
@@ -86,26 +71,55 @@ A scenario label (Baseline / Boom / Recovery / Correction / Crash / High Rates) 
 
 ### 4.1 Market
 
-At game start the market contains 10 properties. 2 new listings are added each turn, priced relative to the current price index. Properties have:
-- `id` — unique identifier (P-xxx)
-- `region` — one of: North, South, East, West, Midlands, Scotland, Wales
-- `value` — current market value in £
-- `rent` — monthly rent in £
+At game start the market contains 19 named properties (p01–p15, m1–m4). Properties replenish dynamically from 8 regional profiles to maintain a minimum of 4 available listings.
 
-### 4.2 Valuation Update (per tick)
+| Field | Description |
+|---|---|
+| `id` | Unique identifier |
+| `region` | One of: London, South, East, West, Midlands, North, Scotland, Wales |
+| `archetype` | btl \| hmo \| short_let \| new_build \| value_add |
+| `current_value` | Current market value in £ |
+| `rent` | Monthly rent in £ |
+| `epc_band` | 1=A (best) … 7=G (worst) |
+| `age` | Property age in years |
+| `mortgage_balance` | Outstanding mortgage debt |
+| `renovated` | Whether property has been renovated (once per property) |
+| `is_auction` | Whether property is an auction listing |
 
-Property values and rents move in line with the historical price growth for that period:
+### 4.2 Regional Pricing
+
+Properties are priced relative to a national base of £165,000 multiplied by regional price level:
+
+| Region | Price level | Annual yield | HPI factor |
+|---|---|---|---|
+| London | 2.50× | 3.5% | 1.35 |
+| South | 1.50× | 4.0% | 1.15 |
+| East | 1.20× | 4.5% | 1.10 |
+| West | 1.00× | 4.8% | 0.95 |
+| Midlands | 0.85× | 5.5% | 0.90 |
+| North | 0.75× | 6.0% | 0.85 |
+| Scotland | 0.80× | 5.5% | 0.88 |
+| Wales | 0.70× | 6.5% | 0.80 |
+
+### 4.3 EPC Purchase Discounts
+
+Poor EPC properties are priced below their HPI-adjusted value to reflect compliance risk:
+
+| EPC Band | Purchase discount |
+|---|---|
+| D (band 4) | 5% |
+| E (band 5) | 8% |
+| F (band 6) | 12% |
+| G (band 7) | 15% |
+
+### 4.4 Valuation Update (per tick)
+
+Property values move with regional HPI:
 
 ```
-biannual_growth = (price_index_next - price_index_now) / price_index_now
-value *= (1 + biannual_growth)
-rent  *= (1 + biannual_growth * 0.5)   # rents lag prices
-```
-
-### 4.3 Gross Yield
-
-```
-gross_yield = (rent * 12) / value * 100   # annual %
+quarterly_growth = (price_index_next - price_index_now) / price_index_now * hpi_factor
+current_value   *= (1 + quarterly_growth)
+rent            *= (1 + quarterly_growth * 0.5)   # rents lag prices
 ```
 
 ---
@@ -114,29 +128,16 @@ gross_yield = (rent * 12) / value * 100   # annual %
 
 ### 5.1 Starting Positions
 
-All three actors start with equal total wealth (£1,200,000):
+All actors start with approximately equal total wealth (~£1,500,000). The player gets 3 randomly assigned properties from the starting market; two AI actors each get 2 properties from distinct strategy profiles.
 
-| Actor | Cash | Portfolio Value | Properties |
-|---|---|---|---|
-| You | £345,000 | £855,000 | 5 |
-| Conservative | £360,000 | £840,000 | 5 |
-| Aggressive | £190,000 | £1,010,000 | 5 |
+### 5.2 Income Per Tick (quarterly)
 
-### 5.2 Income Per Tick
+**Cash in:**
+- Rent income = `monthly_rent × 3 × (1 − 0.12)` (12% management fee deducted)
+- Savings interest on cash = `BoE_rate × 0.75 / 4` (competitive savings rate, quarterly)
 
-Each turn actors receive 6 months of rent income:
-
-```
-rent_income = sum(monthly_rent) * 6
-```
-
-AI actors also receive a flat 5% annualised yield on portfolio value (approximation):
-
-```
-ai_income = portfolio_value * 0.05 / 2
-```
-
-Mortgage interest is deducted (see §6.3).
+**Cash out:**
+- Mortgage interest = `mortgage_balance × mortgage_rate / 4`
 
 ---
 
@@ -147,151 +148,188 @@ No transaction. Rent income still collected.
 
 ### 6.2 Buy
 
-Player selects a property from the market and a financing option:
+Player selects a property from the market and an LTV:
 
-| Option | LTV | Deposit required | Monthly cost |
-|---|---|---|---|
-| Cash | 0% | Full value | £0 |
-| Mortgage | 50% | 50% of value | `loan × rate / 12` |
-| High leverage | 75% | 25% of value | `loan × rate / 12` |
+| Option | LTV | Deposit required |
+|---|---|---|
+| Cash | 0% | Full value |
+| Mortgage | 50% | 50% of value |
+| High leverage | 75% | 25% of value |
 
-Monthly mortgage payment is interest-only at the current BoE base rate.
+Mortgage rate = `BoE rate + 1.8%`, fixed for 8 ticks (2 years), then variable.
+
+**SDLT (additional-property surcharge):**
+
+| Price range | Rate |
+|---|---|
+| £0–£125,000 | 3% |
+| £125,001–£250,000 | 5% |
+| £250,001–£925,000 | 8% |
+| £925,001–£1,500,000 | 13% |
+| Over £1,500,000 | 15% |
 
 ### 6.3 Sell
 
-Player selects a property from their portfolio. Net proceeds:
+Net proceeds = `current_value − mortgage_balance − (current_value × 1.5%)` (agent fee)
 
-```
-net_proceeds = max(0, property_value - outstanding_loan)
-```
+### 6.4 Upgrade (EPC)
 
-The mortgage (if any) is repaid from proceeds. The property returns to the market.
+**Cost by band:**
 
-### 6.4 Forced Sale
+| EPC Band | Cost |
+|---|---|
+| D (band 4) | £5,000 |
+| E (band 5) | £8,000 |
+| F (band 6) | £10,000 |
+| G (band 7) | £10,000 |
 
-If player cash falls below −£50,000, the cheapest portfolio property is automatically sold to cover the shortfall.
+**Effect:** EPC band improves by 2 bands. Rent increases by **10%**. Property value increases by the EPC uplift factor:
 
----
+| Original EPC Band | Value uplift |
+|---|---|
+| D (band 4) | 6% |
+| E (band 5) | 10% |
+| F (band 6) | 15% |
+| G (band 7) | 18% |
 
-## 7. AI Actors
+`base_value` is rebased to post-upgrade value so future HPI appreciation compounds from the improved baseline.
 
-### 7.1 Conservative
+### 6.5 Refi (Remortgage)
 
-- **Buy trigger**: gross yield > 4%, can afford 50% deposit
-- **Buy preference**: cheapest qualifying property (lower risk)
-- **Sell trigger**: price index falling turn-on-turn (exits early)
-- **LTV**: 50%
+Available when the fixed-rate term has expired and there is headroom at the target LTV.
 
-### 7.2 Aggressive
+- Released equity = `(current_value × LTV) − existing_mortgage_balance`
+- Flat fee = **£1,500**
+- Resets to a new 8-tick fixed term at current `BoE + 1.8%`
 
-- **Buy trigger**: can afford 25% deposit on any market property
-- **Buy preference**: highest-value affordable property
-- **Sell trigger**: Correction or Crash scenario label (exits late)
-- **LTV**: 75%
+### 6.6 Renovate
 
-### 7.3 AI Sell Mechanics
+Pay 10% of current property value to improve an owned property. Can only be done once per property.
 
-When an AI sells, it liquidates one average-value position:
+- **Cost:** `current_value × 10%`
+- **Effect:** rent +15%, property value +8%
 
-```
-prop_value = portfolio_value / props
-net_proceeds = prop_value - (total_debt / props)
-```
+### 6.7 Buy (Auction)
 
-The sold property is added to the market. Debt is reduced proportionally.
+Auction properties appear every 8 ticks, priced 15% below market value, flagged with an AUCTION badge.
 
----
+- Player selects a bid premium: Asking / +5% / +10% / +15%
+- Aggressive AI always bids +5%; Conservative AI bids at asking
+- Player wins if their bid ≥ highest AI bid (ties go to player)
+- Player pays their bid price (not asking price)
 
-## 8. Scoring
+### 6.8 Forced Sale
 
-### 8.1 Score Formula
-
-```
-score = portfolio_value + cash - leverage_penalty
-```
-
-### 8.2 Leverage Penalty
-
-Debt exceeding 50% LTV incurs a 10% penalty on the excess:
-
-```
-safe_debt      = portfolio_value * 0.5
-excess_debt    = max(0, total_debt - safe_debt)
-leverage_penalty = excess_debt * 0.10
-```
-
-### 8.3 Leaderboard
-
-All three actors are ranked by score at the end of every turn. The player's rank and score are shown in the sidebar throughout.
+If player cash goes negative, the cheapest portfolio property is automatically sold to cover the shortfall.
 
 ---
 
-## 9. UI / Screens
+## 7. EPC Mandate
 
-The web UI runs as a Flask app (`ui_web/app.py`, port 5050).
+At tick 10 a government mandate fires requiring all properties to be EPC C (band 3) or better within 2 ticks. Non-compliant properties:
 
-| Route | Screen | Purpose |
+1. Enter an EPC void — no rent income until upgraded
+2. If still non-compliant after the grace window, force-sold at **85% of current value** minus 1.5% agent fee minus mortgage balance
+
+---
+
+## 8. Random Events (per tick, per property)
+
+### 8.1 Void Risk
+
+| Condition | Extra void chance |
+|---|---|
+| btl archetype | 8% base |
+| hmo archetype | 3% base |
+| new_build archetype | 4% base |
+| short_let archetype | 12% base |
+| value_add archetype | 10% base |
+| EPC D | +2% |
+| EPC E | +4% |
+| EPC F | +6% |
+| EPC G | +8% |
+| Falling rent market | +5% |
+
+### 8.2 Maintenance Risk
+
+| Property age | Maintenance chance/tick | Cost range |
 |---|---|---|
-| `/` | Opening | Starting positions, market preview, mode selection |
-| `/start` (POST) | — | Initialises game state, redirects to Turn |
-| `/turn` | Turn dashboard | Macro sidebar, portfolio, AI positions, news, actor chart |
-| `/decision` | Decision | Market table, portfolio, buy/sell/hold form with LTV selector |
-| `/decision/confirm` (POST) | — | Applies all actions, advances tick, redirects to Summary |
-| `/round-summary` | Round Summary | Player and AI decisions for the completed turn |
-| `/end` | End screen | Final scores, breakdown, era reveal |
-| `/play-again` (POST) | — | Resets state, redirects to Opening |
-
-### 9.1 Turn Dashboard Panels
-
-- **Sidebar**: tick progress bar, macro values with trend arrows and SVG sparklines, rank and score
-- **Actor Positions**: stacked proportional bar chart — all turns shown as fixed-width columns from the start
-- **Your Portfolio**: property table with values, rent, yield; mortgage table if leveraged
-- **AI Positions**: last action (BUY / SELL / HOLD badge) and rationale for each AI
-- **News**: last 2 events (scenario shifts, forced sales, market notes)
-
-### 9.2 End Screen
-
-- Leaderboard ranking
-- Player breakdown: portfolio value, cash, estimated rent
-- Final score
-- **Era Reveal**: the real UK period played through, named era label, and the random selection range
+| < 15 years | 3% | £300–£800 |
+| 15–50 years | 8% | £500–£5,000 |
+| 50–70 years | 13% | £1,000–£8,000 |
+| 70+ years | 20% | £1,500–£12,000 |
+| HMO (any age) | +5% | — |
 
 ---
 
-## 10. Architecture
+## 9. Scoring
+
+### 9.1 Score Formula
 
 ```
-RealEstGame/
-├── data/
-│   └── uk_macro_history.py     # semi-annual UK macro data 1983-2024
-├── ui_web/
-│   ├── app.py                  # Flask app — all game logic
-│   └── templates/
-│       ├── base.html
-│       ├── opening.html
-│       ├── turn.html
-│       ├── decision.html
-│       ├── round_summary.html
-│       └── end.html
-└── ui_kivy/
-    └── dummy_data.py           # starting positions (shared by both UIs)
+final_score = total_return − risk_cost
+
+total_return = (portfolio_equity + cash) − initial_wealth
+portfolio_equity = sum(current_value − mortgage_balance) for each owned property
+```
+
+### 9.2 Risk Costs (deducted from score)
+
+**ICR stress test:** If the portfolio fails ICR ≥ 1.25 at current rate + 2%, the shortfall is capitalised over 2 years:
+```
+icr_cost = (stressed_annual_interest × 1.25 − annual_rent) × 2
+```
+
+**LTV capital risk:** Potential loss in a 20% price correction scales with LTV above 60%:
+- LTV 60–75%: up to 5% of portfolio value
+- LTV > 75%: up to 20% of portfolio value (scales to max at LTV 100%)
+
+**Concentration risk:** If any single region exceeds 60% of portfolio value, penalty scales to 10% of portfolio value.
+
+**EPC regulatory risk:** Non-compliant properties (EPC D–G) are haircut by 15% of their value.
+
+---
+
+## 10. AI Strategies
+
+Six AI strategies are available. Two are randomly selected each game.
+
+| Actor Name | Strategy | Summary |
+|---|---|---|
+| Ms Di Vidend | yield | Buys for income at low LTV; yield-first filter |
+| Mr Hugh Price | capital | Buys high-value properties for appreciation |
+| Mr Ray Novate | value_add | Targets distressed EPC stock; upgrades then refis |
+| Mr Reid Furbish | brrr | Buy, Refurbish, Refinance, Repeat cycle |
+| Mr Max Lever | leverage | High LTV, rate-sensitive; sells on rate spikes |
+| Ms Demi Graphic | demographic | Diversifies regions; exits on sustained rent decline |
+
+See `strat.md` for full strategy parameters.
+
+---
+
+## 11. Architecture
+
+```
+realestgame-v2/
+├── kernel.py                   # SimulationKernel — main game loop
+├── state.py                    # SimulationState, Property, ActorState, MacroState
+├── actors.py                   # ActorManager — rent, mortgage, savings per tick
+├── ai.py                       # AIController — all 6 AI strategy implementations
+├── scoring.py                  # ScoringEngine — risk-adjusted score
+├── property_model.py           # HPI-based valuation updates
+├── void_maintenance.py         # VoidMaintenanceEngine — random void/maintenance events
+├── player/choices.py           # PlayerChoiceEngine — reads actions from GameBus or stdin
+├── game_bus.py                 # GameBus — IPC between kernel thread and Flask server
+├── visualisation/
+│   ├── dashboard_server.py     # Flask server serving turn_state.json
+│   └── turn_state.json         # Written each tick; read by dashboard.html
+├── static/dashboard.html       # Single-file web dashboard (player UI)
+├── data/uk_macro_history.py    # Quarterly UK macro data 1983–2024
+└── game_on.py                  # 99-game benchmark runner
 ```
 
 To run:
 ```bash
-cd ui_web
-python app.py
+python main.py
 # Open http://localhost:5050
 ```
-
----
-
-## 11. Known Limitations / Future Work
-
-- Single-player only (module-level `GAME_STATE` — one session at a time)
-- AI portfolio is an aggregate value, not individual named properties
-- Rental growth in `uk_macro_history.py` is estimated pre-2011; ONS IPHRP data only available from 2011
-- Mortgage rate is fixed at the BoE base rate at time of purchase (no refinancing)
-- No vacancy modelling, maintenance costs, or tenant events
-- No regional price variation (all properties move with the national index)
-- Scenario labels are derived heuristically; they do not map to exact historical events

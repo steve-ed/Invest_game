@@ -259,7 +259,7 @@ def _epc_upgrade_cost(epc_band: int) -> float:
 # Purchase discount and matching value uplift on upgrade for poor-EPC properties.
 # Poor EPC deters buyers, so market prices reflect the cost/risk of non-compliance.
 _EPC_PRICE_DISCOUNT = {4: 0.05, 5: 0.08, 6: 0.12, 7: 0.15}
-_EPC_VALUE_UPLIFT   = {4: 0.05, 5: 0.09, 6: 0.14, 7: 0.18}
+_EPC_VALUE_UPLIFT   = {4: 0.06, 5: 0.10, 6: 0.15, 7: 0.18}
 
 
 def _select_era(turns):
