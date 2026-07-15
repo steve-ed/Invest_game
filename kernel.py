@@ -410,6 +410,7 @@ class SimulationKernel:
                         "void_ticks_remaining": p.void_ticks_remaining,
                         "age": p.age,
                         "maintenance_risk": maintenance_risk_label(p),
+                        "renovated": p.renovated,
                     })
 
         # Per-actor state for dashboard turn sequence panels
@@ -546,6 +547,7 @@ class SimulationKernel:
                     "void_risk_pct": void_risk_pct(p, self.state.macro_history),
                     "maintenance_risk": maintenance_risk_label(p),
                     "maintenance_reserve": expected_maintenance_reserve(p),
+                    "is_auction": p.is_auction,
                 })
 
         # Net worth delta vs previous tick
