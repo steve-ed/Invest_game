@@ -944,11 +944,18 @@ class SimulationKernel:
                 wealth_snap[f"{actor_id}_cash"] = round(actor.cash, 2)
             self._wealth_history.append(wealth_snap)
 
+            # Remove stale auction properties before replenishing
+            self._remove_stale_auction_properties()
+
             # Keep a minimum number of properties available on the market
             owned_ids = {pid for a in self.state.actors.values() for pid in a.portfolio}
             available_count = sum(1 for p in self.state.properties if p.id not in owned_ids)
             if available_count < _MARKET_MIN_AVAILABLE:
                 self._replenish_market(_MARKET_TARGET - available_count)
+
+            # Schedule one auction property every 8 ticks
+            if tick % 8 == 0:
+                self._add_auction_property()
 
             is_final = (i == self.turns - 1)
             self._write_turn_state(tick_events, is_final=is_final)
@@ -1110,3 +1117,40 @@ class SimulationKernel:
             )
             self.state.properties.append(prop)
             self._next_market_id += 1
+
+    def _add_auction_property(self) -> None:
+        """Add one auction property at 15% below market value."""
+        region = _MARKET_REGIONS[self._next_market_id % len(_MARKET_REGIONS)]
+        profile = _MARKET_REGION_PROFILES[region]
+        price_factor = self.state.macro.price_index / 100.0
+        archetype = random.choice(["btl", "value_add", "hmo"])
+        _PRICE_MULT = {"btl": 1.0, "value_add": 0.80, "hmo": 1.30}
+        _YIELD_MULT = {"btl": 1.0, "value_add": 1.05, "hmo": 2.20}
+        market_value = _MARKET_NATIONAL_BASE * profile["price_level"] * price_factor * _PRICE_MULT[archetype]
+        auction_value = round(market_value * 0.85 / 1000) * 1000
+        rent = round(auction_value * profile["annual_yield"] * _YIELD_MULT[archetype] / 12)
+        epc_band = random.choice(profile["epc_bands"])
+        bedrooms = {"btl": 3, "value_add": 3, "hmo": 5}.get(archetype, 3)
+        prop = Property(
+            id=f"auc{self._next_market_id:03d}",
+            region=region,
+            base_value=float(auction_value),
+            current_value=float(auction_value),
+            rent=float(rent),
+            archetype=archetype,
+            epc_band=epc_band,
+            age=random.randint(20, 80),
+            bedrooms=bedrooms,
+            hpi_factor=profile["hpi_factor"],
+            is_auction=True,
+        )
+        self.state.properties.append(prop)
+        self._next_market_id += 1
+
+    def _remove_stale_auction_properties(self) -> None:
+        """Remove unsold auction properties from the market."""
+        owned = {pid for a in self.state.actors.values() for pid in a.portfolio}
+        self.state.properties = [
+            p for p in self.state.properties
+            if not p.is_auction or p.id in owned
+        ]
