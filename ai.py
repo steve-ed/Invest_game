@@ -1,7 +1,7 @@
 from void_maintenance import expected_maintenance_reserve
 from actors import MGMT_FEE_RATE
 
-YIELD_TARGET          = 0.06    # minimum net annual yield to buy (yield strategy)
+YIELD_TARGET          = 0.05    # minimum net annual yield to buy (yield strategy)
 YIELD_MAX_RATE        = 0.07    # yield AI holds when BoE rate exceeds this
 LEVERAGE_MAX_RATE_BUY = 0.065   # leverage AI only buys when rate <= this
 LEVERAGE_SELL_RATE    = 0.085   # leverage AI sells when rate exceeds this
@@ -291,7 +291,7 @@ class AIController:
             return "hold", None, 0.0
         for prop in available:
             net_yield = (prop.rent * 12) / prop.current_value * (1 - MGMT_FEE_RATE)
-            if net_yield >= 0.04:
+            if net_yield >= 0.035:
                 deposit = prop.current_value * (1 - LTV_MODERATE)
                 if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop):
                     return "buy", prop.id, LTV_MODERATE
