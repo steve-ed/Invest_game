@@ -177,11 +177,11 @@ class AIController:
         # Sell only when rate is high AND portfolio is cash-flow negative under stress
         if rate > BRRR_SELL_RATE and actor.portfolio:
             held = [prop_map[pid] for pid in actor.portfolio if pid in prop_map]
-            annual_rent = sum(p.rent * 12 for p in held)
+            annual_net_rent = sum(p.rent * 12 * (1 - MGMT_FEE_RATE) for p in held)
             stressed_interest = sum(
                 p.mortgage_balance * (p.mortgage_rate + 0.02) for p in held if p.mortgage_balance > 0
             )
-            if stressed_interest > 0 and annual_rent < stressed_interest:
+            if stressed_interest > 0 and annual_net_rent < stressed_interest:
                 return "sell", self._brrr_worst_hold(actor, prop_map), 0.0
 
         # Refurbish owned distressed properties before acquiring new ones
@@ -224,7 +224,7 @@ class AIController:
         # ranked by projected post-upgrade yield so best cash-flow comes first
         def _post_upgrade_yield(p):
             upgrade_cost = _BRRR_UPGRADE_COST.get(p.epc_band, 0) if p.epc_band >= 4 else 0
-            projected_rent = p.rent * (1.10 if upgrade_cost > 0 else 1.0)
+            projected_rent = p.rent * (1.10 if upgrade_cost > 0 else 1.0) * (1 - MGMT_FEE_RATE)
             return (projected_rent * 12) / (p.current_value + upgrade_cost) if p.current_value > 0 else 0
 
         candidates = sorted(
@@ -235,7 +235,11 @@ class AIController:
         )
         if not candidates:
             candidates = sorted(available, key=_post_upgrade_yield, reverse=True)
+        mortgage_rate = rate + 0.018
         for prop in candidates:
+            net_yield = prop.rent * 12 * (1 - MGMT_FEE_RATE) / prop.current_value
+            if net_yield < LTV_LEVERAGE * mortgage_rate:
+                continue  # would be cash-flow negative from day one
             deposit = prop.current_value * (1 - LTV_LEVERAGE)
             upgrade_reserve = _BRRR_UPGRADE_COST.get(prop.epc_band, 0) if prop.epc_band >= 4 else 0
             if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop) + upgrade_reserve:
