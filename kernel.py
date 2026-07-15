@@ -835,10 +835,11 @@ class SimulationKernel:
                 pid      = event.get("property_id")
                 if actor_id:
                     self.state.last_ai_actions[actor_id] = (
-                        f"bought {pid}"   if action == "buy"     else
-                        f"sold {pid}"     if action == "sell"    else
-                        f"upgraded {pid}" if action == "upgrade" else
-                        f"refi {pid}"     if action == "refi"    else "hold"
+                        f"bought {pid}"    if action == "buy"      else
+                        f"sold {pid}"      if action == "sell"     else
+                        f"upgraded {pid}"  if action == "upgrade"  else
+                        f"refi {pid}"      if action == "refi"     else
+                        f"renovated {pid}" if action == "renovate" else "hold"
                     )
             tick_events += player_events
 
