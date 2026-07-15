@@ -1037,18 +1037,38 @@ class SimulationKernel:
             actor.portfolio.remove(property_id)
 
         elif action == "buy" and property_id not in owned_all:
-            deposit      = prop.current_value * (1 - ltv)
-            sdlt         = _calculate_sdlt(prop.current_value)
-            total_outlay = deposit + sdlt
-            if actor.cash >= total_outlay:
-                actor.cash -= total_outlay
-                actor.total_transaction_costs += sdlt
-                prop.mortgage_balance = prop.current_value * ltv
-                prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
-                prop.is_fixed_rate = True
-                prop.fixed_ticks_remaining = 8
-                prop.void_ticks_remaining = _VOID_BY_ARCHETYPE.get(prop.archetype, 0)
-                actor.portfolio.append(property_id)
+            if prop.is_auction:
+                bid_premium = event.get("bid_premium", 0.0)
+                player_bid  = prop.current_value * (1 + bid_premium)
+                ai_bids = {
+                    aid: prop.current_value * (1 + self.ai.ai_bid_premium(aid))
+                    for aid in self.state.actors
+                    if aid != "player"
+                }
+                best_ai_bid = max(ai_bids.values()) if ai_bids else 0.0
+                player_wins = player_bid >= best_ai_bid  # ties go to player
+                if player_wins and actor.cash >= round(player_bid):
+                    actor.cash -= round(player_bid)
+                    actor.total_transaction_costs += round(player_bid * 0.01)
+                    prop.mortgage_balance = round(player_bid * event.get("ltv", 0.0))
+                    prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
+                    prop.is_fixed_rate = True
+                    prop.fixed_ticks_remaining = 8
+                    prop.void_ticks_remaining = _VOID_BY_ARCHETYPE.get(prop.archetype, 0)
+                    actor.portfolio.append(property_id)
+            else:
+                deposit      = prop.current_value * (1 - ltv)
+                sdlt         = _calculate_sdlt(prop.current_value)
+                total_outlay = deposit + sdlt
+                if actor.cash >= total_outlay:
+                    actor.cash -= total_outlay
+                    actor.total_transaction_costs += sdlt
+                    prop.mortgage_balance = prop.current_value * ltv
+                    prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
+                    prop.is_fixed_rate = True
+                    prop.fixed_ticks_remaining = 8
+                    prop.void_ticks_remaining = _VOID_BY_ARCHETYPE.get(prop.archetype, 0)
+                    actor.portfolio.append(property_id)
 
         elif action == "upgrade" and property_id in actor.portfolio:
             cost = _epc_upgrade_cost(prop.epc_band)
