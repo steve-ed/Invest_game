@@ -452,6 +452,7 @@
             <button onclick="playerSelectAction('sell')"    class="mob-act-btn" style="background:#3a1a1a;color:#ef5350;border:1px solid #ef5350;">Sell</button>
             <button onclick="playerSelectAction('upgrade')" class="mob-act-btn" style="background:#3a2a1a;color:#ffa726;border:1px solid #ffa726;">Upg</button>
             <button onclick="playerSelectAction('refi')"    class="mob-act-btn" style="background:#1a1a3a;color:#9c27b0;border:1px solid #9c27b0;">Refi</button>
+            <button onclick="playerSelectAction('renovate')" class="mob-act-btn" style="background:#0a2a2a;color:#00bcd4;border:1px solid #00bcd4;">Reno</button>
           </div>
           <div id="prop-picker" style="display:none;max-height:160px;overflow-y:auto;border:1px solid #2a3f50;border-radius:4px;margin-bottom:6px;"></div>
           <button id="btn-confirm" onclick="playerConfirm()" style="display:none;width:100%;padding:4px;font-size:10px;background:#032147;color:#209dd7;border:1px solid #209dd7;border-radius:3px;cursor:pointer;font-weight:600;margin-bottom:4px;">Confirm</button>
@@ -717,7 +718,7 @@ function updateEventFeed(currentEvents) {
   el.innerHTML = (ordered.length ? ordered : currentEvents).slice(0, 8).map(e => {
     const cls = EVENT_TAG_CLASS[e.type] || "tag-info";
     const LABELS = { void_period: "void", maintenance: "maintenance",
-                     epc_force_sell: "EPC force-sell", epc_warning: "EPC warning", epc_mandate: "EPC mandate" };
+                     epc_force_sell: "EPC void", epc_warning: "EPC warning", epc_mandate: "EPC mandate" };
     const label = LABELS[e.type] || e.type.replace(/_/g, " ");
     const isPlayer = e.actor_id === "player";
     const impact = EVENT_STRATEGY_IMPACT[e.type];
@@ -1088,7 +1089,7 @@ function buildPortfolioTable(rows) {
     <tbody>${rows.map(p => `
       <tr>
         <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
-          ${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span>${p.fixed_ticks_remaining > 0 ? `<span style="font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;background:#3a2e00;color:#ecad0a;margin-left:3px;">Fixed ${p.fixed_ticks_remaining}mo</span>` : ''}${p.void_ticks_remaining > 0 ? `<span style="font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;background:#2a1a3a;color:#b07dd7;margin-left:3px;">VOID</span>` : ''}
+          ${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span>${p.fixed_ticks_remaining > 0 ? `<span style="font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;background:#3a2e00;color:#ecad0a;margin-left:3px;">Fixed ${p.fixed_ticks_remaining}mo</span>` : ''}${p.void_ticks_remaining > 0 ? `<span style="font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;background:#2a1a3a;color:#b07dd7;margin-left:3px;">VOID</span>` : ''}${p.renovated ? '<span style="font-size:9px;padding:1px 4px;border-radius:3px;background:#0a2a2a;color:#00bcd4;font-weight:700;margin-left:3px;">RENO</span>' : ''}
         </td>
         <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;">
           <span style="color:#4caf50;font-weight:600;">£${(p.rent_monthly/1000).toFixed(1)}k</span><br>
@@ -1135,31 +1136,9 @@ function analyticsHTML(analytics) {
       ${tile('Unrealised', `<span style="color:${analytics.unrealised_gain >= 0 ? '#ecad0a' : '#f44336'};">${analytics.unrealised_gain >= 0 ? '+' : ''}£${(Math.abs(analytics.unrealised_gain)/1000).toFixed(0)}k</span>`)}
       ${tile('ROE', `<span style="color:${roeColor};">${roeVal !== null ? roeVal + '%' : '—'}</span>`)}
       ${tile('CoC Return', `<span style="color:${cocColor};">${cocVal !== null ? cocVal + '%' : '—'}</span>`)}
-      ${tile('Avg Cap Gr', `<span style="color:${capGrowth >= 0 ? '#ecad0a' : '#f44336'};">${capGrowth >= 0 ? '+' : ''}${capGrowth}%</span>`)}
       ${tile('Refi Headrm', `<span style="color:#4a7a9b;">£${(refiTotal/1000).toFixed(0)}k</span>`)}
       ${tile('EPC Risk', `<span style="color:${epc.count > 0 ? '#f44336' : '#4caf50'};">${epc.count > 0 ? epc.count + ' · £' + (epc.value/1000).toFixed(0) + 'k' : 'None'}</span>`, epc.count > 2)}
-      ${tile('Region Conc', `<span style="color:${regionConc >= 80 ? '#f44336' : regionConc >= 60 ? '#ecad0a' : '#4caf50'};">${regionConc}%</span>`, regionConc >= 80)}
-    </div>
-    ${arch.length ? `
-    <div style="font-size:8px;color:#777;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;">Archetype Mix</div>
-    ${arch.map(a => `
-      <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">
-        <span style="font-size:8px;color:${ARCHETYPE_COLORS[a.archetype]||'#888'};width:44px;flex-shrink:0;">${a.archetype}</span>
-        <div style="flex:1;height:3px;background:#0f1923;border-radius:2px;overflow:hidden;">
-          <div style="height:100%;width:${a.pct}%;background:${ARCHETYPE_COLORS[a.archetype]||'#888'};border-radius:2px;"></div>
-        </div>
-        <span style="font-size:8px;color:#999;width:24px;text-align:right;">${a.pct}%</span>
-      </div>`).join('')}` : ''}
-    ${beds.length ? `
-    <div style="font-size:8px;color:#777;text-transform:uppercase;letter-spacing:0.3px;margin-top:4px;margin-bottom:2px;">Bedroom Mix</div>
-    ${beds.map(b => `
-      <div style="margin-bottom:2px;display:flex;align-items:center;gap:4px;">
-        <span style="font-size:8px;color:#aaa;width:28px;flex-shrink:0;">${b.label}</span>
-        <div style="flex:1;height:3px;background:#0f1923;border-radius:2px;overflow:hidden;">
-          <div style="height:100%;width:${b.pct}%;background:#4a7a9b;border-radius:2px;"></div>
-        </div>
-        <span style="font-size:8px;color:#999;width:24px;text-align:right;">${b.count}</span>
-      </div>`).join('')}` : ''}`;
+    </div>`;
 }
 
 function renderAnalyticsPanel(actorsState) {
@@ -1229,10 +1208,8 @@ function renderAnalyticsPanel(actorsState) {
         ${row('Unrealised',   order.map(id => money(a(id).unrealised_gain)))}
         ${row('ROE',          order.map(id => pct(a(id).return_on_equity, 8, 4)))}
         ${row('CoC Return',   order.map(id => pct(a(id).cash_on_cash, 8, 4)))}
-        ${row('Avg Cap Gr',   order.map(id => capCell(id)))}
         ${row('Refi Headrm',  order.map(id => refiCell(id)))}
         ${row('EPC Risk',     order.map(id => epcCell(id)))}
-        ${row('Region Conc',  order.map(id => concCell(id)))}
         ` : ''}
         ${row('Cash',         order.map(id => cashCell(id)))}
       </tbody>
@@ -1349,6 +1326,7 @@ function renderTurnSequence(actions, actors, activeId) {
           { type:'sell',    label:'Sell', color:'#ef5350', bg:'#3a1a1a', border:'#ef5350' },
           { type:'upgrade', label:'Upg',  color:'#ffa726', bg:'#3a2a1a', border:'#ffa726' },
           { type:'refi',    label:'Refi', color:'#9c27b0', bg:'#1a1a3a', border:'#9c27b0' },
+          { type:'renovate', label:'Reno', color:'#00bcd4', bg:'#0a2a2a', border:'#00bcd4' },
         ];
 
         const clickable = isPlayer && active;
@@ -1612,6 +1590,18 @@ function playerSelectAction(type) {
         <span style="color:#9c27b0;font-size:10px;">+£${(p.refi_headroom/1000).toFixed(0)}k release</span>
       </div>`).join('')
       : '<div style="font-size:10px;color:#888;padding:8px;">No properties eligible for refi (fixed rate or no equity to release)</div>';
+  } else if (type === 'renovate') {
+    const rows = (_lastPs?.portfolio || []).filter(p => !p.renovated);
+    picker.innerHTML = rows.length ? rows.map(p => `
+      <div id="pick-${p.id}" onclick="playerSelectProp('${p.id}')" style="cursor:pointer;padding:4px 8px;border-bottom:1px solid #0f1923;font-size:10px;display:flex;justify-content:space-between;align-items:center;">
+        <span>
+          <span style="font-family:monospace;font-size:9px;color:#4a7a9b;">${p.id}</span>
+          <span style="color:#e0e0e0;margin-left:4px;">${p.region}</span>
+          <span class="arch-badge">${p.archetype}</span>
+        </span>
+        <span style="color:#00bcd4;font-size:10px;">£${(p.value*0.10/1000).toFixed(0)}k cost · +15% rent</span>
+      </div>`).join('')
+      : '<div style="font-size:10px;color:#888;padding:8px;">No properties available to renovate</div>';
   } else {
     const rows = _lastPs?.portfolio || [];
     picker.innerHTML = rows.length ? rows.map(p => `
@@ -1632,6 +1622,7 @@ function renderMobilePortfolioPicker(type) {
   if (heading) heading.textContent =
     type === 'sell' ? 'Select Property to Sell'
     : type === 'refi' ? 'Select Property to Refi'
+    : type === 'renovate' ? 'Select Property to Renovate'
     : 'Select Property to Upgrade';
 
   const avail = document.getElementById('available-props');
@@ -1639,15 +1630,19 @@ function renderMobilePortfolioPicker(type) {
 
   const isSell = type === 'sell';
   const isRefi = type === 'refi';
+  const isRenovate = type === 'renovate';
   const rows = isSell
     ? (_lastPs?.portfolio || [])
     : isRefi
       ? (_lastPs?.portfolio || []).filter(p => (p.refi_headroom || 0) > 0)
-      : (_lastPs?.portfolio || []).filter(p => p.epc_band >= 4);
+      : isRenovate
+        ? (_lastPs?.portfolio || []).filter(p => !p.renovated)
+        : (_lastPs?.portfolio || []).filter(p => p.epc_band >= 4);
 
   const headerRight = isSell ? 'P&L' : isRefi ? 'Release' : 'Cost';
   const emptyMsg = isSell ? 'No properties to sell'
     : isRefi ? 'No properties eligible for refi (fixed rate or no equity to release)'
+    : isRenovate ? 'No properties available to renovate'
     : 'No properties need upgrading';
 
   avail.innerHTML = rows.length
@@ -1661,7 +1656,9 @@ function renderMobilePortfolioPicker(type) {
             ? `<span style="color:${p.pnl_abs >= 0 ? '#ecad0a' : '#f44336'};font-weight:600;">${p.pnl_abs >= 0 ? '+' : ''}£${(p.pnl_abs/1000).toFixed(0)}k</span>`
             : isRefi
               ? `<span style="color:#9c27b0;font-weight:600;">+£${(p.refi_headroom/1000).toFixed(0)}k</span>`
-              : `<span style="color:#ffa726;font-weight:600;">£${(p.epc_upgrade_cost/1000).toFixed(0)}k</span>`;
+              : isRenovate
+                ? `<span style="color:#00bcd4;font-weight:600;">£${(p.value*0.10/1000).toFixed(0)}k · +15%</span>`
+                : `<span style="color:#ffa726;font-weight:600;">£${(p.epc_upgrade_cost/1000).toFixed(0)}k</span>`;
           return `
           <tr id="avail-${p.id}" onclick="playerSelectProp('${p.id}')" style="cursor:pointer;">
             <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
@@ -1820,8 +1817,8 @@ function renderAvailableProps(rows) {
   }
   _prevAvailProps = [...rows];
 
-  // On mobile don't overwrite while player is picking a sell/upgrade/refi property
-  if (window.innerWidth <= 768 && (_pendingAction === 'sell' || _pendingAction === 'upgrade' || _pendingAction === 'refi')) return;
+  // On mobile don't overwrite while player is picking a sell/upgrade/refi/renovate property
+  if (window.innerWidth <= 768 && (_pendingAction === 'sell' || _pendingAction === 'upgrade' || _pendingAction === 'refi' || _pendingAction === 'renovate')) return;
 
   const heading = document.querySelector('.market-col .panel h3');
   if (heading) heading.textContent = 'Available to Buy';
@@ -1966,11 +1963,10 @@ function mobileTab(name) {
 
 if (window.innerWidth <= 768) {
   // Move player-action-bar to body so position:fixed works independent of sidebar visibility
-  document.addEventListener('DOMContentLoaded', () => {
-    const pab = document.getElementById('player-action-bar');
-    if (pab) document.body.appendChild(pab);
-    mobileTab('charts');
-  });
+  // Script is at bottom of body so DOM is already ready — no need for DOMContentLoaded
+  const pab = document.getElementById('player-action-bar');
+  if (pab) document.body.appendChild(pab);
+  mobileTab('charts');
 }
 </script>
 
