@@ -651,6 +651,7 @@ function makeAnnotations(macroHistory, offset = 0) {
 let macroChart  = null;
 let wealthChart      = null;
 let _preambleMacro  = null;
+let _introXLabels   = null;
 // Extract game_id from /game/{game_id} URL; fall back to legacy routes if not present
 const _gameId = (window.location.pathname.match(/^\/game\/([^/]+)/) || [])[1] || null;
 const _api = _gameId ? `/game/${_gameId}` : '';
@@ -673,9 +674,11 @@ let _marketNews      = [];
 
 function _macroChartData(macro) {
   const pre  = _preambleMacro || [];
+  const totalSlots = (_introXLabels || []).length;
+  const futurePad  = totalSlots > macro.length ? new Array(totalSlots - macro.length).fill(null) : [];
   const mkDataset = (gameKey, color, axisID) => ({
     label: axisID === "yHPI" ? "Price Index" : axisID === "yRate" ? "Interest Rate %" : "Rent Growth %",
-    data: [...pre.map(m => m[gameKey]), ...macro.map(m => m[gameKey])],
+    data: [...pre.map(m => m[gameKey]), ...macro.map(m => m[gameKey]), ...futurePad],
     borderColor: color,
     borderWidth: 2.5,
     pointRadius: 2,
@@ -702,7 +705,8 @@ function initMacroChart(labels, macro) {
   const r = axisRanges || {};
   const pre  = _preambleMacro || [];
   const pLen = pre.length;
-  const allLabels = [...pre.map(m => m.label), ...labels];
+  const gameLabels = (_introXLabels && _introXLabels.length) ? _introXLabels : labels;
+  const allLabels = [...pre.map(m => m.label), ...gameLabels];
   const { datasets } = _macroChartData(macro);
   macroChart = new Chart(ctx, {
     type: "line",
@@ -1126,9 +1130,7 @@ async function poll() {
     }
 
     const labels = d.x_labels || d.macro_history.map((_, i) => `T${i+1}`);
-    const _introEl = document.getElementById("intro-overlay");
-    const _introGone = !_introEl || _introEl.style.display === "none";
-    if (_introGone && d.macro_history.length && d.wealth_history.length)
+    if (d.macro_history.length && d.wealth_history.length)
       updateCharts(labels, d.macro_history, d.wealth_history);
     if (d.actors && Object.keys(d.actors).length) updateWealthBars(d.actors);
 
@@ -2083,6 +2085,8 @@ async function loadIntroOpponents() {
             const pl = document.getElementById("preamble-label");
             if (pl && _preambleMacro.length) pl.style.display = "inline";
           }
+          if (d.x_labels && !_introXLabels) _introXLabels = d.x_labels;
+          if (d.axis_ranges && !axisRanges) axisRanges = d.axis_ranges;
           if (d.player_cash) {
             const cashEl = document.getElementById("intro-cash");
             if (cashEl) cashEl.textContent = "£" + Math.round(d.player_cash).toLocaleString("en-GB");
@@ -2145,7 +2149,7 @@ async function startGame() {
   setTimeout(() => {
     document.getElementById("intro-overlay").style.display = "none";
     if (_preambleMacro && !macroChart) {
-      initMacroChart([], []);   // preamble labels/data prepended inside initMacroChart
+      initMacroChart(_introXLabels || [], []);  // full x-axis with null-padded future ticks
       setTimeout(() => { if (macroChart) macroChart.resize(); }, 100);
     }
   }, 600);

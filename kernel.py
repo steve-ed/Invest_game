@@ -729,6 +729,8 @@ class SimulationKernel:
             "total_ticks": self.turns,
             "player_cash": round(player_actor.cash, 0) if player_actor else 0,
             "preamble_macro": self.preamble_macro,
+            "x_labels": ["Start"] + [f"{year} H{half}" for year, half, *_ in self.historical_slice],
+            "axis_ranges": self._axis_ranges,
         }
 
         if self._bus is not None:
