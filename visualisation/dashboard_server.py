@@ -72,6 +72,7 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
             b.set_player_name(name)
         b.set_game_active(True)
         b.reset_poll()
+        b.reset_for_new_game()
         b.signal_ready()
         return Response('{"ok":true}', mimetype="application/json",
                         headers={"Access-Control-Allow-Origin": "*"})
@@ -114,6 +115,8 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
             if name:
                 bus.set_player_name(name)
             bus.set_game_active(True)
+            bus.reset_poll()
+            bus.reset_for_new_game()
             bus.signal_ready()
         return Response('{"ok":true}', mimetype="application/json",
                         headers={"Access-Control-Allow-Origin": "*"})

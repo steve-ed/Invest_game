@@ -280,7 +280,7 @@ class SimulationKernel:
     def __init__(self, turns=20, mode="student", turn_delay=3, bus=None):
         self.turns = turns
         self.mode = mode
-        self.turn_delay = turn_delay
+        self.turn_delay = 0  # state is written immediately; TURN_SECONDS timer handles pacing
         self._bus = bus
 
         start_year, start_half = _select_era(turns)
