@@ -182,7 +182,7 @@ def get_era_label(start_year):
     return best
 
 
-PREAMBLE_TICKS = 4  # 2 years of pre-game history shown on chart
+PREAMBLE_TICKS = 2  # 1 year of pre-game history shown on chart
 
 
 def get_start_limits(total_ticks):
