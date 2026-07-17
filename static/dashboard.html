@@ -2078,17 +2078,25 @@ async function startGame() {
       body: JSON.stringify({ name }),
     });
     const data = await resp.json();
-    if (data.waiting) {
+    if (!data.ok) {
       btn.disabled = false;
       btn.textContent = "Start Challenge →";
       const msg = document.getElementById("waiting-msg");
       if (msg) {
         msg.style.display = "block";
-        msg.textContent = `A game is in progress (turn ${data.tick} of ${data.total}). Please wait for it to finish, then start.`;
+        msg.textContent = data.waiting
+          ? `A game is in progress (turn ${data.tick} of ${data.total}). Please wait.`
+          : `Could not start game (game_id: ${_gameId || 'none'}). Try refreshing.`;
       }
       return;
     }
-  } catch (e) {}
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "Start Challenge →";
+    const msg = document.getElementById("waiting-msg");
+    if (msg) { msg.style.display = "block"; msg.textContent = `Network error: ${e.message}. Try refreshing.`; }
+    return;
+  }
   _gameStarted = true;
   ACTOR_NAMES.player = name;
   document.getElementById("intro-overlay").style.transition = "opacity 0.6s";
