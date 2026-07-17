@@ -82,7 +82,7 @@ def expected_maintenance_reserve(prop):
     return 15_000
 
 
-def void_risk_pct(prop, macro_history):
+def void_risk_pct(prop, macro_history, epc_mandate_announced=False):
     """Expected void probability for display on market property cards."""
     p = _VOID_BASE.get(prop.archetype, 0.08)
     p += _VOID_EPC_EXTRA.get(prop.epc_band, 0)
