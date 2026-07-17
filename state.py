@@ -69,6 +69,7 @@ class SimulationState:
     start_year: int = 0
     start_half: int = 1
     era_label: str = ""
+    epc_mandate_announced: bool = False
 
     def advance_tick(self):
         self.tick += 1
