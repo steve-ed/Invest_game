@@ -728,6 +728,7 @@ class SimulationKernel:
             "actors": intro_actors,
             "total_ticks": self.turns,
             "player_cash": round(player_actor.cash, 0) if player_actor else 0,
+            "preamble_macro": self.preamble_macro,
         }
 
         if self._bus is not None:

@@ -174,7 +174,7 @@
       flex: 1; min-height: 48px;
       font-size: 15px; font-weight: 700; letter-spacing: 0.3px;
       border-radius: 4px; cursor: pointer;
-      opacity: 0.25; pointer-events: none;
+      opacity: 0.45; pointer-events: none;
       transition: opacity 0.2s;
     }
     #player-action-bar.player-turn .mob-act-btn {
@@ -452,9 +452,9 @@
 <!-- ── END INTRO OVERLAY ── -->
 
 <!-- Loading banner: shown between intro fade-out and first tick arriving -->
-<div id="loading-banner" style="display:none;position:fixed;inset:0;z-index:1500;background:rgba(10,16,24,0.92);align-items:center;justify-content:center;flex-direction:column;gap:16px;">
-  <div style="width:40px;height:40px;border:4px solid #2a3f50;border-top-color:#ecad0a;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-  <div style="color:#ecad0a;font-size:14px;font-weight:700;letter-spacing:1px;">Setting up your game…</div>
+<div id="loading-banner" style="display:none;position:fixed;top:49px;left:0;right:0;z-index:1500;background:rgba(10,16,24,0.88);align-items:center;justify-content:center;gap:12px;padding:10px 16px;border-bottom:1px solid #2a3f50;">
+  <div style="width:18px;height:18px;border:3px solid #2a3f50;border-top-color:#ecad0a;border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+  <div style="color:#ecad0a;font-size:13px;font-weight:700;letter-spacing:0.5px;">Economic indicators running up to investment period — game starting…</div>
 </div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 
@@ -647,14 +647,8 @@ function makeAnnotations(macroHistory, offset = 0) {
   });
   if (offset > 0) {
     anns.startLine = {
-      type: "line", scaleID: "x", value: offset,
-      borderColor: "rgba(255,255,255,0.45)", borderWidth: 1.5,
-      label: {
-        display: true, content: "Investment Period →",
-        position: "start", color: "#aaa",
-        font: { size: 9 }, padding: 3,
-        backgroundColor: "rgba(10,16,24,0.75)",
-      },
+      type: "line", scaleID: "x", value: offset - 0.5,
+      borderColor: "rgba(255,255,255,0.35)", borderWidth: 1,
     };
   }
   return anns;
@@ -685,23 +679,17 @@ let _marketNews      = [];
 
 function _macroChartData(macro) {
   const pre  = _preambleMacro || [];
-  const pLen = pre.length;
-  const MUTED = { "#ecad0a": "rgba(236,173,10,0.3)", "#f44336": "rgba(244,67,54,0.3)", "#4caf50": "rgba(76,175,80,0.3)" };
   const mkDataset = (gameKey, color, axisID) => ({
     label: axisID === "yHPI" ? "Price Index" : axisID === "yRate" ? "Interest Rate %" : "Rent Growth %",
     data: [...pre.map(m => m[gameKey]), ...macro.map(m => m[gameKey])],
     borderColor: color,
-    borderWidth: 2,
-    pointRadius: 0,
+    borderWidth: 2.5,
+    pointRadius: 2,
+    pointHoverRadius: 4,
     tension: 0.3,
     yAxisID: axisID,
-    segment: pLen === 0 ? undefined : {
-      borderColor: ctx => ctx.p0DataIndex < pLen ? MUTED[color] : color,
-      borderDash:  ctx => ctx.p0DataIndex < pLen ? [4, 4] : [],
-    },
   });
   return {
-    pLen,
     datasets: [
       mkDataset("price_index", "#ecad0a", "yHPI"),
       mkDataset("rate",        "#f44336", "yRate"),
@@ -788,11 +776,8 @@ function updateCharts(labels, macro, wealthHistory) {
     const { datasets } = _macroChartData(macro);
     macroChart.data.labels           = [...pre.map(m => m.label), ...labels];
     macroChart.data.datasets[0].data = datasets[0].data;
-    macroChart.data.datasets[0].segment = datasets[0].segment;
     macroChart.data.datasets[1].data = datasets[1].data;
-    macroChart.data.datasets[1].segment = datasets[1].segment;
     macroChart.data.datasets[2].data = datasets[2].data;
-    macroChart.data.datasets[2].segment = datasets[2].segment;
     macroChart.options.plugins.annotation.annotations = makeAnnotations(macro, pLen);
     macroChart.update('none');
   }
@@ -2098,6 +2083,11 @@ async function loadIntroOpponents() {
       if (resp.ok) {
         const d = await resp.json();
         if (d.state === "intro" && d.actors && Object.keys(d.actors).length) {
+          if (d.preamble_macro && !_preambleMacro) {
+            _preambleMacro = d.preamble_macro;
+            const pl = document.getElementById("preamble-label");
+            if (pl && _preambleMacro.length) pl.style.display = "inline";
+          }
           if (d.player_cash) {
             const cashEl = document.getElementById("intro-cash");
             if (cashEl) cashEl.textContent = "£" + Math.round(d.player_cash).toLocaleString("en-GB");
@@ -2161,6 +2151,10 @@ async function startGame() {
     document.getElementById("intro-overlay").style.display = "none";
     const lb = document.getElementById("loading-banner");
     if (lb) lb.style.display = "flex";
+    if (_preambleMacro && !macroChart) {
+      initMacroChart([], []);   // preamble labels/data prepended inside initMacroChart
+      setTimeout(() => { if (macroChart) macroChart.resize(); }, 100);
+    }
   }, 600);
 }
 
