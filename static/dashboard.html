@@ -718,7 +718,7 @@ function initMacroChart(labels, macro) {
         x: xScale,
         yHPI:  { type: "linear", position: "left",  min: r.hpi?.[0],  max: r.hpi?.[1],  ticks: { color: "#ecad0a", font: tickFont, callback: v => Number.isInteger(v) ? v : null }, grid: { color: gridColor }, title: { display: false }, afterFit(s) { s.width = 65; } },
         yRate: { type: "linear", position: "right", min: 0,  max: 15, grid: { drawOnChartArea: false }, ticks: { color: "#f44336", font: tickFont, callback: v => v + "%" }, title: { display: false }, afterFit(s) { s.width = 38; } },
-        yRent: { type: "linear", position: "right", min: 0, max: 15, grid: { drawOnChartArea: false }, ticks: { color: "#4caf50", font: tickFont, callback: v => v + "%" }, title: { display: false }, afterFit(s) { s.width = 38; } },
+        yRent: { type: "linear", position: "right", min: 0, max: 15, display: false },
       },
     },
   });
