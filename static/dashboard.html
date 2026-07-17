@@ -142,8 +142,8 @@
       display: flex !important; flex-direction: column;
       padding-bottom: 120px; /* room for fixed action bar */
     }
-    .chart-panel.macro { min-height: 220px; }
-    .chart-wrap { min-height: 180px; }
+    .chart-panel.macro { min-height: 198px; }
+    .chart-wrap { min-height: 162px; }
 
     /* Turn sequence: 3 equal cols, no scroll */
     #turn-sequence {
@@ -230,7 +230,7 @@
     }
 
     /* Charts */
-    .chart-panel.macro  { min-height: 155px; }
+    .chart-panel.macro  { min-height: 140px; }
     .chart-panel.wealth { min-height: 155px; }
 
     /* Top bar compact */
@@ -470,7 +470,7 @@
           <div style="display:flex;gap:10px;font-size:10px;color:#aaa;">
             <span><span style="display:inline-block;width:10px;height:2px;background:#ecad0a;vertical-align:middle;margin-right:3px;"></span>Price Index</span>
             <span><span style="display:inline-block;width:10px;height:2px;background:#f44336;vertical-align:middle;margin-right:3px;"></span>Int Rate</span>
-            <span><span style="display:inline-block;width:10px;height:2px;background:#4caf50;vertical-align:middle;margin-right:3px;"></span>Rent Growth</span>
+            <span><span style="display:inline-block;width:10px;height:2px;background:#4caf50;vertical-align:middle;margin-right:3px;"></span>Rent</span>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="macro-chart"></canvas></div>
@@ -695,8 +695,8 @@ function _macroChartData(macro) {
 function initMacroChart(labels, macro) {
   const canvas = document.getElementById("macro-chart");
   if (!canvas.offsetHeight) {
-    canvas.style.height = "180px";
-    canvas.parentElement.style.minHeight = "180px";
+    canvas.style.height = "162px";
+    canvas.parentElement.style.minHeight = "162px";
   }
   const ctx = canvas.getContext("2d");
   const r = axisRanges || {};
