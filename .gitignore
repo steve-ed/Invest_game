@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 visualisation/turn_state.json
 .claude/
+*.png
