@@ -1126,7 +1126,9 @@ async function poll() {
     }
 
     const labels = d.x_labels || d.macro_history.map((_, i) => `T${i+1}`);
-    if (d.macro_history.length && d.wealth_history.length)
+    const _introEl = document.getElementById("intro-overlay");
+    const _introGone = !_introEl || _introEl.style.display === "none";
+    if (_introGone && d.macro_history.length && d.wealth_history.length)
       updateCharts(labels, d.macro_history, d.wealth_history);
     if (d.actors && Object.keys(d.actors).length) updateWealthBars(d.actors);
 
