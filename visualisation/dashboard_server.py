@@ -71,6 +71,7 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
         if name:
             b.set_player_name(name)
         b.set_game_active(True)
+        b.reset_poll()
         b.signal_ready()
         return Response('{"ok":true}', mimetype="application/json",
                         headers={"Access-Control-Allow-Origin": "*"})
