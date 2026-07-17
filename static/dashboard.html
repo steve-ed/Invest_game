@@ -834,16 +834,14 @@ function updateEventFeed(currentEvents) {
   updateEconomyNews(currentEvents);
   if (!currentEvents.length) { el.innerHTML = '<div class="event-item" style="color:#888">Quiet turn — no major events</div>'; return; }
   // Priority: EPC first, then player void/maint, then macro, then AI void/maint
-  const playerForceSell = currentEvents.filter(e => e.type === "epc_force_sell" && e.actor_id === "player");
   const epcMandate      = currentEvents.filter((e,i,arr) => e.type === "epc_mandate" && arr.findIndex(x => x.type === "epc_mandate") === i);
   const epcWarnings     = currentEvents.filter(e => e.type === "epc_warning" && e.actor_id === "player");
-  const otherForceSell  = currentEvents.filter(e => e.type === "epc_force_sell" && e.actor_id !== "player");
   const playerVoidMaint = currentEvents.filter(e => (e.type === "void_period" || e.type === "maintenance") && e.actor_id === "player");
   const macro           = currentEvents.filter(e =>
     !["void_period","maintenance","actor_step","property_valuation","ai_action","player_action",
-      "epc_force_sell","epc_warning","epc_mandate"].includes(e.type));
+      "epc_warning","epc_mandate"].includes(e.type));
   const otherVoidMaint  = currentEvents.filter(e => (e.type === "void_period" || e.type === "maintenance") && e.actor_id !== "player");
-  const ordered = [...playerForceSell, ...epcMandate, ...epcWarnings, ...otherForceSell, ...playerVoidMaint, ...macro, ...otherVoidMaint];
+  const ordered = [...epcMandate, ...epcWarnings, ...playerVoidMaint, ...macro, ...otherVoidMaint];
   el.innerHTML = (ordered.length ? ordered : currentEvents).slice(0, 1).map(e => {
     const cls = EVENT_TAG_CLASS[e.type] || "tag-info";
     const LABELS = { void_period: "void", maintenance: "maintenance",
