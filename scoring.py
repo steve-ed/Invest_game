@@ -99,17 +99,24 @@ class ScoringEngine:
             risk_cost, risk_breakdown = self.compute_risk_cost(actor, state.properties, macro_rate)
             final_score = round(total_return - risk_cost, 0)
 
+            gross_pv       = sum(prop_map[pid].current_value
+                                 for pid in actor.portfolio if pid in prop_map)
+            total_mortgage = sum(prop_map[pid].mortgage_balance
+                                 for pid in actor.portfolio if pid in prop_map)
             scores[actor_id] = {
-                "actor_id":        actor_id,
-                "name":            actor.name,
-                "portfolio_value": round(current_pv, 0),
-                "cash":            round(actor.cash, 0),
-                "income_return":   round(income_return, 0),
-                "capital_return":  round(capital_return, 0),
-                "total_return":    round(total_return, 0),
-                "risk_cost":       risk_cost,
-                "risk_breakdown":  risk_breakdown,
-                "final_score":     final_score,
+                "actor_id":             actor_id,
+                "name":                 actor.name,
+                "gross_portfolio_value": round(gross_pv, 0),
+                "total_mortgage":       round(total_mortgage, 0),
+                "initial_wealth":       round(actor.initial_wealth, 0),
+                "portfolio_value":      round(current_pv, 0),
+                "cash":                 round(actor.cash, 0),
+                "income_return":        round(income_return, 0),
+                "capital_return":       round(capital_return, 0),
+                "total_return":         round(total_return, 0),
+                "risk_cost":            risk_cost,
+                "risk_breakdown":       risk_breakdown,
+                "final_score":          final_score,
             }
         return scores
 
