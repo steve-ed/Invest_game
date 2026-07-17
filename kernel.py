@@ -920,7 +920,7 @@ class SimulationKernel:
                 tick_events.append({
                     "type": "epc_mandate",
                     "tick": tick,
-                    "detail": f"Government mandates EPC C minimum — all EPC properties must reach C within 2 years",
+                    "detail": f"Government mandates EPC C minimum — within 2 years",
                 })
                 for prop in self.state.properties:
                     if prop.epc_band >= 4:
