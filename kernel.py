@@ -22,8 +22,7 @@ from data.uk_macro_history import get_slice, get_start_limits, get_era_label
 
 TURN_STATE_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "turn_state.json")
 READY_PATH       = os.path.join(os.path.dirname(__file__), "visualisation", "ready.json")
-EPC_MANDATE_TICK = 10     # fires once; actors have 2 ticks to comply
-EPC_GRACE_TICKS  = 2
+EPC_GRACE_TICKS  = 4
 MORTGAGE_SPREAD  = 0.018  # lender margin above BoE base rate
 _VOID_BY_ARCHETYPE = {"btl": 0, "new_build": 0, "hmo": 1, "value_add": 1, "short_let": 1}
 
@@ -91,8 +90,7 @@ def _select_advice(state, player_actor, available, ai_controller,
 
     # Only surface upgrade in advice when the EPC mandate is active or approaching,
     # and no strategic move is available.
-    epc_mandate_active = state.tick >= EPC_MANDATE_TICK
-    if action == "hold" and epc_mandate_active:
+    if action == "hold" and state.epc_mandate_announced:
         upg = _orig_check(state, player_actor)
         if upg:
             return upg[0], upg[1], upg[2], strategy
@@ -146,7 +144,7 @@ def _eval_comment(player_action, adv_action, adv_prop, rate, scenario,
         return "Upgrade was early; worthwhile if EPC mandate is imminent."
 
     if pa_verb != "upgrade" and adv_action == "upgrade":
-        return f"Upgrade {adv_prop} to avoid EPC force-sell risk."
+        return f"Upgrade {adv_prop} to avoid EPC scoring penalty and void risk."
 
     if pa_verb == "hold" and adv_action == "refi":
         return f"Refi {adv_prop} to extract equity and stay competitive."
@@ -167,10 +165,10 @@ def _default_properties():
         Property(id="p09", region="Manchester",          base_value=240000.0, current_value=240000.0, rent=1200.0, archetype="btl",       epc_band=4, age=40,  bedrooms=3),
         Property(id="p10", region="Leeds",               base_value=170000.0, current_value=170000.0, rent=850.0,  archetype="value_add", epc_band=5, age=65,  bedrooms=3),
         Property(id="p11", region="Nottingham",          base_value=240000.0, current_value=240000.0, rent=1800.0, archetype="hmo",       epc_band=5, age=70,  bedrooms=5),
-        Property(id="p12", region="Liverpool",           base_value=220000.0, current_value=220000.0, rent=1950.0, archetype="hmo",       epc_band=6, age=85,  bedrooms=6),
+        Property(id="p12", region="Liverpool",           base_value=220000.0, current_value=220000.0, rent=1950.0, archetype="hmo",       epc_band=5, age=85,  bedrooms=6),
         Property(id="p13", region="Cardiff",             base_value=160000.0, current_value=160000.0, rent=800.0,  archetype="btl",       epc_band=4, age=55,  bedrooms=3),
-        Property(id="p14", region="Newcastle",           base_value=120000.0, current_value=120000.0, rent=600.0,  archetype="value_add", epc_band=6, age=90,  bedrooms=2),
-        Property(id="p15", region="Sunderland",          base_value=90000.0,  current_value=90000.0,  rent=540.0,  archetype="value_add", epc_band=7, age=95,  bedrooms=2),
+        Property(id="p14", region="Newcastle",           base_value=120000.0, current_value=120000.0, rent=600.0,  archetype="value_add", epc_band=5, age=90,  bedrooms=2),
+        Property(id="p15", region="Sunderland",          base_value=90000.0,  current_value=90000.0,  rent=540.0,  archetype="value_add", epc_band=5, age=95,  bedrooms=2),
         Property(id="m1",  region="London Shoreditch",   base_value=420000.0, current_value=420000.0, rent=2800.0, archetype="short_let", epc_band=2, age=15,  bedrooms=1),
         Property(id="m2",  region="Bristol Harbourside", base_value=230000.0, current_value=230000.0, rent=1035.0, archetype="new_build", epc_band=1, age=2,   bedrooms=2),
         Property(id="m3",  region="Leeds City Centre",   base_value=230000.0, current_value=230000.0, rent=1950.0, archetype="hmo",       epc_band=4, age=30,  bedrooms=5),
@@ -279,7 +277,7 @@ def _normalize_slice(raw_slice):
 
 
 class SimulationKernel:
-    def __init__(self, turns=20, mode="student", turn_delay=6, bus=None):
+    def __init__(self, turns=20, mode="student", turn_delay=3, bus=None):
         self.turns = turns
         self.mode = mode
         self.turn_delay = turn_delay
@@ -305,7 +303,9 @@ class SimulationKernel:
         self.property_model = PropertyModel()
         self.scoring = ScoringEngine()
         self.void_maintenance = VoidMaintenanceEngine()
-        self._epc_warned = {}     # property_id -> tick when warning was issued
+        self._epc_warned = {}           # property_id -> tick when mandate warning issued
+        self._epc_mandate_tick = random.randint(5, 8)
+        self._epc_mandate_announced = False
         self._next_market_id = 100  # ids mk100+ avoid clashing with p01-p15, m1-m4
         for actor in self.state.actors.values():
             pv = _portfolio_value(actor, self.state.properties)
@@ -466,7 +466,8 @@ class SimulationKernel:
             a_gross_yield = round(a_rent * 12 / a_pv * 100, 1) if a_pv > 0 else 0.0
             a_annual_net  = (a_rent - a_mtg) * 12
             a_roe = round(a_annual_net / a_equity * 100, 1) if a_equity > 0 else None
-            a_epc_risk_props = [p for p in a_portfolio if p["epc_band"] >= 4]
+            _epc_thresh      = 4 if self.state.epc_mandate_announced else 6
+            a_epc_risk_props = [p for p in a_portfolio if p["epc_band"] >= _epc_thresh]
             a_arch: dict[str, float] = {}
             a_beds: dict[str, int] = {}
             a_regions: dict[str, float] = {}
@@ -553,7 +554,7 @@ class SimulationKernel:
                     "bedrooms": p.bedrooms,
                     "affordable": affordable,
                     "age": p.age,
-                    "void_risk_pct": void_risk_pct(p, self.state.macro_history),
+                    "void_risk_pct": void_risk_pct(p, self.state.macro_history, self.state.epc_mandate_announced),
                     "maintenance_risk": maintenance_risk_label(p),
                     "maintenance_reserve": expected_maintenance_reserve(p),
                     "is_auction": p.is_auction,
@@ -607,8 +608,9 @@ class SimulationKernel:
         gross_yield_pct  = round(total_rent * 12 / total_portfolio_value * 100, 1) if total_portfolio_value > 0 else 0.0
         annual_net_cf    = (total_rent - total_mortgage_cost) * 12
         return_on_equity = round(annual_net_cf / player_equity * 100, 1) if player_equity > 0 else None
+        _epc_threshold   = 4 if self.state.epc_mandate_announced else 6
         epc_risk_props   = [prop_map[pid] for pid in (player.portfolio if player else [])
-                            if pid in prop_map and prop_map[pid].epc_band >= 4]
+                            if pid in prop_map and prop_map[pid].epc_band >= _epc_threshold]
         epc_risk = {"count": len(epc_risk_props),
                     "value": round(sum(p.current_value for p in epc_risk_props), 0)}
         arch_values: dict[str, float] = {}
@@ -649,7 +651,7 @@ class SimulationKernel:
                                                   "price_crash", "price_surge",
                                                   "rent_surge", "rent_squeeze",
                                                   "epc_mandate", "epc_warning",
-                                                  "epc_force_sell")],
+                                                  "epc_void")],
             "actors": actors_data,
             "actors_state": actors_state,
             "last_actions": dict(self.state.last_ai_actions),
@@ -722,7 +724,6 @@ class SimulationKernel:
             self._bus.set_state(intro_data)
             print("Waiting for player to start game… (in-process bus)", flush=True)
             self._bus.wait_ready()
-            self._bus.set_state({})
             # Apply player name entered on the intro screen
             player_name = self._bus.get_player_name()
             if player_name and player_name != "You":
@@ -880,32 +881,49 @@ class SimulationKernel:
             tick_events += self.branching.step(self.state, tick)
             tick_events += self.scenario_events.step(self.state, tick)
 
-            # EPC mandate: fire warning at mandate tick, force-sell after grace period
-            if tick == EPC_MANDATE_TICK:
+            # Tick 1: void any F/G properties — minimum standard is EPC E at game start
+            if tick == 1:
                 _owner_map = {pid: aid
                               for aid, a in self.state.actors.items()
                               for pid in a.portfolio}
-                _mandate_fired = False
+                for prop in self.state.properties:
+                    if prop.epc_band >= 6 and not prop.epc_void:
+                        prop.epc_void = True
+                        prop.void_ticks_remaining = 999
+                        owner = _owner_map.get(prop.id)
+                        tick_events.append({
+                            "type": "epc_void",
+                            "tick": tick,
+                            "property_id": prop.id,
+                            "actor_id": owner,
+                            "detail": f"{prop.id} void — EPC {chr(64 + prop.epc_band)} is below the minimum E standard (upgrade to re-let)",
+                        })
+
+            # EPC mandate: randomly announced between ticks 7–12
+            if tick == self._epc_mandate_tick:
+                self._epc_mandate_announced = True
+                self.state.epc_mandate_announced = True
+                _owner_map = {pid: aid
+                              for aid, a in self.state.actors.items()
+                              for pid in a.portfolio}
+                tick_events.append({
+                    "type": "epc_mandate",
+                    "tick": tick,
+                    "detail": f"Government mandates EPC C minimum — all EPC properties must reach C within 2 years",
+                })
                 for prop in self.state.properties:
                     if prop.epc_band >= 4:
                         self._epc_warned[prop.id] = tick
-                        if not _mandate_fired:
-                            tick_events.append({
-                                "type": "epc_mandate",
-                                "tick": tick,
-                                "detail": "EPC minimum-C mandate activated — all EPC D–G properties must reach C within 2 turns",
-                            })
-                            _mandate_fired = True
                         owner = _owner_map.get(prop.id)
                         tick_events.append({
                             "type": "epc_warning",
                             "tick": tick,
                             "property_id": prop.id,
                             "actor_id": owner,
-                            "detail": f"{prop.id} (EPC {chr(64 + prop.epc_band)}) must be upgraded within {EPC_GRACE_TICKS} ticks",
+                            "detail": f"{prop.id} (EPC {chr(64 + prop.epc_band)}) must reach C within 2 years or it will go void",
                         })
 
-            # EPC void: non-compliant properties go void after grace period until upgraded
+            # EPC void: post-mandate, non-compliant D–G properties go void after grace period
             for prop in list(self.state.properties):
                 warned_at = self._epc_warned.get(prop.id)
                 if warned_at and tick == warned_at + EPC_GRACE_TICKS and prop.epc_band >= 4:
@@ -917,11 +935,11 @@ class SimulationKernel:
                             None,
                         )
                         tick_events.append({
-                            "type": "epc_force_sell",
+                            "type": "epc_void",
                             "tick": tick,
                             "property_id": prop.id,
                             "actor_id": owner,
-                            "detail": f"{prop.id} gone void — EPC non-compliant (upgrade to re-let)",
+                            "detail": f"{prop.id} gone void — EPC {chr(64 + prop.epc_band)} non-compliant with mandate (upgrade to C or better to re-let)",
                         })
 
             self.state.event_log.extend(tick_events)
@@ -964,8 +982,14 @@ class SimulationKernel:
             if available_count < _MARKET_MIN_AVAILABLE:
                 self._replenish_market(_MARKET_TARGET - available_count)
 
-            # Schedule one auction property every 8 ticks
-            if tick % 8 == 0:
+            # Schedule one auction property every 4 ticks — only when an eligible AI is playing
+            _AUCTION_STRATEGIES = {"value_add", "brrr", "yield"}
+            _auction_eligible = any(
+                a.strategy in _AUCTION_STRATEGIES
+                for a in self.state.actors.values()
+                if a.id != "player"
+            )
+            if tick % 6 == 0 and _auction_eligible:
                 self._add_auction_property()
 
             is_final = (i == self.turns - 1)
@@ -1050,21 +1074,28 @@ class SimulationKernel:
         elif action == "buy" and property_id not in owned_all:
             if prop.is_auction:
                 bid_premium = event.get("bid_premium", 0.0)
-                player_bid  = prop.current_value * (1 + bid_premium)
-                ai_bids = {
-                    aid: prop.current_value * (1 + self.ai.ai_bid_premium(aid))
-                    for aid in self.state.actors
-                    if aid != "player"
-                }
-                best_ai_bid = max(ai_bids.values()) if ai_bids else 0.0
-                player_wins = player_bid >= best_ai_bid  # ties go to player
-                if player_wins and actor.cash >= round(player_bid):
-                    actor.cash -= round(player_bid)
-                    actor.total_transaction_costs += round(player_bid * 0.01)
-                    prop.mortgage_balance = round(player_bid * event.get("ltv", 0.0))
-                    prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
-                    prop.is_fixed_rate = True
-                    prop.fixed_ticks_remaining = 8
+                bid_price   = round(prop.current_value * (1 + bid_premium))
+                if actor_id == "player":
+                    # Competitive resolution: player vs eligible AI bids
+                    _AUCTION_STRATEGIES = {"value_add", "brrr", "yield"}
+                    ai_bids = {}
+                    for aid, a in self.state.actors.items():
+                        if aid != "player" and a.strategy in _AUCTION_STRATEGIES:
+                            premium = self.ai.ai_bid_premium(aid, a, prop, self.state)
+                            if premium is not None:
+                                ai_bids[aid] = round(prop.current_value * (1 + premium))
+                    best_ai_bid = max(ai_bids.values()) if ai_bids else 0
+                    player_wins = bid_price >= best_ai_bid  # ties go to player
+                    can_buy = player_wins and actor.cash >= bid_price
+                else:
+                    # AI auction buy already resolved in ai.step() — direct cash purchase
+                    can_buy = actor.cash >= bid_price
+                if can_buy:
+                    actor.cash -= bid_price
+                    actor.total_transaction_costs += round(bid_price * 0.01)
+                    prop.mortgage_balance = 0.0
+                    prop.mortgage_rate = 0.0
+                    prop.is_fixed_rate = False
                     prop.void_ticks_remaining = _VOID_BY_ARCHETYPE.get(prop.archetype, 0)
                     actor.portfolio.append(property_id)
             else:
@@ -1077,7 +1108,7 @@ class SimulationKernel:
                     prop.mortgage_balance = prop.current_value * ltv
                     prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                     prop.is_fixed_rate = True
-                    prop.fixed_ticks_remaining = 8
+                    prop.fixed_ticks_remaining = 4
                     prop.void_ticks_remaining = _VOID_BY_ARCHETYPE.get(prop.archetype, 0)
                     actor.portfolio.append(property_id)
 
@@ -1093,7 +1124,8 @@ class SimulationKernel:
                 if uplift:
                     prop.current_value = round(prop.current_value * (1 + uplift) / 1000) * 1000
                 prop.base_value = prop.current_value  # rebase so HPI compounds from post-upgrade value
-                if prop.epc_void and prop.epc_band < 4:
+                compliant_threshold = 4 if self._epc_mandate_announced else 6
+                if prop.epc_void and prop.epc_band < compliant_threshold:
                     prop.epc_void = False
                     prop.void_ticks_remaining = 0
 
@@ -1118,7 +1150,7 @@ class SimulationKernel:
                     prop.mortgage_balance = new_balance
                     prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                     prop.is_fixed_rate = True
-                    prop.fixed_ticks_remaining = 8
+                    prop.fixed_ticks_remaining = 4
 
     def _replenish_market(self, count: int) -> None:
         """Add new properties to the market scaled to current price index."""
@@ -1157,7 +1189,7 @@ class SimulationKernel:
             self._next_market_id += 1
 
     def _add_auction_property(self) -> None:
-        """Add one auction property at 15% below market value."""
+        """Add one auction property at 25% below market value."""
         region = _MARKET_REGIONS[self._next_market_id % len(_MARKET_REGIONS)]
         profile = _MARKET_REGION_PROFILES[region]
         price_factor = self.state.macro.price_index / 100.0
@@ -1167,8 +1199,8 @@ class SimulationKernel:
         market_value = _MARKET_NATIONAL_BASE * profile["price_level"] * price_factor * _PRICE_MULT[archetype]
         epc_band = random.choice(profile["epc_bands"])
         epc_discount = _EPC_PRICE_DISCOUNT.get(epc_band, 0)
-        auction_value = round(market_value * 0.85 * (1 - epc_discount) / 1000) * 1000
-        rent = round(market_value * 0.85 * profile["annual_yield"] * _YIELD_MULT[archetype] / 12)
+        auction_value = round(market_value * 0.75 * (1 - epc_discount) / 1000) * 1000
+        rent = round(market_value * 0.75 * profile["annual_yield"] * _YIELD_MULT[archetype] / 12)
         bedrooms = {"btl": 3, "value_add": 3, "hmo": 5}.get(archetype, 3)
         prop = Property(
             id=f"auc{self._next_market_id:03d}",

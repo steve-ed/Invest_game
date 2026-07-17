@@ -32,10 +32,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", choices=["student", "expert"], default="student")
     parser.add_argument("--ngrok", action="store_true", help="Expose via ngrok tunnel")
+    parser.add_argument("--port", type=int, default=5050, help="Port for the dashboard server")
     args = parser.parse_args()
 
     bus = GameBus()
-    port = start_server(bus=bus)
+    port = start_server(bus=bus, port=args.port)
 
     if args.ngrok:
         _start_tunnel(port)
