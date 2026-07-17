@@ -664,7 +664,12 @@ let _boughtDetails   = {};   // propId -> prop object
 let _marketNews      = [];
 
 function initMacroChart(labels, macro) {
-  const ctx = document.getElementById("macro-chart").getContext("2d");
+  const canvas = document.getElementById("macro-chart");
+  if (!canvas.offsetHeight) {
+    canvas.style.height = "180px";
+    canvas.parentElement.style.minHeight = "180px";
+  }
+  const ctx = canvas.getContext("2d");
   const r = axisRanges || {};
   macroChart = new Chart(ctx, {
     type: "line",
