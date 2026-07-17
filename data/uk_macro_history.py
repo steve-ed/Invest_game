@@ -182,18 +182,36 @@ def get_era_label(start_year):
     return best
 
 
+PREAMBLE_TICKS = 4  # 2 years of pre-game history shown on chart
+
+
 def get_start_limits(total_ticks):
     """
     Return (min_year, max_year) for random start selection.
-    Ensures enough data remains to cover the game length.
-    total_ticks: number of semi-annual periods needed.
+    Ensures enough data remains to cover the game length and PREAMBLE_TICKS of
+    pre-game history are available before the start point.
     """
     max_start_idx = len(UK_MACRO) - total_ticks - 1  # -1 guards against start_half=2 adding one index
     if max_start_idx < 0:
         raise ValueError(f"Not enough data for {total_ticks} ticks (have {len(UK_MACRO)})")
-    min_year = UK_MACRO[0][0]
+    min_year = UK_MACRO[PREAMBLE_TICKS][0]   # push earliest start forward by preamble window
     max_year = UK_MACRO[max_start_idx][0]
     return min_year, max_year
+
+
+def get_preamble_slice(start_year, start_half):
+    """
+    Return up to PREAMBLE_TICKS entries immediately before (start_year, start_half).
+    Returns fewer entries if the start is near the beginning of the dataset.
+    """
+    idx = None
+    for i, entry in enumerate(UK_MACRO):
+        if entry[0] == start_year and entry[1] == start_half:
+            idx = i
+            break
+    if idx is None:
+        return []
+    return UK_MACRO[max(0, idx - PREAMBLE_TICKS):idx]
 
 
 def get_slice(start_year, start_half, count):

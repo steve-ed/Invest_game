@@ -18,7 +18,7 @@ from property_model import PropertyModel
 from scoring import ScoringEngine
 from void_maintenance import VoidMaintenanceEngine, void_risk_pct, maintenance_risk_label, expected_maintenance_reserve
 from ui.dashboard import show_opening, show_end
-from data.uk_macro_history import get_slice, get_start_limits, get_era_label
+from data.uk_macro_history import get_slice, get_start_limits, get_era_label, get_preamble_slice
 
 TURN_STATE_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "turn_state.json")
 READY_PATH       = os.path.join(os.path.dirname(__file__), "visualisation", "ready.json")
@@ -287,6 +287,15 @@ class SimulationKernel:
         raw_slice = get_slice(start_year, start_half, turns)
         self.historical_slice = _normalize_slice(raw_slice)
         self.era_label = get_era_label(start_year)
+
+        # Pre-game preamble: 2 years of history before the start, normalised to same base
+        raw_preamble = get_preamble_slice(start_year, start_half)
+        game_base_hpi = raw_slice[0][2]
+        self.preamble_macro = [
+            {"label": f"{y} H{h}", "price_index": round(pi / game_base_hpi * 100, 2),
+             "rate": round(r, 2), "rent_growth": round(rg, 2)}
+            for y, h, pi, r, rg, _ in raw_preamble
+        ]
 
         self.state = SimulationState()
         self.state.properties = _default_properties()
@@ -657,6 +666,7 @@ class SimulationKernel:
             "last_actions": dict(self.state.last_ai_actions),
             "x_labels": x_labels,
             "axis_ranges": self._axis_ranges,
+            "preamble_macro": self.preamble_macro,
             "era_label": self.era_label if is_final else None,
             "start_year": self.state.start_year if is_final else None,
             "final_year": self.historical_slice[-1][0] if is_final else None,

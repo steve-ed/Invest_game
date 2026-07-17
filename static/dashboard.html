@@ -472,7 +472,7 @@
     <div class="charts-col">
       <div class="chart-panel macro">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0;">
-          <h3 style="margin-bottom:0;">Economy</h3>
+          <h3 style="margin-bottom:0;">Economy <span id="preamble-label" style="display:none;font-size:9px;font-weight:400;color:#666;letter-spacing:0.5px;"> — shaded region: pre-investment period</span></h3>
           <div style="display:flex;gap:10px;font-size:10px;color:#aaa;">
             <span><span style="display:inline-block;width:10px;height:2px;background:#ecad0a;vertical-align:middle;margin-right:3px;"></span>Price Index</span>
             <span><span style="display:inline-block;width:10px;height:2px;background:#f44336;vertical-align:middle;margin-right:3px;"></span>Int Rate</span>
@@ -631,7 +631,7 @@ const gridColor  = "#1e2f3a";
 const tickFont   = { size: 10 };
 const xScale     = { ticks: { display: false }, grid: { color: gridColor } };
 
-function makeAnnotations(macroHistory) {
+function makeAnnotations(macroHistory, offset = 0) {
   const anns = {};
   macroHistory.forEach((m, i) => {
     const prev = macroHistory[i - 1];
@@ -640,16 +640,29 @@ function makeAnnotations(macroHistory) {
     const hpiDelta  = (m.price_index - prev.price_index) / prev.price_index * 100;
     if (Math.abs(rateDelta) > 1.5 || Math.abs(hpiDelta) > 8) {
       anns[`shock_${i}`] = {
-        type: "line", scaleID: "x", value: i,
+        type: "line", scaleID: "x", value: i + offset,
         borderColor: "rgba(255,255,255,0.2)", borderWidth: 1, borderDash: [4, 4],
       };
     }
   });
+  if (offset > 0) {
+    anns.startLine = {
+      type: "line", scaleID: "x", value: offset,
+      borderColor: "rgba(255,255,255,0.45)", borderWidth: 1.5,
+      label: {
+        display: true, content: "Investment Period →",
+        position: "start", color: "#aaa",
+        font: { size: 9 }, padding: 3,
+        backgroundColor: "rgba(10,16,24,0.75)",
+      },
+    };
+  }
   return anns;
 }
 
 let macroChart  = null;
 let wealthChart      = null;
+let _preambleMacro  = null;
 // Extract game_id from /game/{game_id} URL; fall back to legacy routes if not present
 const _gameId = (window.location.pathname.match(/^\/game\/([^/]+)/) || [])[1] || null;
 const _api = _gameId ? `/game/${_gameId}` : '';
@@ -670,6 +683,33 @@ let _boughtByActor   = {};   // propId -> actorId for this tick's buys
 let _boughtDetails   = {};   // propId -> prop object
 let _marketNews      = [];
 
+function _macroChartData(macro) {
+  const pre  = _preambleMacro || [];
+  const pLen = pre.length;
+  const MUTED = { "#ecad0a": "rgba(236,173,10,0.3)", "#f44336": "rgba(244,67,54,0.3)", "#4caf50": "rgba(76,175,80,0.3)" };
+  const mkDataset = (gameKey, color, axisID) => ({
+    label: axisID === "yHPI" ? "Price Index" : axisID === "yRate" ? "Interest Rate %" : "Rent Growth %",
+    data: [...pre.map(m => m[gameKey]), ...macro.map(m => m[gameKey])],
+    borderColor: color,
+    borderWidth: 2,
+    pointRadius: 0,
+    tension: 0.3,
+    yAxisID: axisID,
+    segment: pLen === 0 ? undefined : {
+      borderColor: ctx => ctx.p0DataIndex < pLen ? MUTED[color] : color,
+      borderDash:  ctx => ctx.p0DataIndex < pLen ? [4, 4] : [],
+    },
+  });
+  return {
+    pLen,
+    datasets: [
+      mkDataset("price_index", "#ecad0a", "yHPI"),
+      mkDataset("rate",        "#f44336", "yRate"),
+      mkDataset("rent_growth", "#4caf50", "yRent"),
+    ],
+  };
+}
+
 function initMacroChart(labels, macro) {
   const canvas = document.getElementById("macro-chart");
   if (!canvas.offsetHeight) {
@@ -678,22 +718,19 @@ function initMacroChart(labels, macro) {
   }
   const ctx = canvas.getContext("2d");
   const r = axisRanges || {};
+  const pre  = _preambleMacro || [];
+  const pLen = pre.length;
+  const allLabels = [...pre.map(m => m.label), ...labels];
+  const { datasets } = _macroChartData(macro);
   macroChart = new Chart(ctx, {
     type: "line",
-    data: {
-      labels,
-      datasets: [
-        { label: "Price Index",     data: macro.map(m => m.price_index), borderColor: "#ecad0a", borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: "yHPI" },
-        { label: "Interest Rate %", data: macro.map(m => m.rate),        borderColor: "#f44336", borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: "yRate" },
-        { label: "Rent Growth %",   data: macro.map(m => m.rent_growth), borderColor: "#4caf50", borderWidth: 2, pointRadius: 0, tension: 0.3, yAxisID: "yRent" },
-      ],
-    },
+    data: { labels: allLabels, datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       animation: { duration: 600 },
       plugins: {
         legend: { display: false },
-        annotation: { annotations: {} },
+        annotation: { annotations: makeAnnotations(macro, pLen) },
       },
       scales: {
         x: xScale,
@@ -746,14 +783,19 @@ function updateCharts(labels, macro, wealthHistory) {
     initMacroChart(labels, macro);
     setTimeout(() => { if (macroChart) macroChart.resize(); }, 100);
   } else {
-    macroChart.data.labels              = labels;
-    macroChart.data.datasets[0].data    = macro.map(m => m.price_index);
-    macroChart.data.datasets[1].data    = macro.map(m => m.rate);
-    macroChart.data.datasets[2].data    = macro.map(m => m.rent_growth);
-    macroChart.options.plugins.annotation.annotations = makeAnnotations(macro);
+    const pre  = _preambleMacro || [];
+    const pLen = pre.length;
+    const { datasets } = _macroChartData(macro);
+    macroChart.data.labels           = [...pre.map(m => m.label), ...labels];
+    macroChart.data.datasets[0].data = datasets[0].data;
+    macroChart.data.datasets[0].segment = datasets[0].segment;
+    macroChart.data.datasets[1].data = datasets[1].data;
+    macroChart.data.datasets[1].segment = datasets[1].segment;
+    macroChart.data.datasets[2].data = datasets[2].data;
+    macroChart.data.datasets[2].segment = datasets[2].segment;
+    macroChart.options.plugins.annotation.annotations = makeAnnotations(macro, pLen);
     macroChart.update('none');
   }
-
 }
 
 function updateWealthBars(actors) {
@@ -1104,6 +1146,11 @@ async function poll() {
     const lb = document.getElementById("loading-banner");
     if (lb) lb.style.display = "none";
     if (d.axis_ranges && !axisRanges) axisRanges = d.axis_ranges;
+    if (d.preamble_macro && !_preambleMacro) {
+      _preambleMacro = d.preamble_macro;
+      const pl = document.getElementById("preamble-label");
+      if (pl && _preambleMacro.length) pl.style.display = "inline";
+    }
 
     const labels = d.x_labels || d.macro_history.map((_, i) => `T${i+1}`);
     if (d.macro_history.length && d.wealth_history.length)
