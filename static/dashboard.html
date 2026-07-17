@@ -1620,13 +1620,18 @@ let _pendingPropId = null;
 let _pendingLtv    = 0;
 let _pendingBidPremium = 0.0;
 
-const TURN_SECONDS = 20;
+const TURN_SECONDS = 45;
 let _timerInterval = null;
 let _timerEnd = null;
 let _turnActionSent = false;
 
 function _startTimer() {
   _clearTimer();
+  const _overlay = document.getElementById("intro-overlay");
+  if (_overlay && _overlay.style.display !== "none") {
+    setTimeout(() => { if (!_timerInterval && !_timerEnd) _startTimer(); }, 700);
+    return;
+  }
   _timerEnd = Date.now() + TURN_SECONDS * 1000;
   const fill  = document.getElementById('turn-timer-fill');
   const label = document.getElementById('turn-timer-label');
@@ -1634,7 +1639,7 @@ function _startTimer() {
     const remaining = Math.max(0, (_timerEnd - Date.now()) / 1000);
     const pct = remaining / TURN_SECONDS * 100;
     fill.style.width = pct + '%';
-    fill.style.background = remaining <= 10 ? '#f44336' : remaining <= 20 ? '#ecad0a' : '#4caf50';
+    fill.style.background = remaining <= 10 ? '#f44336' : remaining <= 20 ? '#ecad0a' : '#4caf50';  // colours relative to last 20s
     label.textContent = Math.ceil(remaining) + 's';
     if (remaining <= 0) { _clearTimer(); playerHold(); }
   }
