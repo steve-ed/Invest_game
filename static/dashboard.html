@@ -730,6 +730,7 @@ function initWealthChart(labels, wealthHistory) {
 function updateCharts(labels, macro, wealthHistory) {
   if (!macroChart) {
     initMacroChart(labels, macro);
+    setTimeout(() => { if (macroChart) macroChart.resize(); }, 100);
   } else {
     macroChart.data.labels              = labels;
     macroChart.data.datasets[0].data    = macro.map(m => m.price_index);
