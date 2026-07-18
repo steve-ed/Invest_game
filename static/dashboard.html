@@ -430,14 +430,14 @@
   <div style="flex-shrink:0;background:linear-gradient(transparent,#0a1018 40%);padding:24px 24px 16px;text-align:center;">
     <div id="waiting-msg" style="display:none;margin-bottom:12px;padding:10px 16px;background:#1a2733;border:1px solid #ecad0a;border-radius:6px;color:#ecad0a;font-size:12px;line-height:1.5;"></div>
     <div style="margin-bottom:10px;">
-      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Your tax situation <span style="color:#444;font-style:italic;text-transform:none;">(affects net returns)</span></div>
+      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Ownership structure <span style="color:#444;font-style:italic;text-transform:none;">(affects net returns)</span></div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
-        <button class="tax-sel-btn" data-tax="none"    onclick="selectTaxMode('none')"    style="padding:6px 4px;font-size:9px;background:#0f1923;color:#4caf50;border:1px solid #4caf50;border-radius:3px;cursor:pointer;">No tax</button>
-        <button class="tax-sel-btn" data-tax="basic"   onclick="selectTaxMode('basic')"   style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Basic 20%</button>
-        <button class="tax-sel-btn" data-tax="higher"  onclick="selectTaxMode('higher')"  style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Higher 40%</button>
-        <button class="tax-sel-btn" data-tax="company" onclick="selectTaxMode('company')" style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Company 25%</button>
+        <button class="tax-sel-btn" data-tax="none"    onclick="selectTaxMode('none')"    style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">No tax</button>
+        <button class="tax-sel-btn" data-tax="basic"   onclick="selectTaxMode('basic')"   style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Personal basic</button>
+        <button class="tax-sel-btn" data-tax="higher"  onclick="selectTaxMode('higher')"  style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Personal S.24</button>
+        <button class="tax-sel-btn" data-tax="company" onclick="selectTaxMode('company')" style="padding:6px 4px;font-size:9px;background:#0a2010;color:#4caf50;border:1px solid #4caf50;border-radius:3px;cursor:pointer;">SPV / Ltd Co ✓</button>
       </div>
-      <div id="tax-note" style="font-size:9px;color:#888;margin-top:5px;line-height:1.4;">No tax modelled — use Basic 20% or Higher 40% (S.24) to see real net returns.</div>
+      <div id="tax-note" style="font-size:9px;color:#888;margin-top:5px;line-height:1.4;">SPV (25% corp tax): full mortgage interest deductible, profits reinvested tax-free until extracted. This book assumes SPV ownership throughout.</div>
     </div>
     <div style="margin-bottom:12px;">
       <input id="player-name-input" type="text" maxlength="30" placeholder="Enter your name to play"
@@ -679,7 +679,7 @@ const _api = _gameId ? `/game/${_gameId}` : '';
 let lastTick         = -1;
 let _gameEnded       = false;
 let _gameStarted     = false;
-let _selectedTaxMode = 'none';
+let _selectedTaxMode = 'company';
 let axisRanges       = null;
 let _seqTimer        = null;
 let _highlightTimer  = null;
@@ -2384,10 +2384,10 @@ async function loadIntroOpponents() {
 }
 
 const TAX_NOTES = {
-  none:    'No tax modelled — use Basic 20% or Higher 40% (S.24) to see real net returns.',
-  basic:   'Basic rate (20%): mortgage interest fully deductible. Typical for lower earners or company-structured portfolios.',
-  higher:  'Higher rate with Section 24: tax at 40% on gross rent, 20% credit on mortgage interest. This is the S.24 trap — can turn cashflow-positive into cashflow-negative.',
-  company: 'Company (25% corp tax): full interest deductibility, but extraction costs and higher mortgage rates apply.',
+  none:    'No tax modelled — for comparison only. Does not reflect real-world ownership.',
+  basic:   'Personal ownership, basic rate (20%): full mortgage interest relief. Only applies if total income stays below £50,270.',
+  higher:  'Personal ownership, Section 24: tax at 40% on gross rent with only 20% credit on interest. This is the trap that wiped out many landlords 2015–2020.',
+  company: 'SPV / Ltd Co (25% corp tax): full mortgage interest deductible, profits reinvested tax-free until extracted. This book assumes SPV ownership throughout.',
 };
 
 function selectTaxMode(mode) {

@@ -24,7 +24,7 @@ from data.era_narratives import ERA_NARRATIVES
 TURN_STATE_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "turn_state.json")
 READY_PATH       = os.path.join(os.path.dirname(__file__), "visualisation", "ready.json")
 EPC_GRACE_TICKS  = 4
-MORTGAGE_SPREAD  = 0.018  # lender margin above BoE base rate
+MORTGAGE_SPREAD  = 0.022  # lender margin above BoE base rate (company BTL premium included)
 _VOID_BY_ARCHETYPE = {"btl": 0, "new_build": 0, "hmo": 1, "value_add": 1, "short_let": 1}
 
 _MARKET_NATIONAL_BASE = 165_000

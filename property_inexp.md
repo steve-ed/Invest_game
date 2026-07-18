@@ -19,6 +19,67 @@ This book draws on 40 years of real UK property data: house prices, Bank of Engl
 
 ---
 
+## Why This Book Assumes SPV Ownership
+
+---
+
+### The Structure This Book Uses
+
+This book assumes you will buy your investment property through a **Special Purpose Vehicle (SPV)** — a UK limited company set up solely to hold property. Every calculation, every cost table, every tax example, and the simulation engine all reflect company ownership. If you are considering personal ownership instead, you should understand why most serious landlords no longer do so.
+
+**The Section 24 problem**
+
+Between 2015 and 2020, the UK government phased out mortgage interest relief for higher-rate personal landlords. Under the new rules — known as **Section 24** — a landlord in the 40% tax bracket pays income tax on their gross rent, then receives only a 20% tax credit on mortgage interest. At modest loan-to-value ratios and current interest rates, many higher-rate personal landlords now pay tax on properties that make a cash loss.
+
+This is not a fringe concern. It is the single most important structural change in UK buy-to-let history. It is why this book does not teach personal ownership as a default.
+
+**What an SPV is**
+
+An SPV is an ordinary UK limited company, registered at Companies House under SIC code 68100 (Buying and Selling of Own Real Estate) or 68209 (Other Letting and Operating of Own or Leased Real Estate). It has:
+
+- A separate legal identity from you personally
+- Its own bank account (required — lenders will not lend without one)
+- Annual accounts filed at Companies House
+- Corporation Tax obligations (not income tax)
+
+You are typically the sole director and shareholder. The company holds the property; you hold the company.
+
+**Why the numbers are better**
+
+| Item | Personal (higher rate) | SPV / Ltd Co |
+|---|---|---|
+| Mortgage interest | 20% credit only (S.24) | Fully deductible |
+| Tax rate on profit | 40–45% income tax | 19–25% corporation tax |
+| Mortgage rate premium | — | +0.4% above personal rates |
+| Annual accountancy | — | £800–£1,500 |
+| Companies House fee | — | £13/yr |
+
+The company pays corporation tax at 19% (small profits, under £50,000/yr) or 25% (profits above £50,000/yr). Mortgage interest is deducted before tax — exactly as Section 24 removed from personal landlords. For a mortgaged portfolio, the SPV structure typically saves thousands of pounds per year versus personal higher-rate ownership.
+
+**The cost of the structure**
+
+The main additional costs are:
+
+1. **Higher mortgage rate:** Company BTL mortgages carry approximately 0.4% more than equivalent personal products. This is the price of the structure and is already reflected in all examples in this book.
+2. **Accountancy:** £800–£1,500 per year for a sole-director property company with one or two properties. Increases modestly with portfolio size.
+3. **Companies House annual confirmation statement:** £13 per year.
+4. **Personal guarantees:** Most lenders will require you to personally guarantee the mortgage. This is standard — it does not undermine the legal separation for tax purposes.
+
+**Setup cost and process**
+
+Incorporation costs £50 at Companies House and takes 24 hours online. You will need:
+
+- A company name (avoid generic names — check availability at Companies House)
+- A registered address (can be your home address or an accountant's)
+- A business bank account (Starling, Mettle, Tide, or a high-street business account)
+- A solicitor and mortgage broker who regularly act for SPV landlords — not all do
+
+**The one rule**
+
+If you buy in your personal name, you cannot retroactively transfer the property into a company without paying SDLT again and triggering Capital Gains Tax on any gain. **Buy in the company name from day one.** There is no route back without significant cost.
+
+---
+
 ## PART ONE: BEFORE YOU BUY ANYTHING
 
 ---
@@ -54,7 +115,7 @@ This is the number people forget to check — how much cash is left in your acco
 | Less solicitor + survey + broker | −£2,750 |
 | **Cash remaining as your buffer** | **£3,950** |
 
-That £7,050 is not spare money. It is your entire financial cushion as a landlord. A boiler replacement costs £1,500–£3,000. A one-month void costs £900 in lost rent. If both happen in the first year — which is possible — you are at £2,000–£4,600. At that level, one more problem becomes a crisis.
+That £3,950 is not spare money. It is your entire financial cushion as a landlord. A boiler replacement costs £1,500–£3,000. A one-month void costs £900 in lost rent. If both happen in the first year — which is possible — you are at £2,000–£4,600. At that level, one more problem becomes a crisis.
 
 This is why the table above shows a £9,000 buffer for a £190,000 property, and why this book recommends starting with savings of at least £70,000 for that price point following the October 2024 SDLT surcharge increase. If your savings are closer to £65,000, buy at a lower price point rather than squeezing the buffer.
 
@@ -98,7 +159,7 @@ The simple rule: you cannot time the market perfectly. But buying in a period of
 
 **2. Bank of England base rate**
 
-The base rate is the cost of borrowing money. When it rises, your mortgage costs more. When it falls, your mortgage costs less. Buy-to-let mortgage rates are typically 1.8% above the base rate. So if the base rate is 5%, expect to pay around 6.8% on a BTL mortgage.
+The base rate is the cost of borrowing money. When it rises, your mortgage costs more. When it falls, your mortgage costs less. Company buy-to-let mortgage rates are typically 2.2% above the base rate. So if the base rate is 5%, expect to pay around 7.2% on a company BTL mortgage. (Personal BTL products are roughly 0.4% cheaper, but as explained in the SPV section, personal ownership is not the structure this book recommends.)
 
 Why does this matter to you? Because it determines whether your rent covers your mortgage. At 4% rates, the sums are comfortable. At 6–7% rates, the sums are tight. Before you buy any property, check what happens to your cashflow if rates rise by 2%.
 
@@ -242,25 +303,7 @@ Cheap money was good for landlords in the obvious ways: mortgage costs were mini
 
 Three important things happened during this era that matter for your understanding as a new investor:
 
-**Section 24 (2015–2020):** The government removed the ability of higher-rate taxpayers to deduct mortgage interest as a business expense. This changed overnight the economics of holding a large mortgaged portfolio in personal names. Many landlords restructured into limited companies.
-
-Here is why it matters in plain numbers:
-
-*Scenario: £900/month rent, £9,263/year mortgage interest, 40% income tax*
-
-| | Personal ownership (pre-2015 rules) | Personal ownership (post-Section 24) | Limited company |
-|---|---|---|---|
-| Gross rental income | £10,800 | £10,800 | £10,800 |
-| Mortgage interest deducted | −£9,263 | Not deductible | −£9,263 |
-| Taxable profit | £1,537 | £10,800 | £1,537 |
-| Tax (40% / 25% corp) | −£615 | −£4,320 less 20% credit (−£4,320 + £2,160 relief = −£2,160) | −£384 |
-| **Net profit after tax** | **£922** | **−£623 (loss)** | **£1,153** |
-
-The same property, same rent, same mortgage: Section 24 turns a personal-name profit into an after-tax loss for a 40% taxpayer.
-
-The solution is not automatic. Buying via a limited company means: corporation tax on profits (currently 25% for profits above £50k, 19% for smaller companies), higher mortgage rates (BTL company mortgages typically cost 0.5–1% more than personal mortgages), and additional accountancy costs (£500–£1,500/year). Whether company or personal ownership wins depends on your income tax rate, your total portfolio size, and whether you plan to draw income from the portfolio or reinvest it.
-
-The simple version: if your employment income already puts you in the 40% tax bracket, talk to a property accountant before you sign anything. Do not buy in your personal name and restructure later — transferring a property from personal to company ownership triggers both SDLT and Capital Gains Tax on the current value.
+**Section 24 (2015–2020):** The government removed the ability of higher-rate taxpayers to deduct mortgage interest as a business expense. This is the single most important tax change in UK landlord history. It is why this book assumes SPV ownership throughout — see *Why This Book Assumes SPV Ownership* at the start of this book for the full explanation and comparison table.
 
 **Brexit (2016):** The Bank of England cut rates to 0.25% after the referendum result, and London prices stagnated for three years while uncertainty persisted.
 
@@ -400,10 +443,12 @@ The rule of thumb: your annual rent should cover your annual mortgage interest a
 Simple check: multiply your monthly rent by 9. If the answer is more than your monthly mortgage payment, you pass.
 
 Example:
-- Property: £190,000 at 75% LTV = £142,500 mortgage at 6.5%
-- Monthly mortgage interest: £772
+- Property: £190,000 at 75% LTV = £142,500 mortgage at 7.0% (company BTL rate)
+- Monthly mortgage interest: £831
 - Monthly rent: £900
 - Quick check: £900 × 9 = £8,100 minimum annual rent required. Actual annual rent = £10,800. Passes.
+
+Note: Most BTL lenders also require the ICR to hold at a stressed rate (typically +2–3%), and many cap company BTL lending at 65% LTV unless the ICR is strong. Check with your broker before assuming 75% LTV is available on your chosen property.
 
 If you miss the remortgage window when your fixed term expires, the lender auto-remortgages you onto the current variable rate and charges a 1% arrangement fee on the outstanding balance. On £142,500 that is £1,425. This is avoidable — set a calendar reminder 3 months before your fixed term ends.
 
@@ -419,7 +464,9 @@ Your mortgage is not your only cost. For every property you own, budget for the 
 | Buildings + landlord liability insurance | £300–£600 |
 | Maintenance (average reserve) | £500–£2,500 |
 | Void periods (see note) | £900–£1,800 |
-| **Total non-mortgage costs** | **£3,200–£6,800** |
+| SPV accountancy (sole-director company) | £800–£1,500 |
+| Companies House annual confirmation | £13 |
+| **Total non-mortgage costs** | **£4,013–£8,313** |
 
 > **Letting agent note:** Agents quote a headline monthly management rate (typically 10–12%), but the all-in annual cost is higher once you include VAT, re-letting fees (50–100% of one month's rent each time a tenancy renews or changes), and occasional admin charges. Budget 14–16% of gross rent as your annual letting agent cost. The simulation models 12% — use 15% for your own planning.
 
@@ -431,13 +478,51 @@ Add these to your annual mortgage interest and compare to your annual rent. If t
 
 Add 3% to your mortgage rate and recalculate the monthly interest. Can you still cover it from rent? If not, the property carries more rate risk than is advisable for a first purchase. The +3% stress test is deliberately conservative: the 2021–2023 rate cycle moved exactly 5.15 percentage points in 20 months. Using +2% would have felt safe in 2021 and proved wrong by 2023.
 
-At current rates (6.5% + 3% stress = 9.5%), a £142,500 mortgage costs £1,128/month in interest. Against £900/month rent, that is cashflow negative under stress — which means either a lower purchase price, a smaller mortgage, or a higher-yielding property.
+At current rates (7.0% + 3% stress = 10.0%), a £142,500 mortgage costs £1,188/month in interest. Against £900/month rent, that is cashflow negative under stress — which means either a lower purchase price, a smaller mortgage, or a higher-yielding property.
+
+**Question 4: What does the company pay in tax?**
+
+Inside an SPV, the company pays Corporation Tax on its net profit. Mortgage interest is fully deductible, which is the key advantage over personal higher-rate ownership.
+
+Example: £190,000 property at 75% LTV, 7.0% company rate
+
+| Item | Annual |
+|---|---|
+| Gross rent (£900/month) | £10,800 |
+| Letting agent 12% | −£1,296 |
+| Buildings insurance | −£450 |
+| Mortgage interest (£142,500 × 7.0%) | −£9,975 |
+| Maintenance reserve | −£1,000 |
+| Accountancy | −£1,000 |
+| Companies House | −£13 |
+| **Net profit / (loss)** | **−£2,934** |
+
+At current rates (7.0% on a 75% LTV mortgage), a £190,000 property with £900/month rent makes a pre-tax loss inside the company. The company pays no Corporation Tax in this scenario. The loss accumulates as a carried-forward loss against future profits (for example, when rates fall or rent rises).
+
+This illustrates why rent-to-value yield matters so much. A property yielding 5.7% (£900/month on £190,000) is borderline at 7.0% rates. At 6.5% yield (£1,031/month on £190,000), the same calculation would show a small profit. Run Question 4 for every property before you buy.
 
 ---
 
 ### Chapter 14 — The Purchase Process
 
 Buying a BTL property involves more steps than buying a home, and more people. Here is the sequence from offer to keys.
+
+**Step 0: Incorporate your SPV (before you start viewings)**
+
+Before you instruct a broker or view a property, incorporate your limited company. This takes 24 hours at Companies House (companies.gov.uk) and costs £50. You will need:
+
+- A company name (check availability at Companies House — avoid anything generic like "Property Investments Ltd")
+- A registered address (your home address is fine; your accountant's address is also common)
+- A business bank account (Starling Business, Mettle, or Tide work well for sole-director property companies)
+- An accountant with property company experience — appoint one before you apply for a mortgage
+
+The mortgage application goes in the company name. If you start the mortgage process in your personal name and then decide to use a company, you start again from scratch.
+
+**What to say to a broker on your first call:**
+
+"I have incorporated a limited company to hold investment property. I am looking to buy a property at around £[price] through the company. Can you advise which lenders offer company BTL and what rate I would likely qualify for, given my personal income is £[amount]?"
+
+Not all brokers are familiar with company BTL lending — if the broker cannot answer basic questions about company structure requirements, find one who can.
 
 **Step 1: Find a mortgage broker (before you make an offer)**
 
@@ -451,13 +536,13 @@ Good brokers charge a flat fee (typically £300–£500) or take a commission fr
 
 **What to say on your first call with a broker:**
 
-"I am looking to buy my first buy-to-let property at around £[price]. I have a £[deposit] deposit available. The property is in [region]. I am employed / self-employed and my income is roughly £[amount]. Can you tell me what mortgage rate I would likely qualify for, and whether any lenders would be a problem given my circumstances?"
+"I have a limited company set up for property investment. I am looking to buy my first buy-to-let property through the company at around £[price]. The company has been incorporated [X weeks/months]. I have a £[deposit] deposit available to lend into the company. The property is in [region]. My personal income is roughly £[amount]. Can you tell me what company BTL rate I would likely qualify for, and whether any lenders would have issues with a newly incorporated company?"
 
-Ask the broker specifically: which lenders will accept this property type (BTL / HMO / new build)? Is there a minimum income requirement? What happens if the rent-to-mortgage ratio is borderline — are there lenders who assess differently? A broker who cannot answer these clearly is not the right broker.
+Ask the broker specifically: which lenders will accept a new SPV with no trading history? Is there a minimum personal income requirement? What LTV is available on company BTL? What is the stress test rate used for the ICR calculation? A broker who cannot answer these clearly does not regularly place company BTL mortgages.
 
 **What to say when you instruct a solicitor:**
 
-"I am purchasing a buy-to-let property at £[price]. I will be using a mortgage. Please confirm you can act for me and my mortgage lender, and provide your full quote including search fees and SDLT calculation." Ask: how many BTL purchases have you handled in the last 12 months? Do you handle deposit protection setup? What is your target timeline for completion?
+"I am purchasing a buy-to-let property at £[price] through my limited company [Company Name Ltd, Company No. XXXXXXXX]. The company will be the registered buyer and the mortgage will be in the company name. Please confirm you can act for the company and my mortgage lender, and provide your full quote including search fees and SDLT calculation." Ask: how many company BTL purchases have you handled in the last 12 months? Do you handle deposit protection setup for company landlords? What is your target timeline for completion?
 
 Slow conveyancing kills deals. A solicitor who has BTL experience handles title issues (shared drives, restrictive covenants, leasehold complications) without needing to pause and research them.
 
@@ -589,6 +674,10 @@ Running a rental property costs money beyond the mortgage. Here is a complete pi
 | Gas Safety Certificate (annual legal requirement) | £70–£150 |
 | EICR (every 5 years, budget annually) | £30–£60 |
 | Ground rent / service charge (leasehold only) | Varies — check before buying |
+| SPV accountancy | £800–£1,500 |
+| Companies House annual confirmation | £13 |
+
+> **Planning note:** Budget £1,500 for accountancy in year one (the first set of accounts takes more time), and £1,000–£1,200 in subsequent years for a straightforward one-property company.
 
 **Variable costs**
 
@@ -875,7 +964,7 @@ At rates above 6.06%, this property's ICR falls below 1.25. This tells you how m
 
 ### Appendix F — The Full Risk Scoring Model
 
-For readers who want to score their property or portfolio more rigorously, this appendix provides the six-pillar composite risk model used in the experienced investor version of this book.
+For readers who want to score their property or portfolio more rigorously, this appendix provides the six-pillar composite risk model used in the simulation scoring engine.
 
 **The six pillars:**
 
@@ -937,7 +1026,8 @@ For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Gu
 | SDLT | Stamp Duty Land Tax — paid by the buyer; higher rates for additional properties |
 | Section 8 | Notice served when there are legal grounds for possession, typically rent arrears |
 | Section 21 | Notice to end a tenancy without grounds — historically the most common way landlords recovered possession. The Renters Rights Act (expected 2025) abolishes Section 21, replacing it with a reformed Section 8 process. After abolition, landlords will need specific legal grounds to recover possession (e.g. wanting to sell, moving in a family member, or persistent rent arrears). Check the current status of this legislation before relying on any eviction process. |
-| Section 24 | Tax rule limiting mortgage interest relief to basic rate for personally-held portfolios |
+| Section 24 | Tax rule that removed mortgage interest deductibility for higher-rate personal landlords (phased 2015–2020). Does not apply to limited companies — the primary reason serious landlords use SPV structures. |
+| SPV | Special Purpose Vehicle — a UK limited company (SIC 68100/68209) set up solely to hold investment property. Pays corporation tax (19–25%), not income tax. Mortgage interest is fully deductible. This book assumes SPV ownership throughout. |
 | SVR | Standard Variable Rate — lender's default rate, applied when a fixed term expires without remortgage |
 | Void | Period when the property is empty and not generating rent |
 | ZIRP | Zero Interest Rate Policy — base rate at 0.1–0.5%, held 2009–2021 |
@@ -947,8 +1037,11 @@ For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Gu
 ### Appendix I — Your First Property Checklist
 
 **Before you view**
+- [ ] SPV incorporated at Companies House (£50, 24 hours)
+- [ ] Business bank account opened
+- [ ] Accountant with property company experience appointed
 - [ ] Budget calculation complete (Chapter 1)
-- [ ] Decision in Principle obtained from a mortgage broker
+- [ ] Decision in Principle obtained from a mortgage broker who places company BTL
 - [ ] Target area researched; letting agent consulted on void periods and demand
 - [ ] EPC requirement understood (C or D for first property)
 
@@ -992,7 +1085,8 @@ For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Gu
 
 | Item | Typical cost |
 |---|---|
-| SDLT | 3–8% of purchase price (see Appendix C) |
+| SPV incorporation (Companies House) | £50 |
+| SDLT | 5–10% of purchase price (Oct 2024 rates: 5% surcharge on all bands; see Appendix C) |
 | Solicitor | £1,000–£1,500 |
 | Survey (Level 2) | £350–£600 |
 | Mortgage broker | £0–£500 |
@@ -1008,6 +1102,8 @@ For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Gu
 | EICR (5-year cycle, reserve annually) | £30–£60 |
 | Maintenance reserve | £500–£2,500 |
 | Void reserve (1 month) | Monthly rent amount |
+| SPV accountancy | £800–£1,500 |
+| Companies House annual confirmation | £13 |
 
 **On sale**
 

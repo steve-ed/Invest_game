@@ -1,4 +1,4 @@
-MORTGAGE_SPREAD  = 0.018   # lender margin above BoE base rate
+MORTGAGE_SPREAD  = 0.022   # lender margin above BoE base rate (company BTL premium included)
 MGMT_FEE_RATE    = 0.12    # letting agent full management fee
 INSURANCE_RATE   = 0.0015  # buildings + landlord liability insurance (% of value per year)
 
