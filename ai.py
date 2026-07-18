@@ -22,14 +22,37 @@ DEMO_SELL_RENT_TICKS  = 3       # consecutive negative rent growth ticks before 
 
 
 class AIController:
+    # Strategies that participate in auction bidding
+    _AUCTION_STRATEGIES = {"brrr", "value_add"}
+
     def step(self, state, tick):
         owned_all = {pid for a in state.actors.values() for pid in a.portfolio}
         available = [p for p in state.properties if p.id not in owned_all and not p.is_auction]
+        auctions  = [p for p in state.properties if p.id not in owned_all and p.is_auction]
         events = []
         for actor_id, actor in state.actors.items():
             if actor_id == "player":
                 continue
             action, property_id, ltv = self._decide(state, actor, available)
+
+            # Auction bid: brrr and value_add also bid on auction lots if no regular action taken
+            if action == "hold" and actor.strategy in self._AUCTION_STRATEGIES and auctions:
+                auction_action, auction_pid, auction_ltv, bid_premium = \
+                    self._decide_auction(state, actor, auctions)
+                if auction_action == "buy":
+                    events.append({
+                        "type": "ai_action",
+                        "tick": tick,
+                        "actor_id": actor_id,
+                        "action": "buy",
+                        "property_id": auction_pid,
+                        "ltv": auction_ltv,
+                        "bid_premium": bid_premium,
+                        "detail": f"AI {actor.name} [{actor.strategy}]: auction buy {auction_pid}",
+                    })
+                    auctions = [p for p in auctions if p.id != auction_pid]
+                    continue
+
             events.append({
                 "type": "ai_action",
                 "tick": tick,
@@ -296,6 +319,50 @@ class AIController:
                 if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop):
                     return "buy", prop.id, LTV_MODERATE
         return "hold", None, 0.0
+
+    def _decide_auction(self, state, actor, auctions):
+        """Evaluate auction lots for brrr and value_add strategies.
+
+        Auction properties are already discounted to ~75% of market value, so
+        the strategy bids at asking price (0% premium) for cash purchases.
+        Returns (action, property_id, ltv, bid_premium).
+        """
+        rate = state.macro.interest_rate
+        strategy = actor.strategy
+
+        # Rate gates mirror the regular buy gates for each strategy
+        if strategy == "brrr" and rate > BRRR_RATE_GATE:
+            return "hold", None, 0.0, 0.0
+        if strategy == "brrr" and len(actor.portfolio) >= BRRR_RECYCLE_SIZE:
+            return "hold", None, 0.0, 0.0
+
+        # Score auctions: distressed/high-yield lots first, same logic as regular buys
+        def _auction_score(p):
+            upgrade_cost = _BRRR_UPGRADE_COST.get(p.epc_band, 0) if p.epc_band >= 4 else 0
+            projected_rent = p.rent * (1.10 if upgrade_cost > 0 else 1.0) * (1 - MGMT_FEE_RATE)
+            return (projected_rent * 12) / (p.current_value + upgrade_cost) if p.current_value > 0 else 0
+
+        # value_add also targets value_add archetype; brrr focuses on distressed/high-yield
+        if strategy == "value_add":
+            candidates = sorted(
+                [p for p in auctions if p.epc_band >= 4 or p.archetype in ("value_add", "hmo")],
+                key=_auction_score, reverse=True,
+            )
+        else:  # brrr
+            candidates = sorted(
+                [p for p in auctions if p.epc_band >= 4 or p.archetype in ("hmo", "short_let")],
+                key=_auction_score, reverse=True,
+            )
+        if not candidates:
+            candidates = sorted(auctions, key=_auction_score, reverse=True)
+
+        for prop in candidates:
+            bid_price = prop.current_value  # 0% premium — auctions already at discount
+            upgrade_reserve = _BRRR_UPGRADE_COST.get(prop.epc_band, 0) if prop.epc_band >= 4 else 0
+            if actor.cash >= bid_price + upgrade_reserve + expected_maintenance_reserve(prop):
+                return "buy", prop.id, 0.0, 0.0  # auction buys are cash (no mortgage)
+
+        return "hold", None, 0.0, 0.0
 
     def _brrr_worst_hold(self, actor, prop_map):
         """Least capital-appreciated property in portfolio."""
