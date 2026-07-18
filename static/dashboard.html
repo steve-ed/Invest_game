@@ -78,6 +78,7 @@
   .tag-rent  { background: #3a2a1a; color: #ecad0a; }
   .tag-info  { background: #1a2a4a; color: #209dd7; }
   .tag-void  { background: #2a1a3a; color: #b07dd7; }
+  .tag-icr   { background: #3a0a0a; color: #ff5252; border: 1px solid #ff5252; }
   .tag-maint { background: #2a2010; color: #c8841a; }
 
   #era-banner {
@@ -625,6 +626,7 @@ const EVENT_TAG_CLASS = {
   void_period:    "tag-void",  maintenance:      "tag-maint",
   epc_force_sell: "tag-shock", epc_warning:      "tag-shock",
   epc_mandate:    "tag-info",
+  icr_warning:    "tag-icr",  icr_force_sell:   "tag-icr",
 };
 
 const EVENT_STRATEGY_IMPACT = {
@@ -868,19 +870,23 @@ function updateEventFeed(currentEvents) {
   const el = document.getElementById("event-feed");
   updateEconomyNews(currentEvents);
   if (!currentEvents.length) { el.innerHTML = '<div class="event-item" style="color:#888">Quiet turn — no major events</div>'; return; }
-  // Priority: EPC first, then player void/maint, then macro, then AI void/maint
+  // Priority: ICR crises first, then EPC, then player void/maint, then macro
+  const icrCrises       = currentEvents.filter(e => (e.type === "icr_warning" || e.type === "icr_force_sell") && e.actor_id === "player");
   const epcMandate      = currentEvents.filter((e,i,arr) => e.type === "epc_mandate" && arr.findIndex(x => x.type === "epc_mandate") === i);
   const epcWarnings     = currentEvents.filter(e => e.type === "epc_warning" && e.actor_id === "player");
   const playerVoidMaint = currentEvents.filter(e => (e.type === "void_period" || e.type === "maintenance") && e.actor_id === "player");
   const macro           = currentEvents.filter(e =>
     !["void_period","maintenance","actor_step","property_valuation","ai_action","player_action",
-      "epc_warning","epc_mandate"].includes(e.type));
+      "epc_warning","epc_mandate","icr_warning","icr_force_sell"].includes(e.type));
   const otherVoidMaint  = currentEvents.filter(e => (e.type === "void_period" || e.type === "maintenance") && e.actor_id !== "player");
-  const ordered = [...epcMandate, ...epcWarnings, ...playerVoidMaint, ...macro, ...otherVoidMaint];
+  const ordered = [...icrCrises, ...epcMandate, ...epcWarnings, ...playerVoidMaint, ...macro, ...otherVoidMaint];
   el.innerHTML = (ordered.length ? ordered : currentEvents).slice(0, 1).map(e => {
     const cls = EVENT_TAG_CLASS[e.type] || "tag-info";
-    const LABELS = { void_period: "void", maintenance: "maintenance",
-                     epc_force_sell: "EPC void", epc_warning: "EPC warning", epc_mandate: "EPC mandate" };
+    const LABELS = {
+      void_period: "void", maintenance: "maintenance",
+      epc_force_sell: "EPC void", epc_warning: "EPC warning", epc_mandate: "EPC mandate",
+      icr_warning:   "ICR WARNING", icr_force_sell: "FORCED SALE",
+    };
     const label = LABELS[e.type] || e.type.replace(/_/g, " ");
     const isPlayer = e.actor_id === "player";
     const impact = EVENT_STRATEGY_IMPACT[e.type];
@@ -889,8 +895,9 @@ function updateEventFeed(currentEvents) {
       if (impact.helps.length) impactHtml += ` <span style="font-size:9px;color:#4caf50;">↑ ${impact.helps.join(', ')}</span>`;
       if (impact.hurts.length) impactHtml += ` <span style="font-size:9px;color:#f44336;">↓ ${impact.hurts.join(', ')}</span>`;
     }
-    const border = isPlayer && (e.type === "void_period" || e.type === "maintenance" || e.type === "epc_force_sell")
-      ? 'border-left:2px solid #b07dd7;padding-left:6px;' : '';
+    const icrEvent = e.type === "icr_warning" || e.type === "icr_force_sell";
+    const border = isPlayer && (e.type === "void_period" || e.type === "maintenance" || e.type === "epc_force_sell" || icrEvent)
+      ? `border-left:2px solid ${icrEvent ? '#ff5252' : '#b07dd7'};padding-left:6px;` : '';
     return `<div class="event-item" style="${border}"><span class="event-tag ${cls}">${label}</span>${e.detail}${impactHtml}</div>`;
   }).join("");
 }

@@ -23,9 +23,12 @@ from data.era_narratives import ERA_NARRATIVES
 
 TURN_STATE_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "turn_state.json")
 READY_PATH       = os.path.join(os.path.dirname(__file__), "visualisation", "ready.json")
-EPC_GRACE_TICKS          = 4
-MORTGAGE_SPREAD          = 0.022   # lender margin above BoE base rate (company BTL premium included)
+EPC_GRACE_TICKS           = 4
+MORTGAGE_SPREAD           = 0.022  # lender margin above BoE base rate (company BTL premium included)
 PURCHASE_COMPLETION_COSTS = 2_050  # solicitor £1,200 + survey £500 + broker £350
+ICR_HARD_THRESHOLD        = 1.0    # rent:interest ratio below which breach clock starts
+ICR_FORCE_SELL_TICKS      = 2      # consecutive ticks in breach before lender forces sale
+DISTRESSED_DISCOUNT       = 0.10   # price haircut on forced sale
 _VOID_BY_ARCHETYPE = {"btl": 0, "new_build": 0, "hmo": 1, "value_add": 1, "short_let": 1}
 
 _MARKET_NATIONAL_BASE = 165_000
@@ -152,6 +155,88 @@ def _eval_comment(player_action, adv_action, adv_prop, rate, scenario,
         return f"Refi {adv_prop} to extract equity and stay competitive."
 
     return f"Advises '{adv_action}' ({adv_strategy} strategy, {pos})."
+
+
+def _check_icr_breaches(state, tick):
+    """Check every mortgaged, non-void property for ICR < 1.0.
+
+    First consecutive breach: warning event — player has one tick to sell or refi.
+    Second consecutive breach: lender forces sale at a 10% distressed discount,
+    teaching the book's core lesson that ICR failure leads to intervention, not
+    just a score penalty at the end.
+
+    Void periods are excluded: rent loss is already captured by the void mechanic.
+    """
+    events = []
+    prop_map  = {p.id: p for p in state.properties}
+    owner_map = {pid: aid for aid, a in state.actors.items() for pid in a.portfolio}
+
+    for prop in state.properties:
+        if prop.mortgage_balance <= 0:
+            prop.icr_breach_ticks = 0
+            continue
+        if prop.epc_void or prop.void_ticks_remaining > 0:
+            continue  # skip — void mechanic already captures the income loss
+
+        owner_id = owner_map.get(prop.id)
+        if not owner_id:
+            prop.icr_breach_ticks = 0
+            continue
+
+        annual_interest = prop.mortgage_balance * prop.mortgage_rate
+        icr = (prop.rent * 12) / annual_interest if annual_interest > 0 else 999.0
+
+        if icr < ICR_HARD_THRESHOLD:
+            prop.icr_breach_ticks += 1
+            shortfall_yr = round(annual_interest - prop.rent * 12)
+
+            if prop.icr_breach_ticks == 1:
+                events.append({
+                    "type":        "icr_warning",
+                    "tick":        tick,
+                    "property_id": prop.id,
+                    "actor_id":    owner_id,
+                    "detail": (
+                        f"{prop.id} ({prop.region}): rent £{prop.rent:,.0f}/mo does not cover "
+                        f"mortgage interest (ICR {icr:.2f}x — needs 1.0x). "
+                        f"Annual shortfall £{shortfall_yr:,}. "
+                        f"Sell or refinance next turn or lender will force sale."
+                    ),
+                })
+
+            elif prop.icr_breach_ticks >= ICR_FORCE_SELL_TICKS:
+                actor = state.actors.get(owner_id)
+                if actor and prop.id in actor.portfolio:
+                    sale_price = round(prop.current_value * (1 - DISTRESSED_DISCOUNT))
+                    agent_fee  = round(sale_price * 0.015)
+                    net        = round(sale_price - prop.mortgage_balance - agent_fee)
+                    actor.cash += net
+                    actor.total_transaction_costs += agent_fee
+                    prop.mortgage_balance    = 0.0
+                    prop.mortgage_rate       = 0.0
+                    prop.is_fixed_rate       = False
+                    prop.icr_breach_ticks    = 0
+                    actor.portfolio.remove(prop.id)
+                    equity_note = (
+                        f" You absorbed a £{abs(net):,} negative equity loss."
+                        if net < 0 else
+                        f" Net proceeds after mortgage and fees: £{net:,}."
+                    )
+                    events.append({
+                        "type":        "icr_force_sell",
+                        "tick":        tick,
+                        "property_id": prop.id,
+                        "actor_id":    owner_id,
+                        "detail": (
+                            f"{prop.id} ({prop.region}): lender forced sale at "
+                            f"£{sale_price:,} (10% distressed discount on £{round(prop.current_value):,})."
+                            + equity_note
+                        ),
+                    })
+        else:
+            prop.icr_breach_ticks = 0
+
+    return events
 
 
 def _default_properties():
@@ -683,7 +768,8 @@ class SimulationKernel:
                                                   "price_crash", "price_surge",
                                                   "rent_surge", "rent_squeeze",
                                                   "epc_mandate", "epc_warning",
-                                                  "epc_void")],
+                                                  "epc_void",
+                                                  "icr_warning", "icr_force_sell")],
             "actors": actors_data,
             "actors_state": actors_state,
             "last_actions": dict(self.state.last_ai_actions),
@@ -938,6 +1024,8 @@ class SimulationKernel:
                                      player_rank, score_gap, adv_strategy, ticks_remaining,
                                  ),
             })
+
+            tick_events += _check_icr_breaches(self.state, tick)
 
             tick_events += self.branching.step(self.state, tick)
             tick_events += self.scenario_events.step(self.state, tick)

@@ -37,6 +37,7 @@ class Property:
     renovated: bool = False           # tracks whether property has been renovated (once only)
     is_auction: bool = False          # marks property as auction listing (removed after 1 tick if unsold)
     bedrooms: int = 3
+    icr_breach_ticks: int = 0        # consecutive ticks where rent < mortgage interest (non-void, mortgaged)
     hpi_factor: float = 1.0          # regional HPI sensitivity multiplier
 
 
