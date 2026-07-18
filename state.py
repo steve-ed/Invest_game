@@ -54,7 +54,9 @@ class ActorState:
     total_void_losses: float = 0.0
     total_maintenance_costs: float = 0.0
     total_insurance_paid: float = 0.0
+    total_tax_paid: float = 0.0
     initial_wealth: float = 0.0
+    tax_mode: str = "none"              # none | basic | higher | company
 
 
 @dataclass

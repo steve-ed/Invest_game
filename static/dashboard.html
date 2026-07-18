@@ -429,6 +429,16 @@
   <!-- Start button pinned at bottom via flexbox — never scrolls -->
   <div style="flex-shrink:0;background:linear-gradient(transparent,#0a1018 40%);padding:24px 24px 16px;text-align:center;">
     <div id="waiting-msg" style="display:none;margin-bottom:12px;padding:10px 16px;background:#1a2733;border:1px solid #ecad0a;border-radius:6px;color:#ecad0a;font-size:12px;line-height:1.5;"></div>
+    <div style="margin-bottom:10px;">
+      <div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Your tax situation <span style="color:#444;font-style:italic;text-transform:none;">(affects net returns)</span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+        <button class="tax-sel-btn" data-tax="none"    onclick="selectTaxMode('none')"    style="padding:6px 4px;font-size:9px;background:#0f1923;color:#4caf50;border:1px solid #4caf50;border-radius:3px;cursor:pointer;">No tax</button>
+        <button class="tax-sel-btn" data-tax="basic"   onclick="selectTaxMode('basic')"   style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Basic 20%</button>
+        <button class="tax-sel-btn" data-tax="higher"  onclick="selectTaxMode('higher')"  style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Higher 40%</button>
+        <button class="tax-sel-btn" data-tax="company" onclick="selectTaxMode('company')" style="padding:6px 4px;font-size:9px;background:#0f1923;color:#888;border:1px solid #2a3f50;border-radius:3px;cursor:pointer;">Company 25%</button>
+      </div>
+      <div id="tax-note" style="font-size:9px;color:#888;margin-top:5px;line-height:1.4;">No tax modelled — use Basic 20% or Higher 40% (S.24) to see real net returns.</div>
+    </div>
     <div style="margin-bottom:12px;">
       <input id="player-name-input" type="text" maxlength="30" placeholder="Enter your name to play"
         style="width:100%;padding:10px 14px;font-size:14px;background:#0f1923;color:#e0e0e0;
@@ -669,6 +679,7 @@ const _api = _gameId ? `/game/${_gameId}` : '';
 let lastTick         = -1;
 let _gameEnded       = false;
 let _gameStarted     = false;
+let _selectedTaxMode = 'none';
 let axisRanges       = null;
 let _seqTimer        = null;
 let _highlightTimer  = null;
@@ -956,6 +967,29 @@ function buildDebriefHTML(data) {
         <div style="margin-top:8px;padding:7px 10px;background:#0a1520;border-radius:4px;text-align:center;">
           <span style="font-size:12px;color:${diffCol};font-weight:700;">${diffStr}</span>
           <span style="font-size:10px;color:#888;"> vs the benchmark</span>
+        </div>
+      </div>`);
+  }
+
+  // ── 2b. Tax impact (player only) ─────────────────────────────────────────
+  const taxPaid  = data.player_state?.total_tax_paid || 0;
+  const taxMode  = data.player_state?.tax_mode || 'none';
+  const TAX_LABELS = { basic: 'Basic rate (20%)', higher: 'Higher rate (40%) · Section 24', company: 'Company (25%)' };
+  if (taxPaid > 0 && taxMode !== 'none') {
+    const taxLabel = TAX_LABELS[taxMode] || taxMode;
+    sections.push(`
+      <div style="margin-top:8px;background:#111c28;border-radius:6px;border:1px solid #2a3f50;padding:12px 16px;">
+        <div style="font-size:10px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Tax Impact — ${taxLabel}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div style="background:#0a1520;border-radius:4px;padding:8px 10px;">
+            <div style="font-size:8px;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">Total tax paid</div>
+            <div style="font-size:14px;font-weight:700;color:#f44336;">−£${(taxPaid/1000).toFixed(0)}k</div>
+          </div>
+          <div style="background:#0a1520;border-radius:4px;padding:8px 10px;">
+            <div style="font-size:8px;color:#888;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px;">Score without tax</div>
+            <div style="font-size:14px;font-weight:700;color:#ecad0a;">${player ? `+${fk(player.final_score + taxPaid)}` : '—'}</div>
+            <div style="font-size:9px;color:#555;margin-top:2px;">what you'd have scored tax-free</div>
+          </div>
         </div>
       </div>`);
   }
@@ -1587,6 +1621,12 @@ function renderAnalyticsPanel(actorsState) {
         ${row('ROE',          order.map(id => pct(a(id).return_on_equity, 8, 4)))}
         ${row('CoC Return',   order.map(id => pct(a(id).cash_on_cash, 8, 4)))}
         ${row('Refi Headrm',  order.map(id => refiCell(id)), 'Refi Headrm')}
+        ${(_lastPs?.tax_mode && _lastPs.tax_mode !== 'none') ? row('Tax/yr', order.map(id => {
+            if (id !== 'player') return '<span style="color:#888;">—</span>';
+            const t = _lastPs?.tax_annual_est;
+            return t == null ? '<span style="color:#888;">—</span>'
+              : `<span style="font-size:10px;font-weight:600;color:#f44336;">−£${(t/1000).toFixed(0)}k</span>`;
+          })) : ''}
         ` : ''}
         ${row('Cash',         order.map(id => cashCell(id)))}
       </tbody>
@@ -1969,17 +2009,23 @@ function playerSelectAction(type) {
       </div>`).join('')
       : '<div style="font-size:10px;color:#888;padding:8px;">No properties need upgrading (all EPC C or better)</div>';
   } else if (type === 'refi') {
-    const rows = (_lastPs?.portfolio || []).filter(p => (p.refi_headroom || 0) > 0);
-    picker.innerHTML = rows.length ? rows.map(p => `
-      <div id="pick-${p.id}" onclick="playerSelectProp('${p.id}')" style="cursor:pointer;padding:4px 8px;border-bottom:1px solid #0f1923;font-size:10px;display:flex;justify-content:space-between;align-items:center;">
+    const rows = (_lastPs?.portfolio || []).filter(p => p.refi_eligible || (p.refi_headroom || 0) > 0);
+    picker.innerHTML = rows.length ? rows.map(p => {
+      const release = p.refi_headroom || 0;
+      const ltv = Math.round(p.ltv_pct || 0);
+      const info = release > 500
+        ? `<span style="color:#9c27b0;">+£${(release/1000).toFixed(0)}k release avail</span>`
+        : `<span style="color:#ecad0a;">${ltv}% LTV · de-risk or lock rate</span>`;
+      return `<div id="pick-${p.id}" onclick="playerSelectProp('${p.id}')" style="cursor:pointer;padding:4px 8px;border-bottom:1px solid #0f1923;font-size:10px;display:flex;justify-content:space-between;align-items:center;">
         <span>
           <span style="font-family:monospace;font-size:9px;color:#4a7a9b;">${p.id}</span>
           <span style="color:#e0e0e0;margin-left:4px;">${p.region}</span>
           <span class="arch-badge">${p.archetype}</span>
         </span>
-        <span style="color:#9c27b0;font-size:10px;">+£${(p.refi_headroom/1000).toFixed(0)}k release</span>
-      </div>`).join('')
-      : '<div style="font-size:10px;color:#888;padding:8px;">No properties eligible for refi (fixed rate or no equity to release)</div>';
+        ${info}
+      </div>`;
+    }).join('')
+      : '<div style="font-size:10px;color:#888;padding:8px;">No properties eligible for refi (all on fixed rate)</div>';
   } else if (type === 'renovate') {
     const rows = (_lastPs?.portfolio || []).filter(p => !p.renovated);
     picker.innerHTML = rows.length ? rows.map(p => `
@@ -2091,15 +2137,43 @@ function playerSelectProp(id) {
     playerSelectLtv(0.50); // default to 50% LTV; user can change before confirming
   } else if (_pendingAction === 'refi') {
     document.getElementById('ltv-picker').style.display = 'block';
-    playerSelectLtv(0.50);
     const prop = (_lastPs?.portfolio || []).find(p => p.id === id);
-    const release = prop ? (prop.refi_headroom || 0) : 0;
-    const confirmBtn = document.getElementById('btn-confirm');
-    confirmBtn.style.display = 'block';
-    confirmBtn.textContent = `Confirm Refi · +£${(release/1000).toFixed(0)}k released`;
+    if (prop) {
+      // Default LTV to the nearest available option from current LTV
+      const curLtv = (prop.ltv_pct || 0) / 100;
+      const opts = [0, 0.50, 0.65, 0.75];
+      const nearest = opts.reduce((a, b) => Math.abs(b - curLtv) < Math.abs(a - curLtv) ? b : a);
+      playerSelectLtv(nearest);
+    } else {
+      playerSelectLtv(0.50);
+    }
+    updateRefiConfirmButton();
   } else {
     document.getElementById('ltv-picker').style.display = 'none';
     document.getElementById('btn-confirm').style.display = 'block';
+  }
+}
+
+function updateRefiConfirmButton() {
+  if (_pendingAction !== 'refi' || !_pendingPropId) return;
+  const prop = (_lastPs?.portfolio || []).find(p => p.id === _pendingPropId);
+  if (!prop) return;
+  const newBalance = prop.value * _pendingLtv;
+  const delta      = newBalance - prop.mortgage;
+  const confirmBtn = document.getElementById('btn-confirm');
+  confirmBtn.style.display = 'block';
+  if (_pendingLtv === 0) {
+    confirmBtn.textContent = `Confirm Refi · Clear mortgage · £1.5k fee`;
+    confirmBtn.style.color = '#4caf50';
+  } else if (delta > 500) {
+    confirmBtn.textContent = `Confirm Refi · Release +£${((delta - 1500)/1000).toFixed(1)}k`;
+    confirmBtn.style.color = '#9c27b0';
+  } else if (delta < -500) {
+    confirmBtn.textContent = `Confirm Refi · Pay down £${(Math.abs(delta)/1000).toFixed(1)}k + £1.5k fee`;
+    confirmBtn.style.color = '#ecad0a';
+  } else {
+    confirmBtn.textContent = `Confirm Refi · Lock new rate · £1.5k fee`;
+    confirmBtn.style.color = '#aaa';
   }
 }
 
@@ -2111,7 +2185,11 @@ function playerSelectLtv(ltv) {
     b.style.color        = selected ? '#4caf50'  : '#888';
     b.style.borderColor  = selected ? '#4caf50'  : '#2a3f50';
   });
-  document.getElementById('btn-confirm').style.display = 'block';
+  if (_pendingAction === 'refi') {
+    updateRefiConfirmButton();
+  } else {
+    document.getElementById('btn-confirm').style.display = 'block';
+  }
 }
 
 function playerSelectBidPremium(premium) {
@@ -2304,6 +2382,25 @@ async function loadIntroOpponents() {
   }
 }
 
+const TAX_NOTES = {
+  none:    'No tax modelled — use Basic 20% or Higher 40% (S.24) to see real net returns.',
+  basic:   'Basic rate (20%): mortgage interest fully deductible. Typical for lower earners or company-structured portfolios.',
+  higher:  'Higher rate with Section 24: tax at 40% on gross rent, 20% credit on mortgage interest. This is the S.24 trap — can turn cashflow-positive into cashflow-negative.',
+  company: 'Company (25% corp tax): full interest deductibility, but extraction costs and higher mortgage rates apply.',
+};
+
+function selectTaxMode(mode) {
+  _selectedTaxMode = mode;
+  document.querySelectorAll('.tax-sel-btn').forEach(b => {
+    const sel = b.dataset.tax === mode;
+    b.style.color       = sel ? '#4caf50' : '#888';
+    b.style.borderColor = sel ? '#4caf50' : '#2a3f50';
+    b.style.background  = sel ? '#0a2010' : '#0f1923';
+  });
+  const note = document.getElementById('tax-note');
+  if (note) note.textContent = TAX_NOTES[mode] || '';
+}
+
 async function startGame() {
   const btn  = document.getElementById("btn-start-game");
   const name = (document.getElementById("player-name-input")?.value || "").trim();
@@ -2319,7 +2416,7 @@ async function startGame() {
     const resp = await fetch(`${_api}/ready`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, tax_mode: _selectedTaxMode }),
     });
     const data = await resp.json();
     if (!data.ok) {

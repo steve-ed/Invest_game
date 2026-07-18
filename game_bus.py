@@ -28,6 +28,8 @@ class GameBus:
         self._game_active_lock = threading.Lock()
         self._player_name  = "You"
         self._player_name_lock = threading.Lock()
+        self._tax_mode     = "none"
+        self._tax_mode_lock = threading.Lock()
         self._last_poll    = None
         self._poll_lock    = threading.Lock()
 
@@ -134,3 +136,14 @@ class GameBus:
     def get_player_name(self):
         with self._player_name_lock:
             return self._player_name
+
+    # ── Tax mode ─────────────────────────────────────────────────────────────
+
+    def set_tax_mode(self, mode: str):
+        _valid = {"none", "basic", "higher", "company"}
+        with self._tax_mode_lock:
+            self._tax_mode = mode if mode in _valid else "none"
+
+    def get_tax_mode(self):
+        with self._tax_mode_lock:
+            return self._tax_mode

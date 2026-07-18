@@ -425,6 +425,7 @@ class SimulationKernel:
                         "ltv_pct": round(p.mortgage_balance / p.current_value * 100, 1) if p.current_value > 0 else 0.0,
                         "equity": round(p.current_value - p.mortgage_balance, 0),
                         "refi_headroom": round(max(0.0, p.current_value * 0.75 - p.mortgage_balance), 0) if p.fixed_ticks_remaining == 0 else 0,
+                        "refi_eligible": p.fixed_ticks_remaining == 0 and p.mortgage_balance > 0,
                         "epc_upgrade_cost": _epc_upgrade_cost(p.epc_band),
                         "void_ticks_remaining": p.void_ticks_remaining,
                         "age": p.age,
@@ -648,6 +649,22 @@ class SimulationKernel:
             "stress_2pct_net": round(net_cf - total_mortgage_balance * 0.02 / 12, 0),
         }
 
+        # Estimated annual income tax (for display — based on current portfolio state)
+        _tax_mode = getattr(player, 'tax_mode', 'none') if player else 'none'
+        _tax_annual_est = 0.0
+        if _tax_mode != 'none' and player:
+            for pid in player.portfolio:
+                p = prop_map.get(pid)
+                if p and not p.epc_void and p.void_ticks_remaining == 0:
+                    _net_ann      = p.rent * 12 * (1 - 0.12)
+                    _interest_ann = p.mortgage_balance * p.mortgage_rate if p.mortgage_balance > 0 else 0.0
+                    if _tax_mode == 'basic':
+                        _tax_annual_est += max(0.0, (_net_ann - _interest_ann) * 0.20)
+                    elif _tax_mode == 'higher':
+                        _tax_annual_est += max(0.0, _net_ann * 0.40 - _interest_ann * 0.20)
+                    elif _tax_mode == 'company':
+                        _tax_annual_est += max(0.0, (_net_ann - _interest_ann) * 0.25)
+
         data = {
             "tick": self.state.tick,
             "total_ticks": self.turns,
@@ -687,6 +704,9 @@ class SimulationKernel:
                 "rate_stress": rate_stress,
                 "portfolio_ltv_pct": portfolio_ltv_pct,
                 "icr": icr,
+                "tax_mode": _tax_mode,
+                "tax_annual_est": round(_tax_annual_est, 0),
+                "total_tax_paid": round(player.total_tax_paid, 0) if player else 0,
                 "analytics": {
                     "gross_yield_pct": gross_yield_pct,
                     "unrealised_gain": unrealised_gain,
@@ -742,10 +762,11 @@ class SimulationKernel:
             if not self._bus.wait_ready(timeout=300):
                 print("Startup timeout — player did not start within 5 minutes.", flush=True)
                 return {"leaderboard": [], "aborted": True}
-            # Apply player name entered on the intro screen
+            # Apply player name and tax mode entered on the intro screen
             player_name = self._bus.get_player_name()
             if player_name and player_name != "You":
                 self.state.actors["player"].name = player_name
+            self.state.actors["player"].tax_mode = self._bus.get_tax_mode()
         else:
             if os.path.exists(READY_PATH):
                 os.remove(READY_PATH)
@@ -1180,14 +1201,15 @@ class SimulationKernel:
                     prop.renovated = True
 
         elif action == "refi" and property_id in actor.portfolio:
-            if prop.fixed_ticks_remaining == 0:
-                new_balance = prop.current_value * ltv
-                released = new_balance - prop.mortgage_balance
-                if released > 0:
-                    fee = 1_500
-                    actor.cash += released - fee
+            if prop.fixed_ticks_remaining == 0 and prop.mortgage_balance > 0:
+                new_balance = round(prop.current_value * ltv)
+                delta = new_balance - prop.mortgage_balance  # positive = release, negative = pay down
+                fee = 1_500
+                cash_needed = fee + max(0, -delta)  # fee plus any pay-down amount
+                if actor.cash >= cash_needed:
+                    actor.cash += delta - fee
                     actor.total_transaction_costs += fee
-                    prop.mortgage_balance = new_balance
+                    prop.mortgage_balance = max(0.0, float(new_balance))
                     prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                     prop.is_fixed_rate = True
                     prop.fixed_ticks_remaining = 4

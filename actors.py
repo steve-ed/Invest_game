@@ -60,6 +60,30 @@ class ActorManager:
                     actor.cash += income
                     actor.total_rent_received += income
 
+            # Income tax on rental profit (player only, based on tax_mode)
+            tax_mode = getattr(actor, 'tax_mode', 'none')
+            if tax_mode != 'none':
+                for pid in actor.portfolio:
+                    prop = prop_map.get(pid)
+                    if prop is None or prop.epc_void or prop.void_ticks_remaining > 0:
+                        continue
+                    net_6m      = prop.rent * 6 * (1 - MGMT_FEE_RATE)
+                    interest_6m = prop.mortgage_balance * prop.mortgage_rate / 2 if prop.mortgage_balance > 0 else 0.0
+                    if tax_mode == 'basic':
+                        # Full mortgage interest relief at basic rate
+                        tax = max(0.0, (net_6m - interest_6m) * 0.20)
+                    elif tax_mode == 'higher':
+                        # Section 24: tax gross income at 40%, credit back 20% of interest
+                        tax = max(0.0, net_6m * 0.40 - interest_6m * 0.20)
+                    elif tax_mode == 'company':
+                        # Full interest deductibility at corporation tax rate
+                        tax = max(0.0, (net_6m - interest_6m) * 0.25)
+                    else:
+                        tax = 0.0
+                    if tax > 0:
+                        actor.cash -= tax
+                        actor.total_tax_paid += tax
+
             events.append({
                 "type": "actor_step",
                 "tick": tick,

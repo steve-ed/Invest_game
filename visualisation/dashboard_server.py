@@ -70,6 +70,8 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
         name = (payload.get("name") or "").strip()[:30]
         if name:
             b.set_player_name(name)
+        tax_mode = (payload.get("tax_mode") or "none").strip()
+        b.set_tax_mode(tax_mode)
         b.set_game_active(True)
         b.reset_poll()
         b.reset_for_new_game()
@@ -114,6 +116,8 @@ def create_app(session_manager=None, bus=None, state_path=None, action_path=None
             name = (payload.get("name") or "").strip()[:30]
             if name:
                 bus.set_player_name(name)
+            tax_mode = (payload.get("tax_mode") or "none").strip()
+            bus.set_tax_mode(tax_mode)
             bus.set_game_active(True)
             bus.reset_poll()
             bus.reset_for_new_game()
