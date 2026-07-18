@@ -34,6 +34,7 @@ class SessionManager:
 
     def _run_game(self, game_id: str, bus: GameBus):
         result = None
+        exc = None
         try:
             bus.reset_for_new_game()
             bus.set_player_name("You")
@@ -42,7 +43,12 @@ class SessionManager:
             if result and not result.get("restarted") and not result.get("aborted"):
                 _log_result(result, bus.get_player_name())
         except Exception as e:
+            exc = e
             print(f"[{game_id}] Game loop error: {e}", flush=True)
+            # Unblock any Flask handler waiting on the ready or action events so
+            # they don't hang forever after the kernel thread dies.
+            bus.signal_ready()
+            bus.submit_action("hold", None, 0.0)
         finally:
             bus.set_game_active(False)
             bus.set_state({"state": "ended"})

@@ -737,7 +737,9 @@ class SimulationKernel:
         if self._bus is not None:
             self._bus.set_state(intro_data)
             print("Waiting for player to start game… (in-process bus)", flush=True)
-            self._bus.wait_ready()
+            if not self._bus.wait_ready(timeout=300):
+                print("Startup timeout — player did not start within 5 minutes.", flush=True)
+                return {"leaderboard": [], "aborted": True}
             # Apply player name entered on the intro screen
             player_name = self._bus.get_player_name()
             if player_name and player_name != "You":
@@ -1025,6 +1027,9 @@ class SimulationKernel:
             if not is_final:
                 if self._bus is not None:
                     action_deadline = time.time() + 90
+                    # Wait until an action is queued. wait_action() is level-triggered
+                    # (event stays set until pop_action clears it) so there is no
+                    # TOCTOU window between checking has_action() and blocking.
                     while not self._bus.has_action():
                         self._bus.wait_action(timeout=3)
                         if self._bus.has_action():
@@ -1035,7 +1040,9 @@ class SimulationKernel:
                             return {"leaderboard": [], "aborted": True}
                         if time.time() > action_deadline:
                             print(f"Action timeout on tick {tick} — auto-holding.", flush=True)
-                            self._bus.submit_action("hold", None, 0.0)
+                            # Only queue a hold if the player hasn't snuck one in.
+                            if not self._bus.has_action():
+                                self._bus.submit_action("hold", None, 0.0)
                             break
                 else:
                     deadline = time.time() + 60
