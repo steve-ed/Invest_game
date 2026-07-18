@@ -465,9 +465,9 @@
   <div id="main-area" class="main-area">
     <div class="charts-col">
       <div class="chart-panel macro">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0;">
-          <h3 style="margin-bottom:0;">Economy <span id="preamble-label" style="display:none;font-size:9px;font-weight:400;color:#666;letter-spacing:0.5px;"> — shaded region: pre-investment period</span></h3>
-          <div style="display:flex;gap:10px;font-size:10px;color:#aaa;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-shrink:0;flex-wrap:wrap;gap:4px;">
+          <h3 style="margin-bottom:0;">Economy</h3>
+          <div style="display:flex;gap:10px;font-size:10px;color:#aaa;flex-shrink:0;">
             <span><span style="display:inline-block;width:10px;height:2px;background:#ecad0a;vertical-align:middle;margin-right:3px;"></span>Price Index</span>
             <span><span style="display:inline-block;width:10px;height:2px;background:#f44336;vertical-align:middle;margin-right:3px;"></span>Int Rate</span>
             <span><span style="display:inline-block;width:10px;height:2px;background:#4caf50;vertical-align:middle;margin-right:3px;"></span>Rent</span>
@@ -645,6 +645,16 @@ function makeAnnotations(macroHistory, offset = 0) {
       borderColor: "rgba(255,255,255,0.35)", borderWidth: 1,
     };
   }
+  if (_epcMandateTick !== null) {
+    anns.epcDeadline = {
+      type: "line", scaleID: "x", value: _epcMandateTick + 4 + offset,
+      borderColor: "rgba(220,50,50,0.85)", borderWidth: 1.5,
+      label: {
+        display: true, content: "EPC C", position: "start",
+        backgroundColor: "transparent", color: "#dc3232", font: { size: 9 },
+      },
+    };
+  }
   return anns;
 }
 
@@ -671,6 +681,7 @@ let _lastPs          = null;
 let _boughtByActor   = {};   // propId -> actorId for this tick's buys
 let _boughtDetails   = {};   // propId -> prop object
 let _marketNews      = [];
+let _epcMandateTick  = null;
 
 function _macroChartData(macro) {
   const pre  = _preambleMacro || [];
@@ -829,7 +840,9 @@ function updateEconomyNews(currentEvents) {
   } else {
     wrap.style.borderLeftColor = '#ecad0a';
     el.style.color = '#e0e0e0';
-    el.innerHTML = items.map(e => e.detail).join('<br>');
+    const epc  = items.find(e => e.type === 'epc_mandate');
+    const item = epc || items[0];
+    el.textContent = item.detail;
   }
 }
 
@@ -1123,11 +1136,7 @@ async function poll() {
     lastTick = d.tick;
     _turnActionSent = false;
     if (d.axis_ranges && !axisRanges) axisRanges = d.axis_ranges;
-    if (d.preamble_macro && !_preambleMacro) {
-      _preambleMacro = d.preamble_macro;
-      const pl = document.getElementById("preamble-label");
-      if (pl && _preambleMacro.length) pl.style.display = "inline";
-    }
+    if (d.preamble_macro && !_preambleMacro) _preambleMacro = d.preamble_macro;
 
     const labels = d.x_labels || d.macro_history.map((_, i) => `T${i+1}`);
     if (d.macro_history.length && d.wealth_history.length)
@@ -1144,6 +1153,7 @@ async function poll() {
       feed.insertBefore(msg, feed.firstChild);
     }
 
+    if (d.epc_mandate_tick != null && _epcMandateTick === null) _epcMandateTick = d.epc_mandate_tick;
     if (d.actors_state) _lastActorsState = d.actors_state;
     if (d.era_label) { showEraBanner(d); return; }
     if (d.last_actions) { _lastActions = d.last_actions; _lastActors = d.actors || {}; }
@@ -2080,11 +2090,7 @@ async function loadIntroOpponents() {
       if (resp.ok) {
         const d = await resp.json();
         if (d.state === "intro" && d.actors && Object.keys(d.actors).length) {
-          if (d.preamble_macro && !_preambleMacro) {
-            _preambleMacro = d.preamble_macro;
-            const pl = document.getElementById("preamble-label");
-            if (pl && _preambleMacro.length) pl.style.display = "inline";
-          }
+          if (d.preamble_macro && !_preambleMacro) _preambleMacro = d.preamble_macro;
           if (d.x_labels && !_introXLabels) _introXLabels = d.x_labels;
           if (d.axis_ranges && !axisRanges) axisRanges = d.axis_ranges;
           if (d.player_cash) {

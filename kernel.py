@@ -670,6 +670,7 @@ class SimulationKernel:
             "era_label": self.era_label if is_final else None,
             "start_year": self.state.start_year if is_final else None,
             "final_year": self.historical_slice[-1][0] if is_final else None,
+            "epc_mandate_tick": self._epc_mandate_tick if self._epc_mandate_announced else None,
             "player_state": {
                 "cash": round(player.cash, 0) if player else 0,
                 "portfolio": player_portfolio,
