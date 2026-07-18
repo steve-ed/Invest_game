@@ -1001,7 +1001,7 @@ function buildDebriefHTML(data) {
     for (let i = 1; i < ev.length; i++) {
       const delta = (ev[i].score_gap || 0) - (ev[i-1].score_gap || 0);
       if (delta > 0) {
-        moments.push({ ...ev[i], delta,
+        moments.push({ ...ev[i], delta, tick_num: i,
           diverged: ev[i].player.split(' ')[0] !== ev[i].advice.split(' ')[0] });
       }
     }
@@ -1016,6 +1016,7 @@ function buildDebriefHTML(data) {
           <div style="font-size:16px;color:${icol};line-height:1.1;flex-shrink:0;">${icon}</div>
           <div>
             <div style="font-size:9px;color:#888;margin-bottom:3px;">${m.label} · ${m.scenario} · Rate ${(m.rate).toFixed(1)}%</div>
+            <div style="font-size:9px;color:#555;margin-bottom:3px;">Tick ${m.tick_num !== undefined ? m.tick_num : '?'} of 20</div>
             <div style="font-size:11px;color:#e0e0e0;">You: <strong>${m.player}</strong> &nbsp;·&nbsp; Advised: <span style="color:#4a7a9b;">${m.advice}</span></div>
             <div style="font-size:10px;color:#f44336;margin-top:3px;">Score gap widened by ${fk(m.delta)}${comment}</div>
           </div>
@@ -1039,7 +1040,7 @@ function buildDebriefHTML(data) {
           <span style="color:#f44336;font-weight:700;">▼</span> sell &nbsp;
           <span style="color:#ecad0a;font-weight:700;">◆</span> upgrade / refi / renovate
         </div>
-        <div style="height:130px;position:relative;"><canvas id="rate-timeline-chart"></canvas></div>
+        <div style="height:200px;position:relative;"><canvas id="rate-timeline-chart"></canvas></div>
       </div>`);
   }
 

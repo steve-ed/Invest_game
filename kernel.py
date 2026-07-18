@@ -231,12 +231,12 @@ def _portfolio_value(actor, properties):
 
 
 def _calculate_sdlt(price: float) -> float:
-    """SDLT for additional residential property (3% surcharge applies to all bands)."""
+    """SDLT for additional residential property (Oct 2024: 5% surcharge on all bands)."""
     bands = [
-        (125_000, 0.03),
         (125_000, 0.05),
-        (675_000, 0.08),
-        (575_000, 0.13),
+        (125_000, 0.07),
+        (675_000, 0.10),
+        (575_000, 0.15),
     ]
     tax, remaining = 0.0, price
     for band_size, rate in bands:
@@ -246,7 +246,7 @@ def _calculate_sdlt(price: float) -> float:
         if remaining <= 0:
             break
     if remaining > 0:
-        tax += remaining * 0.15
+        tax += remaining * 0.17
     return round(tax, 2)
 
 

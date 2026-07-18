@@ -34,12 +34,12 @@ A standard buy-to-let mortgage requires a minimum 25% deposit. On top of that, y
 | Item | £150,000 property | £190,000 property | £250,000 property |
 |---|---|---|---|
 | 25% deposit | £37,500 | £47,500 | £62,500 |
-| SDLT (additional property) | £4,500 | £7,700 | £10,000 |
+| SDLT (additional property, Oct 2024) | £8,000 | £10,800 | £15,000 |
 | Legal fees (solicitor) | £1,200 | £1,200 | £1,400 |
 | Mortgage broker fee | £300 | £300 | £300 |
 | Survey | £350 | £350 | £500 |
 | Cash buffer (recommended) | £7,000 | £9,000 | £12,000 |
-| **Total cash needed** | **£50,850** | **£66,050** | **£86,700** |
+| **Total cash needed** | **£54,350** | **£69,150** | **£91,700** |
 
 > **The cash buffer is not optional.** It covers your first maintenance emergency, one month of void (no tenant), and the arrangement fee if you miss your remortgage window. Without it you are one broken boiler away from a cash crisis.
 
@@ -50,13 +50,13 @@ This is the number people forget to check — how much cash is left in your acco
 | Starting savings | £65,000 |
 |---|---|
 | Less 25% deposit (£190,000 property) | −£47,500 |
-| Less SDLT | −£7,700 |
+| Less SDLT (Oct 2024) | −£10,800 |
 | Less solicitor + survey + broker | −£2,750 |
-| **Cash remaining as your buffer** | **£7,050** |
+| **Cash remaining as your buffer** | **£3,950** |
 
 That £7,050 is not spare money. It is your entire financial cushion as a landlord. A boiler replacement costs £1,500–£3,000. A one-month void costs £900 in lost rent. If both happen in the first year — which is possible — you are at £2,000–£4,600. At that level, one more problem becomes a crisis.
 
-This is why the table above shows a £9,000 buffer for a £190,000 property, and why this book recommends starting with savings of at least £66,000 for that price point. If your savings are closer to £60,000, buy at a lower price point rather than squeezing the buffer.
+This is why the table above shows a £9,000 buffer for a £190,000 property, and why this book recommends starting with savings of at least £70,000 for that price point following the October 2024 SDLT surcharge increase. If your savings are closer to £65,000, buy at a lower price point rather than squeezing the buffer.
 
 **What this means in practice**
 
@@ -345,6 +345,20 @@ What this means for you as a buyer:
 
 For your first property, buy EPC C or D. Avoid F and G until you are more experienced.
 
+**Leasehold vs freehold**
+
+Most houses are freehold — you own the building and the land it stands on outright. Many flats are leasehold — you own the right to live in the property for a fixed term (the lease), after which ownership reverts to the freeholder.
+
+For a buy-to-let investor, leasehold introduces risks that freehold does not:
+
+**Lease length:** Mortgage lenders will not lend on a property with fewer than 70–85 years remaining on the lease (lenders vary). A property with 75 years remaining is approaching this threshold — and once below 80 years, the lease cannot be extended at a standard cost without invoking the Leasehold Reform Act process, which is both slow and expensive. Always ask the current lease length and check when a future buyer's mortgage lender might refuse it.
+
+**Service charges:** Flat owners pay an annual service charge to the freeholder or management company covering shared maintenance (roof, communal areas, lifts). Service charges can be unpredictable — £800/year in one year, £4,000 in a year when the roof needs replacement. Request three years of service charge accounts before buying any leasehold property.
+
+**Ground rent:** Some leasehold properties carry a ground rent payable to the freeholder. The Leasehold Reform (Ground Rent) Act 2022 prohibits escalating ground rents on new leases, but older leases may still carry doubling clauses — where the ground rent doubles every 10–25 years. This can make the property unmortgageable later. Check the ground rent clause before making any offer.
+
+**The simple rule for your first property:** If you are considering a flat, check (1) lease length is above 100 years, (2) annual service charge is confirmed and stable, and (3) there is no escalating ground rent clause. If any of these is unclear, buy a house instead.
+
 **Property age**
 
 Older properties carry higher maintenance risk. As a rough guide:
@@ -376,6 +390,8 @@ You will also commission a survey (see Chapter 14). But the viewing tells you wh
 ### Chapter 13 — Running the Numbers
 
 Before you make an offer, you need to know whether the property makes financial sense. This does not require a spreadsheet or a formula. It requires answering three questions.
+
+> **Note:** All mortgage calculations in this book assume interest-only repayment, which is standard for buy-to-let mortgages. You pay interest only each month — the capital (the original loan amount) remains outstanding until you sell or choose to overpay. This means your monthly payment is lower than a repayment mortgage, but your debt does not reduce unless you make voluntary capital repayments.
 
 **Question 1: Does the rent cover the mortgage?**
 
@@ -788,15 +804,15 @@ Full semi-annual dataset: year, half, House Price Index (base 100 = 1983 H1), Ba
 
 | Purchase price | SDLT due |
 |---|---|
-| £100,000 | £3,000 |
-| £150,000 | £4,500 |
-| £190,000 | £7,700 |
-| £250,000 | £10,000 |
-| £300,000 | £14,000 |
-| £400,000 | £22,000 |
-| £500,000 | £30,000 |
+| £100,000 | £5,000 |
+| £150,000 | £8,000 |
+| £190,000 | £10,800 |
+| £250,000 | £15,000 |
+| £300,000 | £20,000 |
+| £400,000 | £30,000 |
+| £500,000 | £40,000 |
 
-*Rates: 3% on £0–£125k; 5% on £125k–£250k; 8% on £250k–£925k. Check HMRC for current rates before completing a purchase.*
+*Rates from October 2024: 5% on £0–£125k; 7% on £125k–£250k; 10% on £250k–£925k; 15% on £925k–£1.5m. Check HMRC for current rates before completing a purchase.*
 
 ---
 
@@ -920,7 +936,7 @@ For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Gu
 | Right to Rent | Legal check confirming tenants have the right to rent in the UK. Fine up to £20,000 if not done. |
 | SDLT | Stamp Duty Land Tax — paid by the buyer; higher rates for additional properties |
 | Section 8 | Notice served when there are legal grounds for possession, typically rent arrears |
-| Section 21 | Notice to end a tenancy without grounds. Subject to reform under the Renters Reform Act. |
+| Section 21 | Notice to end a tenancy without grounds — historically the most common way landlords recovered possession. The Renters Rights Act (expected 2025) abolishes Section 21, replacing it with a reformed Section 8 process. After abolition, landlords will need specific legal grounds to recover possession (e.g. wanting to sell, moving in a family member, or persistent rent arrears). Check the current status of this legislation before relying on any eviction process. |
 | Section 24 | Tax rule limiting mortgage interest relief to basic rate for personally-held portfolios |
 | SVR | Standard Variable Rate — lender's default rate, applied when a fixed term expires without remortgage |
 | Void | Period when the property is empty and not generating rent |

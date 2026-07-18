@@ -64,7 +64,8 @@ class ScoringEngine:
             concentration_cost = 0.0
 
         # 4. EPC regulatory risk: forced-sale discount on non-compliant properties
-        non_compliant       = [p for p in held if p.epc_band >= 4]
+        # Band 4 = D (acceptable); only E (5), F (6), G (7) carry the penalty
+        non_compliant       = [p for p in held if p.epc_band >= 5]
         non_compliant_value = sum(p.current_value for p in non_compliant)
         epc_cost            = non_compliant_value * EPC_DISCOUNT
 
