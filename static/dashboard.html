@@ -521,6 +521,10 @@
         <h3>Performance</h3>
         <div id="actor-summary-table"></div>
         <div id="stress-rows" style="display:none;margin-top:10px;padding-top:8px;border-top:1px solid #2a3f50;"></div>
+        <div id="score-history-panel" style="display:none;margin-top:10px;padding-top:8px;border-top:1px solid #2a3f50;">
+          <div style="font-size:10px;color:#888;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">Score Track</div>
+          <div style="height:75px;position:relative;"><canvas id="score-history-chart"></canvas></div>
+        </div>
       </div>
 
       <div id="your-move-panel" class="panel" style="overflow-y:auto;">
@@ -712,6 +716,8 @@ let _boughtByActor   = {};   // propId -> actorId for this tick's buys
 let _boughtDetails   = {};   // propId -> prop object
 let _marketNews      = [];
 let _epcMandateTick  = null;
+let _scoreHistory    = [];
+let scoreHistoryChart = null;
 
 function _macroChartData(macro) {
   const pre  = _preambleMacro || [];
@@ -1424,6 +1430,7 @@ async function poll() {
     }
 
     if (d.epc_mandate_tick != null && _epcMandateTick === null) _epcMandateTick = d.epc_mandate_tick;
+    if (d.score_history) _scoreHistory = d.score_history;
     if (d.actors_state) _lastActorsState = d.actors_state;
     if (d.era_label) { showEraBanner(d); return; }
     if (d.last_actions) { _lastActions = d.last_actions; _lastActors = d.actors || {}; }
@@ -1519,6 +1526,7 @@ function buildPortfolioTable(rows) {
       const netColor = net >= 0 ? '#4caf50' : '#f44336';
       const pnlColor = p.pnl_abs >= 0 ? '#ecad0a' : '#f44336';
       const pnlText = p.pnl_abs >= 0 ? `+£${(p.pnl_abs/1000).toFixed(0)}k` : `(£${(Math.abs(p.pnl_abs)/1000).toFixed(0)}k)`;
+      const pnlTitle = p.is_starting_property ? 'Capital gain since game start' : 'Capital gain since purchase';
       return `
       <tr>
         <td style="padding:4px 4px;border-bottom:1px solid #1a2733;">
@@ -1533,7 +1541,7 @@ function buildPortfolioTable(rows) {
         </td>
         <td style="text-align:right;padding:4px 4px;border-bottom:1px solid #1a2733;">
           <span style="color:#aaa;">£${(p.value/1000).toFixed(0)}k</span><br>
-          <span style="font-size:9px;color:#4a7a9b;">£${(p.equity/1000).toFixed(0)}k</span><span style="font-size:9px;color:#555;"> · </span><span style="font-size:9px;color:${pnlColor};">${pnlText}</span>
+          <span style="font-size:9px;color:#4a7a9b;">£${(p.equity/1000).toFixed(0)}k</span><span style="font-size:9px;color:#555;"> · </span><span style="font-size:9px;color:${pnlColor};" title="${pnlTitle}">${pnlText}</span>
         </td>
       </tr>`;
     }).join('')}
@@ -1677,6 +1685,46 @@ function renderAnalyticsPanel(actorsState) {
     </table>`;
 }
 
+function updateScoreHistoryChart() {
+  const panel  = document.getElementById('score-history-panel');
+  const canvas = document.getElementById('score-history-chart');
+  if (!panel || !canvas) return;
+  if (!_scoreHistory.length) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  const labels   = _scoreHistory.map(s => `T${s.tick}`);
+  const actorIds = ['player', 'ai1', 'ai2'];
+  const datasets = actorIds
+    .filter(id => _scoreHistory[0][id] != null)
+    .map(id => ({
+      label: ACTOR_NAMES[id] || id,
+      data: _scoreHistory.map(s => s[id] ?? null),
+      borderColor: ACTOR_COLORS[id],
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0.3,
+      fill: false,
+    }));
+  if (scoreHistoryChart) {
+    scoreHistoryChart.data.labels   = labels;
+    scoreHistoryChart.data.datasets = datasets;
+    scoreHistoryChart.update('none');
+  } else {
+    scoreHistoryChart = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 0 },
+        plugins: { legend: { labels: { color: '#aaa', boxWidth: 8, font: { size: 9 } } } },
+        scales: {
+          x: { ticks: { color: '#555', font: { size: 8 }, maxTicksLimit: 8 }, grid: { color: '#0f1923' } },
+          y: { ticks: { color: '#aaa', font: { size: 8 }, callback: v => `£${(v/1000).toFixed(0)}k` }, grid: { color: '#1a2733' }, afterFit(s) { s.width = 48; } },
+        },
+      },
+    });
+  }
+}
+
 function switchPanels(actorId) {
   highlightActorRow(actorId);
 
@@ -1748,9 +1796,12 @@ function switchPanels(actorId) {
         stressEl.style.display = 'none';
       }
     }
+    updateScoreHistoryChart();
   } else {
     // AI actor: hide stress panel; only reset action bar if player has no pending selection
     document.getElementById('stress-rows').style.display = 'none';
+    const sp = document.getElementById('score-history-panel');
+    if (sp) sp.style.display = 'none';
     if (!_pendingAction && !_pendingPropId) hideActionBar();
   }
 }
@@ -2402,7 +2453,7 @@ function renderAvailableProps(rows) {
       onclick="${p.affordable ? `playerBuyProp('${p.id}')` : `showAffordHint('${p.id}', ${totalNeededK})`}"
       style="cursor:pointer;${p.affordable ? '' : 'opacity:0.55;'}">
       <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
-        <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;">AUCTION</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
+        <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#2a1a00;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;" title="Auction lots are removed at end of turn — bid now or lose it">AUCTION — BID THIS TURN</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
         <br><span style="font-size:9px;color:#888;">Void ${p.void_risk_pct}%</span><span style="font-size:9px;color:#888;"> · </span><span style="font-size:9px;color:${p.maintenance_risk==='High'?'#f44336':p.maintenance_risk==='Medium'?'#ecad0a':'#4caf50'};">Maint ${p.maintenance_risk}</span>${p.icr_at_75pct != null ? ` · <span style="font-size:9px;color:${p.icr_at_75pct >= 1.25 ? '#4caf50' : '#f44336'};font-weight:600;" title="ICR at 75% LTV: rent ÷ mortgage interest. Lender requires ≥ 1.25×">${p.icr_at_75pct >= 1.25 ? 'ICR✓' : 'ICR✗'} ${p.icr_at_75pct.toFixed(2)}x @75%</span>` : ''}
         <br><span style="font-size:9px;color:${affordColor};font-weight:600;" title="${affordTitle}">${affordLabel}</span>
       </td>

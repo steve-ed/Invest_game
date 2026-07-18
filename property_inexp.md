@@ -545,6 +545,8 @@ The table below shows why base rate matters more than the property itself. Same 
 
 The same property that was moderately profitable in 2014–2018 (base rate ~0.5–0.75%, mortgage ~2.7–2.95%) became heavily loss-making at 2022–2023 rates. It does not make the property a bad investment — the accumulated losses carry forward and reduce future Corporation Tax when rates normalise. But it does mean you need a cash buffer large enough to fund those monthly shortfalls for however long high rates persist.
 
+> **A note on loss claims and filing:** "Loss carried forward" is not automatic. Your company must file a Corporation Tax return (CT600) with HMRC every year, including years when it makes a loss and owes no tax. On the CT600 you formally claim the loss to carry it forward. Miss the filing deadline (twelve months after your company's accounting year end) and HMRC levies an automatic penalty starting at £100. When rates normalise and the company becomes profitable, the carried-forward loss reduces Corporation Tax — but only if it was correctly claimed and documented. Do not assume there is nothing to file simply because there is nothing to pay. Your accountant handles this; the lesson is not to drop them in a loss year.
+
 This is why the book recommends starting with savings of at least £70,000, not £65,000: the extra £5,000 is what keeps you solvent during a rate spike while the company accumulates carried-forward losses.
 
 This illustrates why rent-to-value yield matters so much. A property yielding 5.7% (£900/month on £190,000) is borderline at 7.0% rates. At 6.5% yield (£1,031/month on £190,000), the same calculation would show a small profit. Run Question 4 for every property before you buy.
@@ -828,6 +830,16 @@ Void periods cost you rent while mortgage and insurance continue. Budget for one
 **The property needs major work**
 
 Your survey (Chapter 14) should catch most serious issues before you buy. But properties deteriorate. Maintain your cash buffer, treat maintenance as an ongoing reserve rather than an emergency fund, and keep the property in good repair rather than deferring until it becomes expensive.
+
+**The company account runs out**
+
+If your cash buffer is exhausted — by a combination of voids, rate rises, and maintenance bills — you need to put more money into the SPV. The mechanism is a **director's loan**: you lend personal funds to your own company, which records it as a liability owed back to you.
+
+This is the correct approach, but it carries a tax trap most first-time landlords do not know about. If the company has not repaid the director's loan within nine months of the end of its accounting year, HMRC charges a **Section 455 tax** of 33.75% on the outstanding balance. The charge is fully refundable once the loan is repaid — but in the interim you have an unexpected tax liability you must fund from personal money.
+
+The practical rule: whenever you top up the company, tell your accountant immediately. They will either (a) plan the repayment to fall within the nine-month window, or (b) account for the S455 charge in cash planning so it does not come as a surprise. Director's loans are a standard, legitimate mechanism — the issue is not the structure itself but failing to track the deadline.
+
+The deeper lesson reinforces Chapter 1: the cash buffer exists precisely to avoid this scenario. A sufficient buffer means you never need the director's loan; no loan means no S455 risk.
 
 ---
 

@@ -409,6 +409,9 @@ class SimulationKernel:
         self._wealth_history = []
         self._macro_history_export = []
         self._player_eval = []
+        self._score_history = []
+        _p_init = self.state.actors.get("player")
+        self._player_initial_portfolio = set(_p_init.portfolio) if _p_init else set()
         self._axis_ranges = self._compute_axis_ranges()
 
     def _compute_axis_ranges(self):
@@ -506,6 +509,7 @@ class SimulationKernel:
                         "bedrooms": p.bedrooms,
                         "pnl_abs": pnl_abs,
                         "pnl_pct": pnl_pct,
+                        "is_starting_property": pid in self._player_initial_portfolio,
                         "gross_yield_pct": round(p.rent * 12 / p.current_value * 100, 1) if p.current_value > 0 else 0.0,
                         "net_yield_pct": round((p.rent * 12 - monthly_mortgage * 12) / p.current_value * 100, 1) if p.current_value > 0 else 0.0,
                         "ltv_pct": round(p.mortgage_balance / p.current_value * 100, 1) if p.current_value > 0 else 0.0,
@@ -794,6 +798,7 @@ class SimulationKernel:
             "x_labels": x_labels,
             "axis_ranges": self._axis_ranges,
             "preamble_macro": self.preamble_macro,
+            "score_history": self._score_history,
             "era_label": self.era_label if is_final else None,
             "start_year": self.state.start_year if is_final else None,
             "final_year": self.historical_slice[-1][0] if is_final else None,
@@ -976,6 +981,11 @@ class SimulationKernel:
             # Current standings
             cur_scores      = self.scoring.compute_scores(self.state)
             sorted_scores   = sorted(cur_scores.values(), key=lambda s: s["final_score"], reverse=True)
+            self._score_history.append({
+                "tick": tick,
+                **{actor_id: round(d.get("final_score", 0), 0)
+                   for actor_id, d in cur_scores.items()}
+            })
             player_score    = cur_scores.get("player", {}).get("final_score", 0)
             player_rank     = next((i + 1 for i, s in enumerate(sorted_scores)
                                     if s["actor_id"] == "player"), len(sorted_scores))
@@ -1257,8 +1267,14 @@ class SimulationKernel:
         if action == "sell" and property_id in actor.portfolio:
             agent_fee = prop.current_value * 0.015
             net = prop.current_value - prop.mortgage_balance - agent_fee
-            actor.cash += net
+            # Corporation tax on chargeable gain (SPV / company tax mode only)
+            gain = prop.current_value - prop.base_value
+            ct_on_gain = 0.0
+            if gain > 0 and getattr(actor, 'tax_mode', 'none') == 'company':
+                ct_on_gain = round(gain * 0.25, 2)
+            actor.cash += net - ct_on_gain
             actor.total_transaction_costs += agent_fee
+            actor.total_tax_paid += ct_on_gain
             prop.mortgage_balance = 0.0
             prop.mortgage_rate = 0.0
             prop.is_fixed_rate = False
@@ -1286,6 +1302,7 @@ class SimulationKernel:
                 if can_buy:
                     actor.cash -= bid_price
                     actor.total_transaction_costs += round(bid_price * 0.01)
+                    prop.base_value = prop.current_value  # lock cost basis at auction purchase price
                     prop.mortgage_balance = 0.0
                     prop.mortgage_rate = 0.0
                     prop.is_fixed_rate = False
@@ -1304,6 +1321,7 @@ class SimulationKernel:
                 if actor.cash >= total_outlay:
                     actor.cash -= total_outlay
                     actor.total_transaction_costs += sdlt + PURCHASE_COMPLETION_COSTS
+                    prop.base_value = prop.current_value  # lock cost basis at purchase price
                     prop.mortgage_balance = prop.current_value * ltv
                     prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                     prop.is_fixed_rate = True
