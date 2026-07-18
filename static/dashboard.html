@@ -2314,19 +2314,30 @@ function renderAvailableProps(rows) {
   const heading = document.querySelector('.market-col .panel h3');
   if (heading) heading.textContent = 'Available to Buy';
 
-  const availRow = (p) => `<tr id="avail-${p.id}"
-    ${p.affordable ? `onclick="playerSelectProp('${p.id}')"` : ''}
-    style="cursor:${p.affordable ? 'pointer' : 'default'};${!p.affordable ? 'opacity:0.4;' : ''}">
-    <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
-      <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;">AUCTION</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
-      <br><span style="font-size:9px;color:#888;">Void ${p.void_risk_pct}%</span><span style="font-size:9px;color:#888;"> · </span><span style="font-size:9px;color:${p.maintenance_risk==='High'?'#f44336':p.maintenance_risk==='Medium'?'#ecad0a':'#4caf50'};">Maint ${p.maintenance_risk}</span>
-    </td>
-    <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;">
-      <div style="color:#4caf50;font-weight:600;">${p.gross_yield_pct}%</div>
-      <div style="color:#888;font-size:9px;">£${Math.round(p.rent_monthly)}pm</div>
-    </td>
-    <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;color:#aaa;">£${(p.value/1000).toFixed(0)}k</td>
-  </tr>`;
+  const playerCash = _lastActorsState['player']?.cash ?? Infinity;
+
+  const availRow = (p) => {
+    const deposit75 = Math.round(p.value * 0.25 / 1000);
+    const affordColor = p.affordable ? '#4caf50' : '#f44336';
+    const affordLabel = p.affordable ? `✓ £${deposit75}k dep` : `✗ Need £${deposit75}k+`;
+    const affordTitle = p.affordable
+      ? `You can afford this property (25% deposit + costs within your cash)`
+      : `Insufficient cash: 25% deposit alone is £${deposit75}k`;
+    return `<tr id="avail-${p.id}"
+      onclick="${p.affordable ? `playerBuyProp('${p.id}')` : `showAffordHint('${p.id}', ${deposit75})`}"
+      style="cursor:pointer;${p.affordable ? '' : 'opacity:0.55;'}">
+      <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
+        <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;">AUCTION</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
+        <br><span style="font-size:9px;color:#888;">Void ${p.void_risk_pct}%</span><span style="font-size:9px;color:#888;"> · </span><span style="font-size:9px;color:${p.maintenance_risk==='High'?'#f44336':p.maintenance_risk==='Medium'?'#ecad0a':'#4caf50'};">Maint ${p.maintenance_risk}</span>
+        <br><span style="font-size:9px;color:${affordColor};font-weight:600;" title="${affordTitle}">${affordLabel}</span>
+      </td>
+      <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;">
+        <div style="color:#4caf50;font-weight:600;">${p.gross_yield_pct}%</div>
+        <div style="color:#888;font-size:9px;">£${Math.round(p.rent_monthly)}pm</div>
+      </td>
+      <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;color:#aaa;">£${(p.value/1000).toFixed(0)}k</td>
+    </tr>`;
+  };
 
   avail.innerHTML = rows.length ? `
     <table style="width:100%;border-collapse:collapse;font-size:11px;">
@@ -2341,6 +2352,30 @@ function renderAvailableProps(rows) {
         ${rows.map(availRow).join('')}
       </tbody>
     </table>` : '<div style="font-size:11px;color:#888;">All properties owned</div>';
+}
+
+function playerBuyProp(id) {
+  if (!_pendingAction) {
+    _pendingAction = 'buy';
+    const ltvPicker = document.getElementById('ltv-picker');
+    if (ltvPicker) { ltvPicker.classList.add('ltv-buy-active'); ltvPicker.style.display = 'block'; }
+    document.querySelectorAll('.ltv-btn').forEach(b => {
+      b.style.background = '#0f1923'; b.style.color = '#888'; b.style.borderColor = '#2a3f50';
+    });
+    _pendingLtv = 0;
+    _startTimer();
+    renderTurnSequence(_lastActions, _lastActors, 'player');
+  }
+  playerSelectProp(id);
+}
+
+function showAffordHint(id, depositK) {
+  const statusEl = document.getElementById('action-status');
+  if (statusEl) {
+    statusEl.style.color = '#f44336';
+    statusEl.textContent = `Need at least £${depositK}k for the deposit alone — hold cash or sell a property first.`;
+    setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+  }
 }
 
 

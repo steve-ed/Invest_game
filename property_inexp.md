@@ -78,6 +78,25 @@ Incorporation costs £50 at Companies House and takes 24 hours online. You will 
 
 If you buy in your personal name, you cannot retroactively transfer the property into a company without paying SDLT again and triggering Capital Gains Tax on any gain. **Buy in the company name from day one.** There is no route back without significant cost.
 
+**When you scale: one SPV per property vs an umbrella company**
+
+For a first property, this question doesn't arise. But as you build a portfolio, the structure matters.
+
+*One SPV per property* means each property sits in its own company. The main advantages are:
+
+- **Lender flexibility:** Some BTL lenders will only lend to a company with one property. Multiple SPVs gives you access to a wider lender pool.
+- **Risk isolation:** If one property has a problem — a major structural defect, a litigation claim — it is contained within that company. The other properties are legally separate.
+- **Simpler sale:** Selling a property can mean selling the company that holds it, which may allow a buyer to avoid SDLT (though this is complex and requires specialist advice).
+
+The disadvantage is cost: each company requires its own annual accounts, confirmation statement, and bank account.
+
+*An umbrella company* holds multiple properties in one entity. Simpler administration, but:
+
+- **25% corporation tax at £50,000 profit.** Corporation tax in the UK has a small profits rate of 19% for profits under £50,000, rising to 25% above that threshold. A single-property company earning £5,000 in net profit pays 19%. A four-property company earning £55,000 pays 25% on the majority of its profits. This is still better than personal higher-rate ownership under Section 24, but it is not as favourable as the headline "19% rate" sounds at scale.
+- **Lender complications:** Some lenders apply additional scrutiny to multi-property companies.
+
+**The practical answer for most new investors:** use a single SPV for your first one or two properties. By the time your third property is in view, talk to your accountant about whether a separate SPV per property, or a grouped structure, makes sense given your income, withdrawal strategy, and lender requirements.
+
 ---
 
 ## PART ONE: BEFORE YOU BUY ANYTHING
@@ -144,6 +163,19 @@ For a first-time landlord with £50,000–£80,000, the **Yield strategy** is th
 - Do not refinance in year one
 
 Everything else — BRRR, capital growth, leverage — can come later once you understand how the income, costs, and management of one property actually work.
+
+---
+
+> **Before you search for properties — your four setup steps**
+>
+> This book assumes SPV ownership throughout (see *Why This Book Assumes SPV Ownership* above). These four steps must happen before you instruct a mortgage broker or view a property:
+>
+> 1. **Incorporate your limited company** — companies.gov.uk, £50, 24 hours
+> 2. **Open a business bank account** — Starling Business, Mettle, or Tide are straightforward for a sole-director company
+> 3. **Appoint an accountant** — find one who regularly files accounts for property SPVs; ask specifically: "How many single-director BTL company accounts did you file last year?"
+> 4. **Find a mortgage broker** — not all brokers place company BTL. Ask: "Will you accept an SPV incorporated less than six months ago?" If they hesitate, find another broker.
+>
+> If you buy in your personal name, you cannot transfer the property to a company later without paying SDLT again and triggering Capital Gains Tax. There is no route back.
 
 ---
 
