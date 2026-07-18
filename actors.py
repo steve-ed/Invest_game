@@ -1,5 +1,6 @@
-MORTGAGE_SPREAD = 0.018  # lender margin above BoE base rate
-MGMT_FEE_RATE  = 0.12   # letting agent full management fee
+MORTGAGE_SPREAD  = 0.018   # lender margin above BoE base rate
+MGMT_FEE_RATE    = 0.12    # letting agent full management fee
+INSURANCE_RATE   = 0.0015  # buildings + landlord liability insurance (% of value per year)
 
 
 class ActorManager:
@@ -35,6 +36,14 @@ class ActorManager:
                         if prop.fixed_ticks_remaining == 0:
                             prop.is_fixed_rate = False
                             prop.mortgage_rate = state.macro.interest_rate + MORTGAGE_SPREAD
+
+            # Insurance (buildings + landlord liability, 0.15% of value per year, semi-annual)
+            for pid in actor.portfolio:
+                prop = prop_map.get(pid)
+                if prop:
+                    premium = prop.current_value * INSURANCE_RATE / 2
+                    actor.cash -= premium
+                    actor.total_insurance_paid += premium
 
             # Rent collection (monthly rent × 6 months per semi-annual tick)
             for pid in actor.portfolio:

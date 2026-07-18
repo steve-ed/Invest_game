@@ -10,7 +10,7 @@ import threading
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from actors import ActorManager, MORTGAGE_SPREAD, MGMT_FEE_RATE
+from actors import ActorManager, MORTGAGE_SPREAD, MGMT_FEE_RATE, INSURANCE_RATE
 from kernel import SimulationKernel, _calculate_sdlt, _epc_upgrade_cost
 from game_bus import GameBus
 
@@ -59,6 +59,7 @@ def _audited_step(self, state, tick):
                     "void_ticks_remaining": prop.void_ticks_remaining,
                     "epc_void": prop.epc_void,
                     "rent": prop.rent,
+                    "current_value": prop.current_value,
                 })
         before[actor_id] = {"cash": actor.cash, "props": props_snap}
 
@@ -88,6 +89,11 @@ def _audited_step(self, state, tick):
                 interest = ps["mortgage_balance"] * rate / 2
                 expected -= interest
                 log(f"    mortgage {ps['id']}: bal={ps['mortgage_balance']:.0f} rate={rate:.4f} interest={interest:.2f}")
+
+        for ps in snap["props"]:
+            premium = ps["current_value"] * INSURANCE_RATE / 2
+            expected -= premium
+            log(f"    insurance {ps['id']}: value={ps['current_value']:.0f} premium={premium:.2f}")
 
         for ps in snap["props"]:
             epc_void = ps["epc_void"]

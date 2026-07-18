@@ -53,6 +53,7 @@ class ActorState:
     total_transaction_costs: float = 0.0
     total_void_losses: float = 0.0
     total_maintenance_costs: float = 0.0
+    total_insurance_paid: float = 0.0
     initial_wealth: float = 0.0
 
 
