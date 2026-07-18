@@ -55,6 +55,7 @@ def _audited_step(self, state, tick):
                     "mortgage_balance": prop.mortgage_balance,
                     "mortgage_rate": prop.mortgage_rate,
                     "is_fixed_rate": prop.is_fixed_rate,
+                    "fixed_ticks_remaining": prop.fixed_ticks_remaining,
                     "void_ticks_remaining": prop.void_ticks_remaining,
                     "epc_void": prop.epc_void,
                     "rent": prop.rent,
@@ -75,7 +76,15 @@ def _audited_step(self, state, tick):
 
         for ps in snap["props"]:
             if ps["mortgage_balance"] > 0:
-                rate = ps["mortgage_rate"] if ps["is_fixed_rate"] else boe + MORTGAGE_SPREAD
+                # Auto-remortgage fee fires when is_fixed_rate=False and fixed_ticks_remaining=0
+                if not ps["is_fixed_rate"] and ps["fixed_ticks_remaining"] == 0:
+                    fee = round(ps["mortgage_balance"] * 0.01)
+                    expected -= fee
+                    new_rate = boe + MORTGAGE_SPREAD
+                    log(f"    remortgage {ps['id']}: fee={fee:.0f} new_rate={new_rate:.4f}")
+                    rate = new_rate
+                else:
+                    rate = ps["mortgage_rate"] if ps["is_fixed_rate"] else boe + MORTGAGE_SPREAD
                 interest = ps["mortgage_balance"] * rate / 2
                 expected -= interest
                 log(f"    mortgage {ps['id']}: bal={ps['mortgage_balance']:.0f} rate={rate:.4f} interest={interest:.2f}")

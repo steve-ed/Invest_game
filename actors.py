@@ -16,6 +16,16 @@ class ActorManager:
             for pid in actor.portfolio:
                 prop = prop_map.get(pid)
                 if prop and prop.mortgage_balance > 0:
+                    # Auto-remortgage: fixed term expired last tick and actor didn't refi.
+                    # Charge 1% arrangement fee and lock into a new 2-year fix at current rate.
+                    if not prop.is_fixed_rate and prop.fixed_ticks_remaining == 0:
+                        fee = round(prop.mortgage_balance * 0.01)
+                        actor.cash -= fee
+                        actor.total_transaction_costs += fee
+                        prop.mortgage_rate = state.macro.interest_rate + MORTGAGE_SPREAD
+                        prop.is_fixed_rate = True
+                        prop.fixed_ticks_remaining = 4
+
                     rate = prop.mortgage_rate if prop.is_fixed_rate else state.macro.interest_rate + MORTGAGE_SPREAD
                     interest = prop.mortgage_balance * rate / 2
                     actor.cash -= interest
