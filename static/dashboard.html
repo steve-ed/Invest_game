@@ -893,6 +893,195 @@ function showGameEnded() {
   document.getElementById("era-sub").textContent = "The game has ended. Play again?";
 }
 
+function buildDebriefHTML(data) {
+  const fk = v => `£${(Math.abs(v)/1000).toFixed(0)}k`;
+  const sections = [];
+
+  // ── 1. Era narrative ─────────────────────────────────────────────────────
+  const narr = data.era_narrative;
+  if (narr && narr.headline) {
+    sections.push(`
+      <div style="margin-top:20px;background:#111c28;border-radius:6px;border:1px solid #2a3f50;padding:14px 16px;">
+        <div style="font-size:10px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Era Insight</div>
+        <div style="font-size:13px;color:#ccc;line-height:1.6;margin-bottom:10px;">${narr.headline}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div style="background:#0a1520;border-radius:4px;padding:8px 10px;">
+            <div style="font-size:8px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">Key event</div>
+            <div style="font-size:11px;color:#aaa;line-height:1.4;">${narr.key_event}</div>
+          </div>
+          <div style="background:#0a1520;border-radius:4px;padding:8px 10px;">
+            <div style="font-size:8px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">Optimal strategy</div>
+            <div style="font-size:11px;color:#aaa;line-height:1.4;">${narr.optimal}</div>
+          </div>
+        </div>
+        <div style="background:#0a1520;border:1px solid #1a3048;border-radius:4px;padding:8px 10px;">
+          <div style="font-size:8px;color:#ecad0a;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;">The lesson</div>
+          <div style="font-size:12px;color:#e0e0e0;line-height:1.5;">${narr.lesson}</div>
+        </div>
+      </div>`);
+  }
+
+  // ── 2. You vs Yield ──────────────────────────────────────────────────────
+  const lb = data.leaderboard || [];
+  const player = lb.find(e => e.actor_id === 'player');
+  const yieldActorId = Object.entries(_lastActorsState || {}).find(([, s]) => s.strategy === 'yield')?.[0];
+  const yieldAi = yieldActorId ? lb.find(e => e.actor_id === yieldActorId) : null;
+  const benchAi = yieldAi || lb.find(e => e.actor_id !== 'player');
+  if (player && benchAi) {
+    const diff = player.final_score - benchAi.final_score;
+    const diffStr = diff >= 0 ? `+${fk(diff)} ahead` : `−${fk(diff)} behind`;
+    const diffCol = diff >= 0 ? '#4caf50' : '#f44336';
+    const benchLabel = yieldAi ? `Yield Strategy (${benchAi.name})` : benchAi.name;
+    const row = (label, pval, yval) => {
+      const pBetter = pval >= yval;
+      return `<div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:4px 0;border-bottom:1px solid #0f1923;">
+        <div style="font-size:10px;color:#888;">${label}</div>
+        <div style="font-size:11px;color:${pBetter?'#4caf50':'#e0e0e0'};font-weight:${pBetter?700:400};text-align:right;">${fk(pval)}</div>
+        <div style="font-size:11px;color:${!pBetter?'#4caf50':'#e0e0e0'};font-weight:${!pBetter?700:400};text-align:right;">${fk(yval)}</div>
+      </div>`;
+    };
+    sections.push(`
+      <div style="margin-top:12px;background:#111c28;border-radius:6px;border:1px solid #2a3f50;padding:14px 16px;">
+        <div style="font-size:10px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">You vs ${benchLabel}</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #2a3f50;margin-bottom:4px;">
+          <div></div>
+          <div style="font-size:9px;color:#888;text-align:right;">You</div>
+          <div style="font-size:9px;color:#888;text-align:right;">${benchAi.name.split(' ').pop()}</div>
+        </div>
+        ${row('Risk-adj. score', player.final_score, benchAi.final_score)}
+        ${row('Total return', player.total_return||0, benchAi.total_return||0)}
+        ${row('Income return', player.income_return||0, benchAi.income_return||0)}
+        ${row('Capital return', player.capital_return||0, benchAi.capital_return||0)}
+        ${row('Risk cost', -(player.risk_cost||0), -(benchAi.risk_cost||0))}
+        <div style="margin-top:8px;padding:7px 10px;background:#0a1520;border-radius:4px;text-align:center;">
+          <span style="font-size:12px;color:${diffCol};font-weight:700;">${diffStr}</span>
+          <span style="font-size:10px;color:#888;"> vs the benchmark</span>
+        </div>
+      </div>`);
+  }
+
+  // ── 3. Moments that mattered ─────────────────────────────────────────────
+  const ev = data.player_eval || [];
+  if (ev.length > 1) {
+    const moments = [];
+    for (let i = 1; i < ev.length; i++) {
+      const delta = (ev[i].score_gap || 0) - (ev[i-1].score_gap || 0);
+      if (delta > 0) {
+        moments.push({ ...ev[i], delta,
+          diverged: ev[i].player.split(' ')[0] !== ev[i].advice.split(' ')[0] });
+      }
+    }
+    const top3 = moments.sort((a, b) => b.delta - a.delta).slice(0, 3);
+    if (top3.length) {
+      const cards = top3.map(m => {
+        const icon  = m.diverged ? '⚠' : '↘';
+        const icol  = m.diverged ? '#ecad0a' : '#888';
+        const comment = m.comment && m.comment.toLowerCase() !== 'held' && m.comment.toLowerCase() !== 'agreed'
+          ? ` — ${m.comment}` : '';
+        return `<div style="background:#0a1520;border-radius:4px;padding:9px 11px;display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:16px;color:${icol};line-height:1.1;flex-shrink:0;">${icon}</div>
+          <div>
+            <div style="font-size:9px;color:#888;margin-bottom:3px;">${m.label} · ${m.scenario} · Rate ${(m.rate).toFixed(1)}%</div>
+            <div style="font-size:11px;color:#e0e0e0;">You: <strong>${m.player}</strong> &nbsp;·&nbsp; Advised: <span style="color:#4a7a9b;">${m.advice}</span></div>
+            <div style="font-size:10px;color:#f44336;margin-top:3px;">Score gap widened by ${fk(m.delta)}${comment}</div>
+          </div>
+        </div>`;
+      }).join('');
+      sections.push(`
+        <div style="margin-top:12px;background:#111c28;border-radius:6px;border:1px solid #2a3f50;padding:14px 16px;">
+          <div style="font-size:10px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Moments That Mattered</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">${cards}</div>
+        </div>`);
+    }
+  }
+
+  // ── 4. Rate timeline ─────────────────────────────────────────────────────
+  if ((data.macro_history || []).length > 0 && ev.length > 0) {
+    sections.push(`
+      <div style="margin-top:12px;background:#111c28;border-radius:6px;border:1px solid #2a3f50;padding:14px 16px;">
+        <div style="font-size:10px;color:#4a7a9b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Rate Timeline &amp; Your Decisions</div>
+        <div style="font-size:9px;color:#888;margin-bottom:8px;">
+          <span style="color:#4caf50;font-weight:700;">▲</span> buy &nbsp;
+          <span style="color:#f44336;font-weight:700;">▼</span> sell &nbsp;
+          <span style="color:#ecad0a;font-weight:700;">◆</span> upgrade / refi / renovate
+        </div>
+        <div style="height:130px;position:relative;"><canvas id="rate-timeline-chart"></canvas></div>
+      </div>`);
+  }
+
+  return sections.join('');
+}
+
+function initDebriefCharts(data) {
+  const ctx = document.getElementById('rate-timeline-chart')?.getContext('2d');
+  if (!ctx) return;
+  const ev = data.player_eval || [];
+  const mh = data.macro_history || [];
+  const labels = (data.x_labels || []).slice(1);
+  const rates  = mh.map(m => +(m.rate * 100).toFixed(2));
+
+  const isAction = (verb, e) => e.player.startsWith(verb);
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'BoE Rate %',
+          data: rates,
+          borderColor: '#4a7a9b', borderWidth: 2,
+          pointRadius: 0, tension: 0.3, fill: false, order: 1,
+        },
+        {
+          label: 'Buy',
+          data: ev.map((e, i) => isAction('bought', e) ? rates[i] : null),
+          borderColor: 'transparent', backgroundColor: '#4caf50',
+          pointRadius: ev.map(e => isAction('bought', e) ? 7 : 0),
+          pointStyle: 'triangle', showLine: false, order: 0,
+        },
+        {
+          label: 'Sell',
+          data: ev.map((e, i) => isAction('sold', e) ? rates[i] : null),
+          borderColor: 'transparent', backgroundColor: '#f44336',
+          pointRadius: ev.map(e => isAction('sold', e) ? 7 : 0),
+          pointStyle: 'triangle',
+          rotation: 180,
+          showLine: false, order: 0,
+        },
+        {
+          label: 'Action',
+          data: ev.map((e, i) =>
+            (isAction('upgraded', e) || isAction('refi', e) || isAction('renovated', e)) ? rates[i] : null),
+          borderColor: 'transparent', backgroundColor: '#ecad0a',
+          pointRadius: ev.map(e =>
+            (isAction('upgraded', e) || isAction('refi', e) || isAction('renovated', e)) ? 6 : 0),
+          pointStyle: 'rectRot', showLine: false, order: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
+      plugins: {
+        legend: { labels: { color: '#aaa', boxWidth: 10, font: { size: 9 } }, position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const ds = ctx.dataset.label;
+              if (ds === 'BoE Rate %') return `Rate: ${ctx.parsed.y.toFixed(2)}%`;
+              const e = ev[ctx.dataIndex];
+              return e ? `${ds}: ${e.player}` : ds;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { ticks: { color: '#555', font: { size: 8 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }, grid: { color: '#0f1923' } },
+        y: { ticks: { color: '#aaa', font: { size: 9 }, callback: v => `${v.toFixed(1)}%` }, grid: { color: '#1a2733' }, afterFit(s) { s.width = 42; } },
+      },
+    },
+  });
+}
+
 function showEraBanner(data) {
   _gameEnded = true;
   _marketNews = [];
@@ -1058,12 +1247,15 @@ function showEraBanner(data) {
         </div>`;
     })();
 
+    const debriefHTML = buildDebriefHTML(data);
     document.getElementById('leaderboard-table').innerHTML =
       `<div style="display:flex;flex-direction:row;gap:10px;align-items:stretch;">${rows}</div>
        ${evalHTML}
+       ${debriefHTML}
        <div style="text-align:center;margin-top:24px;">
          <button onclick="location.reload()" style="font-size:15px;font-weight:700;letter-spacing:0.1em;padding:10px 40px;background:#1a2e40;color:#ecad0a;border:1px solid #ecad0a;border-radius:4px;cursor:pointer;">&gt;&gt; NEW GAME</button>
        </div>`;
+    initDebriefCharts(data);
 
     // Wealth chart (full game history)
     const wLabels = data.x_labels || (data.wealth_history||[]).map((_,i)=>`T${i+1}`);

@@ -19,6 +19,7 @@ from scoring import ScoringEngine
 from void_maintenance import VoidMaintenanceEngine, void_risk_pct, maintenance_risk_label, expected_maintenance_reserve
 from ui.dashboard import show_opening, show_end
 from data.uk_macro_history import get_slice, get_start_limits, get_era_label, get_preamble_slice
+from data.era_narratives import ERA_NARRATIVES
 
 TURN_STATE_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "turn_state.json")
 READY_PATH       = os.path.join(os.path.dirname(__file__), "visualisation", "ready.json")
@@ -703,8 +704,9 @@ class SimulationKernel:
             },
         }
         if is_final:
-            data["leaderboard"]   = self.scoring.leaderboard(self.state)
-            data["player_eval"]   = self._player_eval
+            data["leaderboard"]    = self.scoring.leaderboard(self.state)
+            data["player_eval"]    = self._player_eval
+            data["era_narrative"]  = ERA_NARRATIVES.get(self.era_label, {})
         if self._bus is not None:
             self._bus.set_state(data)
         else:
@@ -874,6 +876,21 @@ class SimulationKernel:
             # Record per-turn evaluation
             year, half, *_ = curr_entry
             p_action = self.state.last_ai_actions.get("player", "hold")
+            _prop_map_e = {p.id: p for p in self.state.properties}
+            if player_actor and player_actor.portfolio:
+                _p_rent_ann = sum(_prop_map_e[pid].rent for pid in player_actor.portfolio if pid in _prop_map_e) * 12
+                _p_mtg_ann  = sum(
+                    _prop_map_e[pid].mortgage_balance * _prop_map_e[pid].mortgage_rate
+                    for pid in player_actor.portfolio
+                    if pid in _prop_map_e and _prop_map_e[pid].mortgage_balance > 0
+                )
+                _p_icr      = round(_p_rent_ann / _p_mtg_ann, 2) if _p_mtg_ann > 0 else None
+                _p_equity   = sum(_prop_map_e[pid].current_value - _prop_map_e[pid].mortgage_balance
+                                  for pid in player_actor.portfolio if pid in _prop_map_e)
+                _p_networth = round(player_actor.cash + _p_equity, 0)
+            else:
+                _p_icr      = None
+                _p_networth = round(player_actor.cash, 0) if player_actor else 0
             self._player_eval.append({
                 "tick":          tick,
                 "label":         f"{year} H{half}",
@@ -887,6 +904,8 @@ class SimulationKernel:
                 "rank":          player_rank,
                 "score_gap":     round(score_gap, 0),
                 "ticks_left":    ticks_remaining,
+                "icr":           _p_icr,
+                "net_worth":     _p_networth,
                 "comment":       _eval_comment(
                                      p_action, adv_action, adv_prop,
                                      rate, self.state.current_scenario,
