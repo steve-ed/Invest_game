@@ -1102,7 +1102,7 @@ class SimulationKernel:
                     ai_bids = {}
                     for aid, a in self.state.actors.items():
                         if aid != "player" and a.strategy in _AUCTION_STRATEGIES:
-                            premium = self.ai.ai_bid_premium(aid, a, prop, self.state)
+                            premium = self.ai.ai_bid_premium(aid)
                             if premium is not None:
                                 ai_bids[aid] = round(prop.current_value * (1 + premium))
                     best_ai_bid = max(ai_bids.values()) if ai_bids else 0
