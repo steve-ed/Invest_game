@@ -23,8 +23,9 @@ from data.era_narratives import ERA_NARRATIVES
 
 TURN_STATE_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "turn_state.json")
 READY_PATH       = os.path.join(os.path.dirname(__file__), "visualisation", "ready.json")
-EPC_GRACE_TICKS  = 4
-MORTGAGE_SPREAD  = 0.022  # lender margin above BoE base rate (company BTL premium included)
+EPC_GRACE_TICKS          = 4
+MORTGAGE_SPREAD          = 0.022   # lender margin above BoE base rate (company BTL premium included)
+PURCHASE_COMPLETION_COSTS = 2_050  # solicitor £1,200 + survey £500 + broker £350
 _VOID_BY_ARCHETYPE = {"btl": 0, "new_build": 0, "hmo": 1, "value_add": 1, "short_let": 1}
 
 _MARKET_NATIONAL_BASE = 165_000
@@ -552,11 +553,15 @@ class SimulationKernel:
         for p in self.state.properties:
             if p.id not in owned_all:
                 gross_yield = round((p.rent * 12) / p.current_value * 100, 1)
-                affordable = player and player.cash >= (p.current_value * 0.25 + _calculate_sdlt(p.current_value))
+                sdlt = _calculate_sdlt(p.current_value)
+                total_cash_needed = p.current_value * 0.25 + sdlt + PURCHASE_COMPLETION_COSTS
+                affordable = player and player.cash >= total_cash_needed
                 available_props.append({
                     "id": p.id, "region": p.region,
                     "value": round(p.current_value, 0),
-                    "sdlt": round(_calculate_sdlt(p.current_value), 0),
+                    "sdlt": round(sdlt, 0),
+                    "completion_costs": PURCHASE_COMPLETION_COSTS,
+                    "total_cash_needed": round(total_cash_needed, 0),
                     "gross_yield_pct": gross_yield,
                     "rent_monthly": round(p.rent, 0),
                     "epc_band": p.epc_band,

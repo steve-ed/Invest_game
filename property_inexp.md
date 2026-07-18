@@ -531,6 +531,22 @@ Example: £190,000 property at 75% LTV, 7.0% company rate
 
 At current rates (7.0% on a 75% LTV mortgage), a £190,000 property with £900/month rent makes a pre-tax loss inside the company. The company pays no Corporation Tax in this scenario. The loss accumulates as a carried-forward loss against future profits (for example, when rates fall or rent rises).
 
+**How the same property looks across different rate environments**
+
+The table below shows why base rate matters more than the property itself. Same asset, same rent, same LTV — three different rate environments:
+
+| Base rate | Mortgage rate (base + 2.2%) | Annual mortgage interest | Net profit / (loss) | Corporation tax |
+|---|---|---|---|---|
+| 3.0% | 5.2% | −£7,410 | **+£631** | £120 (19%) |
+| 5.0% | 7.2% | −£10,260 | **−£3,219** | £0 (loss carried forward) |
+| 7.0% | 9.2% | −£13,110 | **−£6,069** | £0 (loss carried forward) |
+
+*Fixed costs in all scenarios: letting agent £1,296, insurance £450, maintenance £1,000, accountancy £1,000, Companies House £13.*
+
+The same property that was moderately profitable in 2014–2018 (base rate ~0.5–0.75%, mortgage ~2.7–2.95%) became heavily loss-making at 2022–2023 rates. It does not make the property a bad investment — the accumulated losses carry forward and reduce future Corporation Tax when rates normalise. But it does mean you need a cash buffer large enough to fund those monthly shortfalls for however long high rates persist.
+
+This is why the book recommends starting with savings of at least £70,000, not £65,000: the extra £5,000 is what keeps you solvent during a rate spike while the company accumulates carried-forward losses.
+
 This illustrates why rent-to-value yield matters so much. A property yielding 5.7% (£900/month on £190,000) is borderline at 7.0% rates. At 6.5% yield (£1,031/month on £190,000), the same calculation would show a small profit. Run Question 4 for every property before you buy.
 
 ---

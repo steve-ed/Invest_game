@@ -469,6 +469,13 @@
     <div class="badge" id="turn-badge">—</div>
   </div>
 </div>
+<div id="game-timeline" style="background:#1a2733;border-bottom:1px solid #2a3f50;padding:4px 20px;display:none;align-items:center;gap:10px;">
+  <span id="timeline-label" style="font-size:10px;color:#888;white-space:nowrap;min-width:140px;"></span>
+  <div style="flex:1;height:5px;background:#0f1923;border-radius:3px;overflow:hidden;">
+    <div id="timeline-fill" style="height:100%;width:0%;background:#209dd7;border-radius:3px;transition:width 0.5s;"></div>
+  </div>
+  <span id="timeline-end" style="font-size:10px;color:#555;white-space:nowrap;">Year 10</span>
+</div>
 
 <div class="layout">
 
@@ -1332,6 +1339,22 @@ async function poll() {
     const d = await resp.json();
 
     document.getElementById("turn-badge").textContent = d.tick != null ? `Turn ${d.tick} / ${d.total_ticks}` : `Turn — / —`;
+    if (d.tick != null && d.total_ticks) {
+      const tl = document.getElementById('game-timeline');
+      const fill = document.getElementById('timeline-fill');
+      const label = document.getElementById('timeline-label');
+      if (tl && fill && label) {
+        tl.style.display = 'flex';
+        const pct = Math.min(100, d.tick / d.total_ticks * 100);
+        const yearFloat = d.tick / 2;
+        const turnsLeft = d.total_ticks - d.tick;
+        fill.style.width = pct + '%';
+        const urgent = turnsLeft <= 4;
+        fill.style.background = urgent ? '#f44336' : turnsLeft <= 8 ? '#ecad0a' : '#209dd7';
+        label.style.color = urgent ? '#f44336' : turnsLeft <= 8 ? '#ecad0a' : '#888';
+        label.textContent = `Year ${yearFloat.toFixed(1)} · ${turnsLeft} turn${turnsLeft !== 1 ? 's' : ''} left`;
+      }
+    }
     const sc = d.scenario || "baseline";
     const scenarioBadge = document.getElementById("scenario-badge");
     scenarioBadge.textContent = sc.charAt(0).toUpperCase() + sc.slice(1);
@@ -2317,14 +2340,14 @@ function renderAvailableProps(rows) {
   const playerCash = _lastActorsState['player']?.cash ?? Infinity;
 
   const availRow = (p) => {
-    const deposit75 = Math.round(p.value * 0.25 / 1000);
+    const totalNeededK = Math.round((p.total_cash_needed || p.value * 0.25) / 1000);
     const affordColor = p.affordable ? '#4caf50' : '#f44336';
-    const affordLabel = p.affordable ? `✓ £${deposit75}k dep` : `✗ Need £${deposit75}k+`;
+    const affordLabel = p.affordable ? `✓ £${totalNeededK}k all-in` : `✗ Need £${totalNeededK}k`;
     const affordTitle = p.affordable
-      ? `You can afford this property (25% deposit + costs within your cash)`
-      : `Insufficient cash: 25% deposit alone is £${deposit75}k`;
+      ? `All-in cost: 25% deposit + SDLT + solicitor/survey/broker = £${totalNeededK}k`
+      : `Need £${totalNeededK}k (deposit + SDLT + completion costs). You have £${Math.round((playerCash||0)/1000)}k.`;
     return `<tr id="avail-${p.id}"
-      onclick="${p.affordable ? `playerBuyProp('${p.id}')` : `showAffordHint('${p.id}', ${deposit75})`}"
+      onclick="${p.affordable ? `playerBuyProp('${p.id}')` : `showAffordHint('${p.id}', ${totalNeededK})`}"
       style="cursor:pointer;${p.affordable ? '' : 'opacity:0.55;'}">
       <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
         <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;">AUCTION</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
@@ -2369,12 +2392,13 @@ function playerBuyProp(id) {
   playerSelectProp(id);
 }
 
-function showAffordHint(id, depositK) {
+function showAffordHint(id, totalNeededK) {
   const statusEl = document.getElementById('action-status');
+  const cashK = Math.round((_lastActorsState['player']?.cash || 0) / 1000);
   if (statusEl) {
     statusEl.style.color = '#f44336';
-    statusEl.textContent = `Need at least £${depositK}k for the deposit alone — hold cash or sell a property first.`;
-    setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 3000);
+    statusEl.textContent = `Need £${totalNeededK}k (deposit + SDLT + solicitor/survey/broker). You have £${cashK}k — short by £${totalNeededK - cashK}k.`;
+    setTimeout(() => { if (statusEl) statusEl.textContent = ''; }, 4000);
   }
 }
 
