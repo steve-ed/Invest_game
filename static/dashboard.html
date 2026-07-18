@@ -99,6 +99,7 @@
   #era-banner p { color: #b0c0b0; font-size: 12px; }
 
   #player-action-bar { position: relative; }
+  #player-action-bar.game-ended { display: none !important; }
   .action-panel { display: flex; flex-direction: column; gap: 8px; }
   .action-panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 4px; }
   .prop-row { font-size: 11px; color: #ddd; padding: 5px 0; border-bottom: 1px solid #2a3f50; display: flex; justify-content: space-between; align-items: center; }
@@ -924,7 +925,7 @@ function showGameEnded() {
   _gameEnded = true;
   hideActionBar();
   const pab = document.getElementById('player-action-bar');
-  if (pab) pab.style.display = 'none';
+  if (pab) { pab.style.display = 'none'; pab.classList.add('game-ended'); }
   const tabs = document.getElementById('mobile-tabs');
   if (tabs) tabs.style.display = 'none';
   document.getElementById("main-area").style.display = "none";
@@ -1158,7 +1159,7 @@ function showEraBanner(data) {
   // Hide fixed action bar and tab bar on end screen
   hideActionBar();
   const pab = document.getElementById('player-action-bar');
-  if (pab) pab.style.display = 'none';
+  if (pab) { pab.style.display = 'none'; pab.classList.add('game-ended'); }
   const tabs = document.getElementById('mobile-tabs');
   if (tabs) tabs.style.display = 'none';
   const banner = document.getElementById("era-banner");
