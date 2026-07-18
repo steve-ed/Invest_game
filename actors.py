@@ -31,9 +31,10 @@ class ActorManager:
                 prop = prop_map.get(pid)
                 if prop is None:
                     continue
-                if prop.void_ticks_remaining > 0:
-                    if not prop.epc_void:
-                        prop.void_ticks_remaining -= 1
+                if prop.epc_void:
+                    pass  # permanently void until upgraded to EPC C or better
+                elif prop.void_ticks_remaining > 0:
+                    prop.void_ticks_remaining -= 1
                 else:
                     gross = prop.rent * 6
                     income = gross * (1 - MGMT_FEE_RATE)
