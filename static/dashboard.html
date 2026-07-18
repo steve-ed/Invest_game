@@ -1135,6 +1135,7 @@ async function poll() {
     if (lastTick > 1 && d.tick === 1) { location.reload(); return; }
     lastTick = d.tick;
     _turnActionSent = false;
+    if (!_gameEnded && !d.era_label) _startTimer();
     if (d.axis_ranges && !axisRanges) axisRanges = d.axis_ranges;
     if (d.preamble_macro && !_preambleMacro) _preambleMacro = d.preamble_macro;
 
