@@ -1,6 +1,6 @@
 # RealEstGame — Specification (as built)
 
-> Last updated: 2026-07-15. Describes the `kernel.py` architecture.
+> Last updated: 2026-07-18. Describes the `kernel.py` architecture.
 
 ---
 
@@ -8,7 +8,7 @@
 
 RealEstGame is a turn-based property investment simulation. The player and two AI actors (drawn randomly from six available strategies) compete to build the strongest risk-adjusted portfolio across a randomly selected slice of real UK macroeconomic history. The era is hidden during play and revealed only at game end.
 
-Each turn represents **3 months** of simulated time. Macro conditions — house price growth, interest rates, rental growth — are driven by approximate historical UK data from 1983 to 2024.
+Each turn represents **6 months** of simulated time (semi-annual). Macro conditions — house price growth, interest rates, rental growth — are driven by approximate historical UK data from 1983 to 2024.
 
 ---
 
@@ -18,18 +18,18 @@ Each turn represents **3 months** of simulated time. Macro conditions — house 
 
 | Mode | Turns | Simulated years |
 |---|---|---|
-| Short | 20 | 5 years |
-| Long | 40 | 10 years |
+| Short | 20 | 10 years |
+| Long | 40 | 20 years |
 
 ### 2.2 Turn Execution Order
 
 Each turn runs in this sequence:
 
 1. **Player decision** — buy, sell, hold, upgrade, refi, renovate (with optional LTV choice)
-2. **AI decisions** — all AI actors decide simultaneously
+2. **AI decisions** — all AI actors decide simultaneously; brrr and value_add strategies also bid at auction listings
 3. **Tick advance** — rent income paid, mortgage costs deducted, prices updated
 4. **Random events** — void periods, maintenance costs, branching narrative events
-5. **EPC mandate check** — at tick 10, non-compliant properties enter a 2-tick grace window
+5. **EPC mandate check** — at a random tick between 5 and 8, non-compliant properties enter a 4-tick grace window
 6. **Market replenishment** — properties added to keep minimum available
 7. **Auction scheduling** — one auction property added every 8 ticks
 8. **Leaderboard update** — scores recomputed for all actors
@@ -40,7 +40,7 @@ Each turn runs in this sequence:
 
 ### 3.1 Historical Data Source
 
-Macro values are drawn from `data/uk_macro_history.py` — a quarterly dataset covering 1983 Q1 → 2024 Q4. Each entry contains:
+Macro values are drawn from `data/uk_macro_history.py` — a semi-annual dataset covering 1983 H1 → 2024 H2. Each entry contains:
 
 | Field | Description |
 |---|---|
@@ -58,7 +58,7 @@ Derived each tick from observed data:
 
 | Condition | Label |
 |---|---|
-| Price growth > 2% per quarter | Boom |
+| Price growth > 2% per half-year | Boom |
 | Price fall > 1.5%, rate > 3% | Correction |
 | Price fall > 1.5%, rate ≤ 3% | Crash |
 | Rate > 8% | High Rates |
@@ -117,9 +117,9 @@ Poor EPC properties are priced below their HPI-adjusted value to reflect complia
 Property values move with regional HPI:
 
 ```
-quarterly_growth = (price_index_next - price_index_now) / price_index_now * hpi_factor
-current_value   *= (1 + quarterly_growth)
-rent            *= (1 + quarterly_growth * 0.5)   # rents lag prices
+semi_annual_growth = (price_index_next - price_index_now) / price_index_now * hpi_factor
+current_value      *= (1 + semi_annual_growth)
+rent               *= (1 + semi_annual_growth * 0.5)   # rents lag prices
 ```
 
 ---
@@ -130,14 +130,14 @@ rent            *= (1 + quarterly_growth * 0.5)   # rents lag prices
 
 All actors start with approximately equal total wealth (~£1,500,000). The player gets 3 randomly assigned properties from the starting market; two AI actors each get 2 properties from distinct strategy profiles.
 
-### 5.2 Income Per Tick (quarterly)
+### 5.2 Income Per Tick (semi-annual)
 
 **Cash in:**
-- Rent income = `monthly_rent × 3 × (1 − 0.12)` (12% management fee deducted)
-- Savings interest on cash = `BoE_rate × 0.75 / 4` (competitive savings rate, quarterly)
+- Rent income = `monthly_rent × 6 × (1 − 0.12)` (12% management fee deducted)
+- Savings interest on cash = `BoE_rate × 0.75 / 2` (competitive savings rate, semi-annual)
 
 **Cash out:**
-- Mortgage interest = `mortgage_balance × mortgage_rate / 4`
+- Mortgage interest = `mortgage_balance × mortgage_rate / 2`
 
 ---
 
@@ -156,7 +156,7 @@ Player selects a property from the market and an LTV:
 | Mortgage | 50% | 50% of value |
 | High leverage | 75% | 25% of value |
 
-Mortgage rate = `BoE rate + 1.8%`, fixed for 8 ticks (2 years), then variable.
+Mortgage rate = `BoE rate + 1.8%`, fixed for 4 ticks (2 years), then variable.
 
 **SDLT (additional-property surcharge):**
 
@@ -200,7 +200,7 @@ Available when the fixed-rate term has expired and there is headroom at the targ
 
 - Released equity = `(current_value × LTV) − existing_mortgage_balance`
 - Flat fee = **£1,500**
-- Resets to a new 8-tick fixed term at current `BoE + 1.8%`
+- Resets to a new 4-tick fixed term at current `BoE + 1.8%`
 
 ### 6.6 Renovate
 
@@ -217,19 +217,30 @@ Auction properties appear every 8 ticks, priced 15% below market value, flagged 
 - Aggressive AI always bids +5%; Conservative AI bids at asking
 - Player wins if their bid ≥ highest AI bid (ties go to player)
 - Player pays their bid price (not asking price)
+- The **brrr** and **value_add** AI strategies also participate in auctions, bidding at asking price when cash reserves allow
 
 ### 6.8 Forced Sale
 
 If player cash goes negative, the cheapest portfolio property is automatically sold to cover the shortfall.
 
+### 6.9 Auto-Remortgage
+
+When a fixed-rate term expires (after 4 ticks) and the actor does not proactively refi, the system automatically remortgages the property:
+
+- **Arrangement fee:** 1% of outstanding mortgage balance (deducted from cash)
+- **New rate:** current `BoE + 1.8%` at time of auto-remortgage
+- **New fixed term:** 4 ticks (2 years)
+
+This preserves one full tick as a window for the actor to refi voluntarily before the auto-remortgage fires.
+
 ---
 
 ## 7. EPC Mandate
 
-At tick 10 a government mandate fires requiring all properties to be EPC C (band 3) or better within 2 ticks. Non-compliant properties:
+At a random tick between tick 5 and tick 8, a government mandate fires requiring all properties to be EPC C (band 3) or better within 4 ticks. Non-compliant properties (EPC D–G):
 
-1. Enter an EPC void — no rent income until upgraded
-2. If still non-compliant after the grace window, force-sold at **85% of current value** minus 1.5% agent fee minus mortgage balance
+1. Enter an EPC void — no rent income until upgraded to EPC C or better
+2. If still non-compliant after the 4-tick grace window, force-sold at **85% of current value** minus 1.5% agent fee minus mortgage balance
 
 ---
 
