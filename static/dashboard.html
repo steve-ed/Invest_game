@@ -1085,7 +1085,7 @@ function initDebriefCharts(data) {
   const ev = data.player_eval || [];
   const mh = data.macro_history || [];
   const labels = (data.x_labels || []).slice(1);
-  const rates  = mh.map(m => +(m.rate * 100).toFixed(2));
+  const rates  = mh.map(m => +m.rate.toFixed(2));
 
   const isAction = (verb, e) => e.player.startsWith(verb);
   new Chart(ctx, {
