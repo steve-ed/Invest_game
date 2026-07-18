@@ -81,6 +81,15 @@
   .tag-icr   { background: #3a0a0a; color: #ff5252; border: 1px solid #ff5252; }
   .tag-maint { background: #2a2010; color: #c8841a; }
 
+  #turn-timer-bar {
+    height: 3px; background: #2a3f50; overflow: hidden; border-radius: 2px; margin-bottom: 4px;
+  }
+  #turn-timer-fill { height: 100%; width: 0%; background: #4caf50; border-radius: 2px; transition: background 0.5s; }
+  #turn-timer-label {
+    font-size: 10px; color: #888; font-family: monospace; text-align: right;
+    min-height: 14px; margin-bottom: 2px;
+  }
+
   #era-banner {
     display: none; flex: 1; min-height: 0; overflow-y: auto;
     background: #0f1923; border-radius: 6px;
@@ -627,6 +636,7 @@ const EVENT_TAG_CLASS = {
   epc_force_sell: "tag-shock", epc_warning:      "tag-shock",
   epc_mandate:    "tag-info",
   icr_warning:    "tag-icr",  icr_force_sell:   "tag-icr",
+  refi_reminder:  "tag-info",
 };
 
 const EVENT_STRATEGY_IMPACT = {
@@ -872,20 +882,22 @@ function updateEventFeed(currentEvents) {
   if (!currentEvents.length) { el.innerHTML = '<div class="event-item" style="color:#888">Quiet turn — no major events</div>'; return; }
   // Priority: ICR crises first, then EPC, then player void/maint, then macro
   const icrCrises       = currentEvents.filter(e => (e.type === "icr_warning" || e.type === "icr_force_sell") && e.actor_id === "player");
+  const refiReminders   = currentEvents.filter(e => e.type === "refi_reminder" && e.actor_id === "player");
   const epcMandate      = currentEvents.filter((e,i,arr) => e.type === "epc_mandate" && arr.findIndex(x => x.type === "epc_mandate") === i);
   const epcWarnings     = currentEvents.filter(e => e.type === "epc_warning" && e.actor_id === "player");
   const playerVoidMaint = currentEvents.filter(e => (e.type === "void_period" || e.type === "maintenance") && e.actor_id === "player");
   const macro           = currentEvents.filter(e =>
     !["void_period","maintenance","actor_step","property_valuation","ai_action","player_action",
-      "epc_warning","epc_mandate","icr_warning","icr_force_sell"].includes(e.type));
+      "epc_warning","epc_mandate","icr_warning","icr_force_sell","refi_reminder"].includes(e.type));
   const otherVoidMaint  = currentEvents.filter(e => (e.type === "void_period" || e.type === "maintenance") && e.actor_id !== "player");
-  const ordered = [...icrCrises, ...epcMandate, ...epcWarnings, ...playerVoidMaint, ...macro, ...otherVoidMaint];
+  const ordered = [...icrCrises, ...refiReminders, ...epcMandate, ...epcWarnings, ...playerVoidMaint, ...macro, ...otherVoidMaint];
   el.innerHTML = (ordered.length ? ordered : currentEvents).slice(0, 1).map(e => {
     const cls = EVENT_TAG_CLASS[e.type] || "tag-info";
     const LABELS = {
       void_period: "void", maintenance: "maintenance",
       epc_force_sell: "EPC void", epc_warning: "EPC warning", epc_mandate: "EPC mandate",
       icr_warning:   "ICR WARNING", icr_force_sell: "FORCED SALE",
+      refi_reminder: "REMORTGAGE",
     };
     const label = LABELS[e.type] || e.type.replace(/_/g, " ");
     const isPlayer = e.actor_id === "player";
@@ -1513,6 +1525,7 @@ function buildPortfolioTable(rows) {
           <span style="color:#ddd;">${p.region}</span>
           <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>
           ${p.fixed_ticks_remaining > 0 ? `<span style="font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;background:#3a2e00;color:#ecad0a;margin-left:2px;">Fx${p.fixed_ticks_remaining}</span>` : ''}${p.void_ticks_remaining > 0 ? `<span style="font-size:9px;padding:1px 4px;border-radius:3px;font-weight:600;background:#2a1a3a;color:#b07dd7;margin-left:2px;">VOID</span>` : ''}${p.renovated ? '<span style="font-size:9px;padding:1px 4px;border-radius:3px;background:#0a2a2a;color:#00bcd4;font-weight:700;margin-left:2px;">RENO</span>' : ''}
+          ${(() => { const icr = p.monthly_mortgage > 0 ? p.rent_monthly / p.monthly_mortgage : null; if (icr === null) return ''; const c = icr >= 1.45 ? '#4caf50' : icr >= 1.25 ? '#ecad0a' : '#f44336'; const w = icr < 1.0 ? ' border:1px solid #f44336;' : ''; return `<span style="font-size:9px;padding:1px 4px;border-radius:3px;background:#0f1923;color:${c};font-weight:600;margin-left:2px;${w}" title="Interest Coverage Ratio: rent ÷ mortgage interest. Lender minimum 1.25×">ICR ${icr.toFixed(2)}x</span>`; })()}
         </td>
         <td style="text-align:right;padding:4px 4px;border-bottom:1px solid #1a2733;">
           <span style="font-weight:600;color:${netColor};">${net >= 0 ? '+' : ''}£${(net/1000).toFixed(1)}k</span><br>
@@ -1698,6 +1711,38 @@ function switchPanels(actorId) {
             <span style="text-align:center;">${fmt(rs.current_net)}</span>
             <span style="text-align:center;">${fmt(rs.stress_1pct_net)}</span>
             <span style="text-align:center;">${fmt(rs.stress_2pct_net)}</span>
+          </div>`;
+        // Live score estimate
+        const rb = _lastPs.live_risk_breakdown || {};
+        const se = _lastPs.live_score_estimate;
+        if (se != null) {
+          const fk = v => v == null ? '—' : `£${(Math.abs(v)/1000).toFixed(0)}k`;
+          const cc = v => v > 50000 ? '#f44336' : v > 20000 ? '#ecad0a' : '#4caf50';
+          stressEl.innerHTML += `
+          <div style="margin-top:10px;padding-top:8px;border-top:1px solid #2a3f50;">
+            <div style="font-size:10px;color:#888;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;">Score Estimate (live)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:5px;">
+              <div style="background:#0f1923;border-radius:3px;padding:3px 5px;">
+                <div style="font-size:8px;color:#777;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;">ICR Stress</div>
+                <div style="font-size:10px;font-weight:700;color:${cc(rb.icr_cost||0)};">−${fk(rb.icr_cost||0)}</div>
+              </div>
+              <div style="background:#0f1923;border-radius:3px;padding:3px 5px;">
+                <div style="font-size:8px;color:#777;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;">LTV Capital</div>
+                <div style="font-size:10px;font-weight:700;color:${cc(rb.ltv_capital_cost||0)};">−${fk(rb.ltv_capital_cost||0)}</div>
+              </div>
+              <div style="background:#0f1923;border-radius:3px;padding:3px 5px;">
+                <div style="font-size:8px;color:#777;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;">Concentration</div>
+                <div style="font-size:10px;font-weight:700;color:${cc(rb.concentration_cost||0)};">−${fk(rb.concentration_cost||0)}</div>
+              </div>
+              <div style="background:#0f1923;border-radius:3px;padding:3px 5px;">
+                <div style="font-size:8px;color:#777;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:1px;">EPC Exposure</div>
+                <div style="font-size:10px;font-weight:700;color:${cc(rb.epc_cost||0)};">−${fk(rb.epc_cost||0)}</div>
+              </div>
+            </div>
+            <div style="background:#0f1923;border-radius:3px;padding:4px 6px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:9px;color:#888;">Est. score</span>
+              <span style="font-size:12px;font-weight:700;color:${se >= 0 ? '#4caf50' : '#f44336'};">${se >= 0 ? '+' : ''}${fk(se)}</span>
+            </div>
           </div>`;
       } else if (stressEl) {
         stressEl.style.display = 'none';
@@ -2358,7 +2403,7 @@ function renderAvailableProps(rows) {
       style="cursor:pointer;${p.affordable ? '' : 'opacity:0.55;'}">
       <td style="padding:5px 4px;border-bottom:1px solid #1a2733;">
         <span style="font-size:9px;color:#4a7a9b;font-family:monospace;margin-right:4px;">${p.id}</span>${p.region} <span class="epc-badge ${epcClass(p.epc_band)}">${p.epc_label}</span><span class="arch-badge">${p.archetype}</span>${p.is_auction ? '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#1a2a1a;color:#f9a825;font-weight:700;margin-left:4px;border:1px solid #f9a825;">AUCTION</span>' : ''}<span style="font-size:9px;color:#888;margin-left:3px;">${p.bedrooms}bd</span><span style="font-size:9px;color:#888;margin-left:3px;">${p.age}yr</span>
-        <br><span style="font-size:9px;color:#888;">Void ${p.void_risk_pct}%</span><span style="font-size:9px;color:#888;"> · </span><span style="font-size:9px;color:${p.maintenance_risk==='High'?'#f44336':p.maintenance_risk==='Medium'?'#ecad0a':'#4caf50'};">Maint ${p.maintenance_risk}</span>
+        <br><span style="font-size:9px;color:#888;">Void ${p.void_risk_pct}%</span><span style="font-size:9px;color:#888;"> · </span><span style="font-size:9px;color:${p.maintenance_risk==='High'?'#f44336':p.maintenance_risk==='Medium'?'#ecad0a':'#4caf50'};">Maint ${p.maintenance_risk}</span>${p.icr_at_75pct != null ? ` · <span style="font-size:9px;color:${p.icr_at_75pct >= 1.25 ? '#4caf50' : '#f44336'};font-weight:600;" title="ICR at 75% LTV: rent ÷ mortgage interest. Lender requires ≥ 1.25×">${p.icr_at_75pct >= 1.25 ? 'ICR✓' : 'ICR✗'} ${p.icr_at_75pct.toFixed(2)}x @75%</span>` : ''}
         <br><span style="font-size:9px;color:${affordColor};font-weight:600;" title="${affordTitle}">${affordLabel}</span>
       </td>
       <td style="text-align:right;padding:5px 4px;border-bottom:1px solid #1a2733;">

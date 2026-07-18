@@ -641,6 +641,10 @@ class SimulationKernel:
                 sdlt = _calculate_sdlt(p.current_value)
                 total_cash_needed = p.current_value * 0.25 + sdlt + PURCHASE_COMPLETION_COSTS
                 affordable = player and player.cash >= total_cash_needed
+                _rate_75 = self.state.macro.interest_rate + MORTGAGE_SPREAD
+                _loan_75 = p.current_value * 0.75
+                _interest_75 = _loan_75 * _rate_75
+                _icr_75 = round((p.rent * 12) / _interest_75, 2) if _interest_75 > 0 else None
                 available_props.append({
                     "id": p.id, "region": p.region,
                     "value": round(p.current_value, 0),
@@ -659,6 +663,7 @@ class SimulationKernel:
                     "maintenance_risk": maintenance_risk_label(p),
                     "maintenance_reserve": expected_maintenance_reserve(p),
                     "is_auction": p.is_auction,
+                    "icr_at_75pct": _icr_75,
                 })
 
         # Net worth delta vs previous tick
@@ -755,6 +760,18 @@ class SimulationKernel:
                     elif _tax_mode == 'company':
                         _tax_annual_est += max(0.0, (_net_ann - _interest_ann) * 0.25)
 
+        # Live risk breakdown for score transparency panel
+        _live_risk_cost = 0.0
+        _live_risk_bd   = {}
+        _live_score_est = None
+        if player:
+            _live_risk_cost, _live_risk_bd = self.scoring.compute_risk_cost(
+                player, self.state.properties, self.state.macro.interest_rate
+            )
+            _live_total_return = (total_portfolio_value - total_mortgage_balance_pf
+                                  + player.cash - player.initial_wealth)
+            _live_score_est = round(_live_total_return - _live_risk_cost, 0)
+
         data = {
             "tick": self.state.tick,
             "total_ticks": self.turns,
@@ -769,7 +786,8 @@ class SimulationKernel:
                                                   "rent_surge", "rent_squeeze",
                                                   "epc_mandate", "epc_warning",
                                                   "epc_void",
-                                                  "icr_warning", "icr_force_sell")],
+                                                  "icr_warning", "icr_force_sell",
+                                                  "refi_reminder")],
             "actors": actors_data,
             "actors_state": actors_state,
             "last_actions": dict(self.state.last_ai_actions),
@@ -812,6 +830,8 @@ class SimulationKernel:
                     "epc_risk": epc_risk,
                     "archetype_concentration": archetype_concentration,
                 },
+                "live_risk_breakdown": _live_risk_bd,
+                "live_score_estimate": _live_score_est,
             },
         }
         if is_final:
@@ -984,6 +1004,25 @@ class SimulationKernel:
                         f"renovated {pid}" if action == "renovate" else "hold"
                     )
             tick_events += player_events
+
+            # Remortgage reminder: warn player one turn before auto-fee fires
+            if player_actor:
+                _prop_map_rm = {p.id: p for p in self.state.properties}
+                for pid in player_actor.portfolio:
+                    p = _prop_map_rm.get(pid)
+                    if p and p.mortgage_balance > 0 and p.fixed_ticks_remaining == 1:
+                        fee_if_missed = round(p.mortgage_balance * 0.01)
+                        tick_events.append({
+                            "type": "refi_reminder",
+                            "tick": tick,
+                            "property_id": p.id,
+                            "actor_id": "player",
+                            "detail": (
+                                f"{p.id} ({p.region}): fixed rate expires next turn. "
+                                f"Refi now to lock a new rate — or the lender charges "
+                                f"a £{fee_if_missed:,} auto-arrangement fee."
+                            ),
+                        })
 
             # Record per-turn evaluation
             year, half, *_ = curr_entry
@@ -1255,10 +1294,16 @@ class SimulationKernel:
             else:
                 deposit      = prop.current_value * (1 - ltv)
                 sdlt         = _calculate_sdlt(prop.current_value)
-                total_outlay = deposit + sdlt
+                total_outlay = deposit + sdlt + PURCHASE_COMPLETION_COSTS
+                # ICR lender gate: standard BTL lender requires ICR >= 1.25
+                if ltv > 0:
+                    _annual_interest = prop.current_value * ltv * (self.state.macro.interest_rate + MORTGAGE_SPREAD)
+                    _icr = (prop.rent * 12) / _annual_interest if _annual_interest > 0 else 999.0
+                    if _icr < 1.25:
+                        return  # Lender rejects mortgage — ICR fails minimum
                 if actor.cash >= total_outlay:
                     actor.cash -= total_outlay
-                    actor.total_transaction_costs += sdlt
+                    actor.total_transaction_costs += sdlt + PURCHASE_COMPLETION_COSTS
                     prop.mortgage_balance = prop.current_value * ltv
                     prop.mortgage_rate = self.state.macro.interest_rate + MORTGAGE_SPREAD
                     prop.is_fixed_rate = True
@@ -1292,6 +1337,7 @@ class SimulationKernel:
                     prop.rent *= 1.15
                     prop.current_value *= 1.08
                     prop.renovated = True
+                    prop.void_ticks_remaining = 1  # 6 months of works — no rent during renovation
 
         elif action == "refi" and property_id in actor.portfolio:
             if prop.fixed_ticks_remaining == 0 and prop.mortgage_balance > 0:

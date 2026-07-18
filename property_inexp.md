@@ -865,6 +865,10 @@ With two properties generating income, your tax position becomes more complex. B
 
 The simulation referenced throughout this book replays actual historical UK property eras. You and two AI competitors each run a different investment strategy through 20 turns — representing 10 simulated years. The era is hidden until the end.
 
+> **A note on scale:** The game is calibrated around an established investor — all players begin with a portfolio worth several times the £50,000–£80,000 starting budget described in Part One. The decisions and ratios the simulation teaches are identical to those in this book. The numbers are larger; the logic is the same. When you see a portfolio generating £3,000 per month in the game, think of it as a scaled-up version of your first £900/month property.
+
+> **A note on numbers:** Each game replays a different historical era drawn at random from 40 years of data. The interest rates, house prices, and yields you encounter will not match the worked examples in Chapter 13 — that is deliberate. The same analysis applies whether rates are 3% or 12%; what changes is how comfortably the sums work out. If your game starts in a high-rate era, Chapter 13's Q3 stress test will bite from turn one. If it starts in a low-rate era, that test will look easy until the era turns.
+
 **What it teaches**
 
 - How the same strategy performs in different economic environments
