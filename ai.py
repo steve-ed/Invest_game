@@ -7,10 +7,17 @@ LEVERAGE_MAX_RATE_BUY = 0.065   # leverage AI only buys when rate <= this
 LEVERAGE_SELL_RATE    = 0.085   # leverage AI sells when rate exceeds this
 LTV_LEVERAGE          = 0.75
 LTV_MODERATE          = 0.50
-LTV_VALUE_ADD         = 0.65    # bridging-style LTV for value_add buyers
-LTV_LOW               = 0.35    # conservative leverage for yield strategy
+LTV_VALUE_ADD_REFI    = 0.75    # refi target — extract maximum post-works equity (no ICR check on refi)
+LTV_VALUE_ADD_BUY_MAX = 0.75    # ceiling for purchase LTV (ICR check may lower this)
+LTV_VALUE_ADD_BUY_MIN = 0.40    # floor — below this the leverage benefit evaporates
+MORTGAGE_SPREAD       = 0.022   # must match kernel MORTGAGE_SPREAD constant
+ICR_MINIMUM           = 1.25    # must match kernel lender gate
+LTV_YIELD_MAX         = 0.65    # target LTV for yield strategy — amplifies cash-on-cash return
+LTV_YIELD_MIN         = 0.40    # floor below which leverage benefit evaporates
 CAPITAL_MIN_VALUE     = 150_000  # capital strategy targets higher-value properties
 VALUE_ADD_MIN_VALUE   = 120_000  # value_add avoids lowest-growth cheap stock
+VALUE_ADD_MAX_RATE    = 0.075   # pause buying above this rate
+VALUE_ADD_SELL_RATE   = 0.085   # sell non-compliant high-LTV above this rate
 CAPITAL_MAX_RATE      = 0.065   # capital growth pauses buying above this rate
 CAPITAL_FALL_TICKS    = 2       # consecutive falling price ticks before selling
 BRRR_RECYCLE_SIZE     = 4       # sell when portfolio reaches this size
@@ -104,14 +111,21 @@ class AIController:
         rate = state.macro.interest_rate
         if rate > YIELD_MAX_RATE:
             return "hold", None, 0.0
+        mortgage_rate = rate + MORTGAGE_SPREAD
         for prop in sorted(available, key=lambda p: -(p.rent * 12) / p.current_value):
             net_yield = (prop.rent * 12) / prop.current_value * (1 - MGMT_FEE_RATE)
             if net_yield < YIELD_TARGET:
                 continue
-            # Use low LTV to scale portfolio while keeping ICR healthy
-            deposit = prop.current_value * (1 - LTV_LOW)
+            # ICR-constrained LTV: lender requires rent × 12 >= mortgage × rate × 1.25
+            # High-yield stock (~6%+) supports 60-65% LTV; marginal stock adjusts down
+            if mortgage_rate > 0 and prop.current_value > 0:
+                icr_ltv = (prop.rent * 12) / (prop.current_value * mortgage_rate * ICR_MINIMUM)
+            else:
+                icr_ltv = LTV_YIELD_MAX
+            buy_ltv = min(LTV_YIELD_MAX, max(LTV_YIELD_MIN, icr_ltv))
+            deposit = prop.current_value * (1 - buy_ltv)
             if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop):
-                return "buy", prop.id, LTV_LOW
+                return "buy", prop.id, buy_ltv
         return "hold", None, 0.0
 
     def _decide_leverage(self, state, actor, available):
@@ -158,39 +172,82 @@ class AIController:
 
     def _decide_value_add(self, state, actor, available):
         prop_map = {p.id: p for p in state.properties}
+        rate = state.macro.interest_rate
 
-        # Upgrade owned distressed properties before buying new ones
+        # 1. EPC upgrade: non-compliant (E/F/G) properties first — removes scoring penalty
+        #    and unlocks value uplift that makes the subsequent refi worthwhile
+        for pid in sorted(
+            [pid for pid in actor.portfolio
+             if pid in prop_map and prop_map[pid].epc_band >= 4],
+            key=lambda pid: -prop_map[pid].epc_band,
+        ):
+            prop = prop_map[pid]
+            cost = _BRRR_UPGRADE_COST.get(prop.epc_band, 0)
+            if cost > 0 and actor.cash >= cost * 1.5:
+                return "upgrade", pid, 0.0
+
+        # 2. Renovate: full refurb on compliant properties not yet done
+        #    Stacks on top of EPC uplift to maximise value before refi
         for pid in actor.portfolio:
             prop = prop_map.get(pid)
-            if prop and prop.epc_band >= 4:
-                cost = _BRRR_UPGRADE_COST.get(prop.epc_band, 0)
-                if cost > 0 and actor.cash >= cost * 1.5:
-                    return "upgrade", pid, 0.0
+            if prop and not prop.renovated and prop.epc_band < 4:
+                cost = round(prop.current_value * 0.10)
+                if actor.cash >= cost * 1.3 + expected_maintenance_reserve(prop):
+                    return "renovate", pid, 0.0
 
-        # Refi compliant properties to recycle uplift from completed upgrades
+        # 3. Refi: extract post-works equity at 75% LTV to fund next acquisition
+        #    Kernel has no ICR check on refis — post-works value justifies the uplift
+        #    Requires existing mortgage > 0 (kernel cannot create new debt via refi)
         for pid in sorted(
             actor.portfolio,
-            key=lambda pid: prop_map[pid].current_value * LTV_VALUE_ADD - prop_map[pid].mortgage_balance
+            key=lambda pid: prop_map[pid].current_value * LTV_VALUE_ADD_REFI - prop_map[pid].mortgage_balance
                             if pid in prop_map else 0,
             reverse=True,
         ):
             prop = prop_map.get(pid)
-            if prop and prop.epc_band < 4 and prop.fixed_ticks_remaining == 0:
-                headroom = prop.current_value * LTV_VALUE_ADD - prop.mortgage_balance
+            if (prop and prop.epc_band < 4 and prop.mortgage_balance > 0
+                    and prop.fixed_ticks_remaining == 0):
+                headroom = prop.current_value * LTV_VALUE_ADD_REFI - prop.mortgage_balance
                 if headroom >= 20_000:
-                    return "refi", pid, LTV_VALUE_ADD
+                    return "refi", pid, LTV_VALUE_ADD_REFI
 
-        candidates = sorted(
-            [p for p in available
-             if (p.epc_band >= 4 or p.archetype == "value_add")
-             and p.current_value >= VALUE_ADD_MIN_VALUE],
-            key=lambda p: -(p.rent * 12) / p.current_value,
-        )
-        for prop in candidates:
-            upgrade_reserve = _BRRR_UPGRADE_COST.get(prop.epc_band, 0) if prop.epc_band >= 4 else 0
-            deposit = prop.current_value * (1 - LTV_VALUE_ADD)
-            if actor.cash >= deposit * 1.05 + upgrade_reserve + expected_maintenance_reserve(prop):
-                return "buy", prop.id, LTV_VALUE_ADD
+        # 4. Sell: unload non-compliant high-LTV stock when rates spike
+        #    Cuts EPC scoring penalty AND LTV capital risk in one move
+        if rate > VALUE_ADD_SELL_RATE and actor.portfolio:
+            non_compliant = [pid for pid in actor.portfolio
+                             if pid in prop_map and prop_map[pid].epc_band >= 5]
+            if non_compliant:
+                worst = max(non_compliant, key=lambda pid:
+                    prop_map[pid].mortgage_balance / max(prop_map[pid].current_value, 1))
+                return "sell", worst, 0.0
+
+        # 5. Buy: distressed or value_add archetype
+        #    Use ICR-constrained LTV: lender requires rent × 12 >= mortgage × rate × 1.25
+        #    Distressed properties yield ~6% which only passes ICR at ~65% LTV when rates ~7%
+        #    Post-works refi (step 3) then lifts to 75% once rent has been upgraded
+        if rate <= VALUE_ADD_MAX_RATE:
+            mortgage_rate = rate + MORTGAGE_SPREAD
+            candidates = sorted(
+                [p for p in available
+                 if (p.epc_band >= 4 or p.archetype == "value_add")
+                 and p.current_value >= VALUE_ADD_MIN_VALUE],
+                key=lambda p: -(p.rent * 12) / p.current_value,
+            )
+            for prop in candidates:
+                # Compute max LTV the lender will approve given current rent
+                if mortgage_rate > 0 and prop.current_value > 0:
+                    icr_ltv = (prop.rent * 12) / (prop.current_value * mortgage_rate * ICR_MINIMUM)
+                else:
+                    icr_ltv = LTV_VALUE_ADD_BUY_MAX
+                buy_ltv = min(LTV_VALUE_ADD_BUY_MAX, max(LTV_VALUE_ADD_BUY_MIN, icr_ltv))
+                if buy_ltv < LTV_VALUE_ADD_BUY_MIN:
+                    continue
+                upgrade_reserve  = _BRRR_UPGRADE_COST.get(prop.epc_band, 0) if prop.epc_band >= 4 else 0
+                renovate_reserve = round(prop.current_value * 0.10)
+                deposit = prop.current_value * (1 - buy_ltv)
+                if actor.cash >= deposit * 1.05 + upgrade_reserve + renovate_reserve + expected_maintenance_reserve(prop):
+                    return "buy", prop.id, buy_ltv
+
         return "hold", None, 0.0
 
     def _decide_brrr(self, state, actor, available):
@@ -207,7 +264,7 @@ class AIController:
             if stressed_interest > 0 and annual_net_rent < stressed_interest:
                 return "sell", self._brrr_worst_hold(actor, prop_map), 0.0
 
-        # Refurbish owned distressed properties before acquiring new ones
+        # EPC upgrade: compliance first — removes scoring penalty and unlocks refi headroom
         for pid in actor.portfolio:
             prop = prop_map.get(pid)
             if prop and prop.epc_band >= 4:
@@ -215,11 +272,22 @@ class AIController:
                 if cost > 0 and actor.cash >= cost * 1.5:
                     return "upgrade", pid, 0.0
 
+        # Renovate: full refurb on compliant, un-renovated properties
+        # Stacks +8% value and +15% rent on top of EPC uplift before the refi
+        for pid in actor.portfolio:
+            prop = prop_map.get(pid)
+            if prop and not prop.renovated and prop.epc_band < 4:
+                cost = round(prop.current_value * 0.10)
+                if actor.cash >= cost * 1.3 + expected_maintenance_reserve(prop):
+                    return "renovate", pid, 0.0
+
         # Recycle equity: refi any compliant property with headroom at 75% LTV
+        # Requires existing mortgage > 0 (kernel cannot create new debt via refi)
         refi_candidates = sorted(
             [pid for pid in actor.portfolio
              if prop_map.get(pid) and prop_map[pid].fixed_ticks_remaining == 0
              and prop_map[pid].epc_band < 4
+             and prop_map[pid].mortgage_balance > 0
              and prop_map[pid].current_value * LTV_LEVERAGE > prop_map[pid].mortgage_balance + 10_000],
             key=lambda pid: prop_map[pid].current_value * LTV_LEVERAGE - prop_map[pid].mortgage_balance,
             reverse=True,
@@ -247,8 +315,11 @@ class AIController:
         # ranked by projected post-upgrade yield so best cash-flow comes first
         def _post_upgrade_yield(p):
             upgrade_cost = _BRRR_UPGRADE_COST.get(p.epc_band, 0) if p.epc_band >= 4 else 0
-            projected_rent = p.rent * (1.10 if upgrade_cost > 0 else 1.0) * (1 - MGMT_FEE_RATE)
-            return (projected_rent * 12) / (p.current_value + upgrade_cost) if p.current_value > 0 else 0
+            renovate_cost = round(p.current_value * 0.10)
+            rent_mult = (1.10 if upgrade_cost > 0 else 1.0) * 1.15  # upgrade +10%, renovate +15%
+            projected_rent = p.rent * rent_mult * (1 - MGMT_FEE_RATE)
+            total_cost = p.current_value + upgrade_cost + renovate_cost
+            return (projected_rent * 12) / total_cost if total_cost > 0 else 0
 
         candidates = sorted(
             [p for p in available
@@ -258,14 +329,15 @@ class AIController:
         )
         if not candidates:
             candidates = sorted(available, key=_post_upgrade_yield, reverse=True)
-        mortgage_rate = rate + 0.018
+        mortgage_rate = rate + MORTGAGE_SPREAD
         for prop in candidates:
             net_yield = prop.rent * 12 * (1 - MGMT_FEE_RATE) / prop.current_value
             if net_yield < LTV_LEVERAGE * mortgage_rate:
                 continue  # would be cash-flow negative from day one
             deposit = prop.current_value * (1 - LTV_LEVERAGE)
-            upgrade_reserve = _BRRR_UPGRADE_COST.get(prop.epc_band, 0) if prop.epc_band >= 4 else 0
-            if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop) + upgrade_reserve:
+            upgrade_reserve  = _BRRR_UPGRADE_COST.get(prop.epc_band, 0) if prop.epc_band >= 4 else 0
+            renovate_reserve = round(prop.current_value * 0.10)
+            if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop) + upgrade_reserve + renovate_reserve:
                 return "buy", prop.id, LTV_LEVERAGE
         return "hold", None, 0.0
 
