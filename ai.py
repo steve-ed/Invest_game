@@ -15,6 +15,8 @@ ICR_MINIMUM           = 1.25    # must match kernel lender gate
 LTV_YIELD_MAX         = 0.65    # target LTV for yield strategy — amplifies cash-on-cash return
 LTV_YIELD_MIN         = 0.40    # floor below which leverage benefit evaporates
 CAPITAL_MIN_VALUE     = 150_000  # capital strategy targets higher-value properties
+LTV_CAPITAL_REFI      = 0.60    # refi target for capital — above buy LTV to extract appreciation
+CAPITAL_REFI_HEADROOM = 25_000  # minimum equity release to justify a capital refi
 VALUE_ADD_MIN_VALUE   = 120_000  # value_add avoids lowest-growth cheap stock
 VALUE_ADD_MAX_RATE    = 0.075   # pause buying above this rate
 VALUE_ADD_SELL_RATE   = 0.085   # sell non-compliant high-LTV above this rate
@@ -146,6 +148,7 @@ class AIController:
         if upg: return upg
         rate = state.macro.interest_rate
         history = state.macro_history
+        prop_map = {p.id: p for p in state.properties}
 
         # Sell only after sustained price falls, and sell the weakest performer
         if len(history) >= CAPITAL_FALL_TICKS + 1:
@@ -160,9 +163,25 @@ class AIController:
         if rate > CAPITAL_MAX_RATE:
             return "hold", None, 0.0
 
+        # Refi: extract appreciation at 60% LTV to fund further purchases
+        # Capital growth investors recycle equity after significant price rises
+        for pid in sorted(
+            actor.portfolio,
+            key=lambda pid: prop_map[pid].current_value * LTV_CAPITAL_REFI - prop_map[pid].mortgage_balance
+                            if pid in prop_map else 0,
+            reverse=True,
+        ):
+            prop = prop_map.get(pid)
+            if prop and prop.mortgage_balance > 0 and prop.fixed_ticks_remaining == 0:
+                headroom = prop.current_value * LTV_CAPITAL_REFI - prop.mortgage_balance
+                if headroom >= CAPITAL_REFI_HEADROOM:
+                    return "refi", pid, LTV_CAPITAL_REFI
+
+        # Buy: prioritise high-HPI regions first, then highest value within each region
+        # London (1.35) and South (1.15) outperform North (0.85) and Wales (0.80) over time
         candidates = sorted(
             [p for p in available if p.current_value >= CAPITAL_MIN_VALUE],
-            key=lambda p: -p.current_value,
+            key=lambda p: (-p.hpi_factor, -p.current_value),
         )
         for prop in candidates:
             deposit = prop.current_value * (1 - LTV_MODERATE)
