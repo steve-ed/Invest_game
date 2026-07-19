@@ -244,8 +244,8 @@ def _default_properties():
         Property(id="p01", region="London Kensington",   base_value=500000.0, current_value=500000.0, rent=2500.0, archetype="btl",       epc_band=3, age=60,  bedrooms=3),
         Property(id="p02", region="Oxford",              base_value=230000.0, current_value=230000.0, rent=1150.0, archetype="btl",       epc_band=4, age=50,  bedrooms=3),
         Property(id="p03", region="Brighton",            base_value=220000.0, current_value=220000.0, rent=1100.0, archetype="btl",       epc_band=4, age=45,  bedrooms=2),
-        Property(id="p04", region="Sheffield",           base_value=130000.0, current_value=130000.0, rent=650.0,  archetype="value_add", epc_band=5, age=80,  bedrooms=3),
-        Property(id="p05", region="Leicester",           base_value=140000.0, current_value=140000.0, rent=700.0,  archetype="value_add", epc_band=5, age=75,  bedrooms=3),
+        Property(id="p04", region="Sheffield",           base_value=130000.0, current_value=130000.0, rent=700.0,  archetype="btl",       epc_band=3, age=25,  bedrooms=3),
+        Property(id="p05", region="Leicester",           base_value=140000.0, current_value=140000.0, rent=750.0,  archetype="btl",       epc_band=3, age=20,  bedrooms=3),
         Property(id="p06", region="Bristol",             base_value=260000.0, current_value=260000.0, rent=1300.0, archetype="btl",       epc_band=3, age=35,  bedrooms=3),
         Property(id="p07", region="Cambridge",           base_value=250000.0, current_value=250000.0, rent=1250.0, archetype="btl",       epc_band=3, age=30,  bedrooms=2),
         Property(id="p08", region="Birmingham",          base_value=200000.0, current_value=200000.0, rent=1000.0, archetype="value_add", epc_band=5, age=70,  bedrooms=3),
@@ -273,7 +273,7 @@ def _default_properties():
 _STARTING_WEALTH = 1_500_000  # all actors start with the same total wealth (hpi-adjusted equity + cash)
 
 _STRATEGY_PROFILES = {
-    # hpi-adjusted: p04 Sheffield(N×0.85)=111k, p05 Leicester(M×0.90)=126k → equity 237k → cash 1,263k
+    # hpi-adjusted: p04 Sheffield(N×0.85)=111k, p05 Leicester(M×0.90)=126k, no EPC discount (band C) → equity 237k → cash 1,263k
     "yield":       {"name": "Ms Di Vidend",      "risk_appetite": 0.25, "cash": 1_263_000, "portfolio": ["p04", "p05"]},
     # hpi-adjusted: p06 Bristol(S×1.15)=299k, p07 Cambridge(E×1.10)=275k → equity 574k → cash 926k
     "capital":     {"name": "Mr Hugh Price",     "risk_appetite": 0.55, "cash":   926_000, "portfolio": ["p06", "p07"]},

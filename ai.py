@@ -4,7 +4,7 @@ from actors import MGMT_FEE_RATE
 YIELD_TARGET          = 0.05    # minimum net annual yield to buy (yield strategy)
 YIELD_MAX_RATE        = 0.07    # yield AI holds when BoE rate exceeds this
 LEVERAGE_MAX_RATE_BUY = 0.065   # leverage AI only buys when rate <= this
-LEVERAGE_SELL_RATE    = 0.085   # leverage AI sells when rate exceeds this
+LEVERAGE_SELL_RATE    = 0.075   # leverage AI sells when rate exceeds this
 LTV_LEVERAGE          = 0.75
 LTV_MODERATE          = 0.50
 LTV_VALUE_ADD_REFI    = 0.75    # refi target — extract maximum post-works equity (no ICR check on refi)
@@ -134,8 +134,24 @@ class AIController:
         upg = self._check_upgrade(state, actor)
         if upg: return upg
         rate = state.macro.interest_rate
+        prop_map = {p.id: p for p in state.properties}
+
         if rate > LEVERAGE_SELL_RATE and actor.portfolio:
             return "sell", self._highest_ltv_hold(actor, state), 0.0
+
+        # Refi: pull out appreciation at 75% LTV — core equity recycling for leverage strategy
+        for pid in sorted(
+            actor.portfolio,
+            key=lambda pid: prop_map[pid].current_value * LTV_LEVERAGE - prop_map[pid].mortgage_balance
+                            if pid in prop_map else 0,
+            reverse=True,
+        ):
+            prop = prop_map.get(pid)
+            if prop and prop.mortgage_balance > 0 and prop.fixed_ticks_remaining == 0:
+                headroom = prop.current_value * LTV_LEVERAGE - prop.mortgage_balance
+                if headroom >= 20_000:
+                    return "refi", pid, LTV_LEVERAGE
+
         if rate <= LEVERAGE_MAX_RATE_BUY:
             for prop in available:
                 deposit = prop.current_value * (1 - LTV_LEVERAGE)
@@ -374,7 +390,14 @@ class AIController:
                 for i in range(DEMO_SELL_RENT_TICKS)
             )
             if neg_rent:
-                return "sell", actor.portfolio[0], 0.0
+                # Sell lowest-yield property — weakest income when demand turns negative
+                owned = [pid for pid in actor.portfolio if pid in prop_map]
+                worst = min(
+                    owned,
+                    key=lambda pid: prop_map[pid].rent / max(prop_map[pid].current_value, 1),
+                    default=actor.portfolio[0],
+                )
+                return "sell", worst, 0.0
 
         # Don't buy at high rates or when rent growth has been flat/falling for 2 ticks
         avg_rent_growth = (
