@@ -990,7 +990,7 @@ function buildDebriefHTML(data) {
         <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:3px 0;border-bottom:1px solid #2a3f50;margin-bottom:4px;">
           <div></div>
           <div style="font-size:9px;color:#888;text-align:right;">You</div>
-          <div style="font-size:9px;color:#888;text-align:right;">${benchAi.name.split(' ').pop()}</div>
+          <div style="font-size:9px;color:#888;text-align:right;">${benchAi.name.split(' ').pop()} <span style="color:#555;font-size:8px;">(tax-free)</span></div>
         </div>
         ${row('Risk-adj. score', player.final_score, benchAi.final_score)}
         ${row('Total return', player.total_return||0, benchAi.total_return||0)}
@@ -1242,7 +1242,10 @@ function showEraBanner(data) {
           <div style="font-size:${isWinner ? '26px' : '16px'};line-height:1;">${isWinner ? '🏆' : rankLabel[i]}</div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:700;color:${border};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.name}</div>
-            <div style="font-size:10px;color:${STRATEGY_COL[strategy] || '#888'};">${STRATEGY_DESC[strategy] || strategy}</div>
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <span style="font-size:10px;color:${STRATEGY_COL[strategy] || '#888'};">${STRATEGY_DESC[strategy] || strategy}</span>
+              ${e.actor_id !== 'player' ? '<span style="font-size:8px;color:#555;background:#0a1520;border:1px solid #2a3f50;border-radius:3px;padding:1px 5px;white-space:nowrap;">tax-free</span>' : ''}
+            </div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:${isWinner ? '18px' : '15px'};font-weight:700;color:#4caf50;">${fk(e.final_score)}</div>

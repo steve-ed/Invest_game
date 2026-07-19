@@ -1,110 +1,118 @@
 """
-Run 30 headless games, log full results, and verify all score calculations.
+Run 30 headless games and verify all score calculations against the live engine.
 
-Per-game log includes:
+Score formula (ui_web/app.py  score_for_archetype):
+    score = portfolio_value - total_debt + cash - concentration_penalty
+
+Per-game log:
   - Start year, ticks played
-  - Final portfolio/cash/rent/debt for each actor
-  - Score component breakdown
-  - Leaderboard vs manually recalculated scores (flags mismatches)
-
-Calculation checks:
-  - Player: score = portfolio + cash + rent*0.4 - leverage_penalty - concentration_penalty
-  - AI: score = portfolio + cash + cumulative_rent*0.4 (no penalties applied to AIs)
-  - Leverage penalty: excess debt above 50% LTV * 10%
-  - Concentration penalty: 4+ props in one region -> 5% avg_value * excess count
+  - Final portfolio / cash / debt for each actor
+  - Concentration penalty
+  - Computed score vs leaderboard score (flags any mismatch)
 """
 
-import sys, random, collections, textwrap
-sys.path.insert(0, 'ui_web')
+import sys, os, collections
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'ui_web'))
 
 from app import (
-    init_game_state, advance_tick, apply_player_action,
-    leverage_penalty, concentration_penalty, score_for_archetype,
+    init_game_state, advance_tick, apply_player_action, apply_ai_actions,
+    calc_sdlt, current_real_year, concentration_penalty, score_for_archetype,
 )
 
-ACTORS = ['You', 'Mr Hugh Price', 'Mr Max Lever']
-COLOURS = {'You': '#00FF88', 'Mr Hugh Price': '#FBBF24', 'Mr Max Lever': '#F87171'}
+ACTORS   = ['You', 'Mr Hugh Price', 'Mr Max Lever']
+COLOURS  = {'You': '#00FF88', 'Mr Hugh Price': '#FBBF24', 'Mr Max Lever': '#F87171'}
+
+_BUY_LTV        = 0.75
+_BUY_RATE_GATE  = 9.0
+_SELL_RATE_GATE = 11.5
 
 
-def run_game(game_num, seed):
-    random.seed(seed)
-    gs = init_game_state(20, 'balanced')
-    start_year = gs['real_start_year']
+def _smart_action(gs):
+    player = gs['player']
+    market = gs['market']
+    rate   = gs['macro']['rate']
+    cash   = player['cash']
+    port   = player['portfolio']
+    year   = current_real_year(gs)
 
-    for _ in range(gs['total_ticks']):
-        market = gs['market']
-        player = gs['player']
-        action, buy_id = 'hold', None
-        from collections import Counter
-        region_counts = Counter(p['region'] for p in player['portfolio'])
+    if rate > _SELL_RATE_GATE and port:
+        worst = min(port, key=lambda p: p['value'])
+        return 'sell', None, worst['id'], 0.0
+
+    if rate <= _BUY_RATE_GATE:
+        region_count = collections.Counter(p.get('region') for p in port)
         affordable = [
             p for p in market
             if not p.get('auction')
-            and player['cash'] >= p['value'] * 0.25
-            and region_counts.get(p['region'], 0) < 3
+            and p['value'] * (1 - _BUY_LTV) + calc_sdlt(p['value'], year) <= cash
         ]
         if affordable:
-            prop = max(affordable, key=lambda p: p['rent'] / p['value'])
-            action, buy_id = 'buy', prop['id']
-        apply_player_action(gs, action, buy_id, None,
-                            ltv=0.75 if action == 'buy' else 0.0, rate_type='variable')
-        if advance_tick(gs):
+            diverse = [p for p in affordable if region_count.get(p.get('region'), 0) < 3]
+            pool = diverse if diverse else affordable
+            best = max(pool, key=lambda p: p['value'])
+            return 'buy', best['id'], None, _BUY_LTV
+
+    return 'hold', None, None, 0.0
+
+
+def _actor_score(portfolio, mortgages, cash):
+    pv       = sum(p['value'] for p in portfolio)
+    debt     = sum(m['loan'] for m in mortgages)
+    con_pen  = concentration_penalty(portfolio)
+    computed = score_for_archetype('balanced', pv, cash, 0, debt, concentration_pen=con_pen)
+    return pv, debt, con_pen, computed
+
+
+def run_game(game_num, total_ticks=20):
+    gs = init_game_state(total_ticks=total_ticks)
+    start_year = gs['real_start_year']
+
+    for _ in range(total_ticks):
+        action, buy_id, sell_id, ltv = _smart_action(gs)
+        apply_player_action(gs, action, buy_id, sell_id, ltv=ltv)
+        apply_ai_actions(gs)
+        if advance_tick(gs) or gs.get('end'):
             break
 
-    # --- Player score components ---
-    player = gs['player']
-    p_portfolio = sum(p['value'] for p in player['portfolio'])
-    p_cash      = player['cash']
-    p_rent      = player.get('cumulative_rent', 0)
-    p_debt      = sum(m['loan'] for m in player.get('mortgages', []))
-    p_lev_pen   = leverage_penalty(p_portfolio, p_debt)
-    p_con_pen   = concentration_penalty(player['portfolio'])
-    p_score_calc = p_portfolio + p_cash + int(p_rent * 0.4) - p_lev_pen - p_con_pen
-
-    # --- AI score components ---
-    ai_data = {}
-    for ai in gs['ai']:
-        ai_portfolio = ai['portfolio_value']
-        ai_cash      = ai['cash']
-        ai_rent      = ai.get('cumulative_rent', 0)
-        ai_debt      = ai.get('total_debt', 0)
-        ai_score_calc = ai_portfolio + ai_cash + int(ai_rent * 0.4)
-        ai_data[ai['name']] = {
-            'portfolio': ai_portfolio, 'cash': ai_cash,
-            'rent': ai_rent, 'debt': ai_debt, 'score_calc': ai_score_calc,
-        }
-
-    # --- Leaderboard scores ---
     lb = {e['name']: e['score'] for e in gs['leaderboard']}
 
-    # --- Mismatch check ---
-    mismatches = []
-    if abs(lb.get('You', 0) - p_score_calc) > 1:
-        mismatches.append(f"  MISMATCH You: leaderboard={lb.get('You',0):,.0f}  calc={p_score_calc:,.0f}")
-    for name, d in ai_data.items():
-        if abs(lb.get(name, 0) - d['score_calc']) > 1:
-            mismatches.append(
-                f"  MISMATCH {name}: leaderboard={lb.get(name,0):,.0f}  calc={d['score_calc']:,.0f}"
-            )
+    # ── Player ───────────────────────────────────────────────────────────────
+    p = gs['player']
+    p_pv, p_debt, p_con, p_calc = _actor_score(
+        p['portfolio'], p.get('mortgages', []), p['cash'])
+    p_lb   = lb.get('You', 0)
+    p_miss = abs(p_lb - p_calc) > 1
+
+    # ── AIs ──────────────────────────────────────────────────────────────────
+    ai_rows = []
+    for ai in gs['ai']:
+        ai_port  = ai.get('portfolio', [])
+        ai_mtg   = ai.get('mortgages', [])
+        a_pv, a_debt, a_con, a_calc = _actor_score(ai_port, ai_mtg, ai['cash'])
+        a_lb   = lb.get(ai['name'], 0)
+        a_miss = abs(a_lb - a_calc) > 1
+        ai_rows.append({
+            'name': ai['name'], 'cash': ai['cash'], 'pv': a_pv, 'debt': a_debt,
+            'con': a_con, 'calc': a_calc, 'lb': a_lb, 'miss': a_miss,
+        })
 
     ranked = sorted(gs['leaderboard'], key=lambda e: e['score'], reverse=True)
+    mismatches = (
+        [f"  MISMATCH You: lb={p_lb:,.0f}  calc={p_calc:,.0f}"] if p_miss else []
+    ) + [
+        f"  MISMATCH {r['name']}: lb={r['lb']:,.0f}  calc={r['calc']:,.0f}"
+        for r in ai_rows if r['miss']
+    ]
 
     return {
-        'game':       game_num,
-        'start_year': start_year,
-        'ticks':      gs['tick'],
-        'first':      ranked[0]['name'],
-        'second':     ranked[1]['name'],
-        'third':      ranked[2]['name'],
-        'player': {
-            'portfolio': p_portfolio, 'cash': p_cash, 'rent': p_rent,
-            'debt': p_debt, 'lev_pen': p_lev_pen, 'con_pen': p_con_pen,
-            'score_calc': p_score_calc, 'score_lb': lb.get('You', 0),
-            'props': len(player['portfolio']),
-        },
-        'ai': ai_data,
-        'lb': lb,
-        'mismatches': mismatches,
+        'game': game_num, 'start_year': start_year, 'ticks': gs['tick'],
+        'first':  ranked[0]['name'] if ranked else '?',
+        'second': ranked[1]['name'] if len(ranked) > 1 else '?',
+        'third':  ranked[2]['name'] if len(ranked) > 2 else '?',
+        'player': {'pv': p_pv, 'cash': p['cash'], 'debt': p_debt,
+                   'con': p_con, 'calc': p_calc, 'lb': p_lb, 'miss': p_miss,
+                   'props': len(p['portfolio'])},
+        'ai': ai_rows, 'lb': lb, 'mismatches': mismatches,
     }
 
 
@@ -113,56 +121,48 @@ def fmt(n): return f'£{n:>12,.0f}'
 
 def main():
     games = 30
-    print(f"Running {games} games and checking calculations...\n")
+    print(f"Running {games} games and verifying score calculations...\n")
 
-    records = []
-    all_mismatches = []
+    records, all_mismatches = [], []
 
     for g in range(1, games + 1):
-        rec = run_game(g, seed=1000 + g)
+        rec = run_game(g)
         records.append(rec)
-
-        p  = rec['player']
-        lb = rec['lb']
+        p = rec['player']
 
         print(f"Game {g:>3}  {rec['start_year']}  "
-              f"1st={rec['first']:<16} 2nd={rec['second']:<16} 3rd={rec['third']}")
-
-        # Player breakdown
-        print(f"         YOU:           portfolio={fmt(p['portfolio'])}  "
-              f"cash={fmt(p['cash'])}  rent={fmt(p['rent'])}  debt={fmt(p['debt'])}")
-        print(f"                        lev_pen={fmt(p['lev_pen'])}  "
-              f"con_pen={fmt(p['con_pen'])}  "
-              f"score={fmt(p['score_calc'])}  props={p['props']}")
-
-        # AI breakdowns
-        for name, d in rec['ai'].items():
-            print(f"         {name:<16} portfolio={fmt(d['portfolio'])}  "
-                  f"cash={fmt(d['cash'])}  rent={fmt(d['rent'])}  debt={fmt(d['debt'])}")
-            print(f"                        score={fmt(d['score_calc'])}")
-
+              f"1st={rec['first']:<20} 2nd={rec['second']:<20} 3rd={rec['third']}")
+        print(f"  You:  pv={fmt(p['pv'])}  cash={fmt(p['cash'])}  "
+              f"debt={fmt(p['debt'])}  con_pen={fmt(p['con'])}  "
+              f"score={fmt(p['calc'])}  lb={fmt(p['lb'])}  "
+              f"{'OK' if not p['miss'] else '*** MISMATCH ***'}  props={p['props']}")
+        for r in rec['ai']:
+            print(f"  {r['name']:<20} pv={fmt(r['pv'])}  cash={fmt(r['cash'])}  "
+                  f"debt={fmt(r['debt'])}  con_pen={fmt(r['con'])}  "
+                  f"score={fmt(r['calc'])}  lb={fmt(r['lb'])}  "
+                  f"{'OK' if not r['miss'] else '*** MISMATCH ***'}")
         if rec['mismatches']:
             for m in rec['mismatches']:
-                print(f"  *** {m}")
+                print(m)
             all_mismatches.extend(rec['mismatches'])
         print()
 
-    # --- Summary table ---
+    # ── Summary table ────────────────────────────────────────────────────────
     wins   = collections.Counter(r['first']  for r in records)
     second = collections.Counter(r['second'] for r in records)
     third  = collections.Counter(r['third']  for r in records)
 
     print(f"\n{'-'*60}")
-    print(f"  {'Actor':<18} {'1st':>5}  {'2nd':>5}  {'3rd':>5}  {'1st%':>6}")
+    print(f"  {'Actor':<22} {'1st':>5}  {'2nd':>5}  {'3rd':>5}  {'1st%':>6}")
     print(f"  {'-'*55}")
     for a in ACTORS:
         w = wins.get(a, 0)
-        print(f"  {a:<18} {w:>5}  {second.get(a,0):>5}  {third.get(a,0):>5}  {w/games*100:>5.1f}%")
+        print(f"  {a:<22} {w:>5}  {second.get(a,0):>5}  {third.get(a,0):>5}  {w/games*100:>5.1f}%")
     print(f"{'-'*60}")
 
-    # --- Calculation audit summary ---
+    # ── Calculation audit ────────────────────────────────────────────────────
     print(f"\n{'='*60}")
-    print(f"  CALCULATION AUDIT")
+    print(f"  CALCULATION AUDIT  (score = pv - debt + cash - con_pen)")
     print(f"{'='*60}")
     if all_mismatches:
         print(f"  {len(all_mismatches)} MISMATCHES FOUND:")
@@ -171,55 +171,12 @@ def main():
     else:
         print(f"  All {games} games: leaderboard scores match manual calculations. OK")
 
-    # --- Range checks ---
-    player_scores = [r['player']['score_calc'] for r in records]
-    print(f"\n  Player score range:  {fmt(min(player_scores))} – {fmt(max(player_scores))}")
-    print(f"  Avg player score:    {fmt(sum(player_scores)/len(player_scores))}")
-
-    lev_pens = [r['player']['lev_pen'] for r in records]
-    con_pens = [r['player']['con_pen'] for r in records]
-    print(f"  Games with leverage penalty:      {sum(1 for x in lev_pens if x > 0)}")
+    player_scores = [r['player']['calc'] for r in records]
+    con_pens      = [r['player']['con']  for r in records]
+    print(f"\n  Player score range: {fmt(min(player_scores))} – {fmt(max(player_scores))}")
+    print(f"  Avg player score:   {fmt(sum(player_scores)/len(player_scores))}")
     print(f"  Games with concentration penalty: {sum(1 for x in con_pens if x > 0)}")
-    print(f"  Max leverage penalty seen:        {fmt(max(lev_pens))}")
-    print(f"  Max concentration penalty seen:   {fmt(max(con_pens))}")
-
-    # --- Plot ---
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    import matplotlib.patches as mpatches
-    import numpy as np
-
-    rng = np.random.default_rng(42)
-    fig, ax = plt.subplots(figsize=(14, 5))
-    actor_y = {a: i for i, a in enumerate(ACTORS)}
-    years = [r['start_year'] for r in records]
-
-    for rec in records:
-        s  = rec['first']
-        y  = actor_y.get(s, len(ACTORS))
-        jy = rng.uniform(-0.2, 0.2)
-        ax.scatter(rec['start_year'], y + jy,
-                   color=COLOURS.get(s, '#888'), s=80, alpha=0.85, zorder=3,
-                   edgecolors='white', linewidths=0.5)
-
-    ax.set_yticks(range(len(ACTORS)))
-    ax.set_yticklabels(ACTORS, fontsize=11)
-    ax.set_xlabel('Game start year', fontsize=11)
-    ax.set_title(f'Winner by game start year — {games} games (20 turns each)', fontsize=13)
-    ax.grid(axis='x', alpha=0.3)
-    xlim = (min(years) - 1, max(years) + 3)
-    ax.set_xlim(xlim)
-    for a, y in actor_y.items():
-        w = wins.get(a, 0)
-        ax.text(xlim[1] + 0.2, y, f"{w} wins ({w/games*100:.0f}%)",
-                va='center', fontsize=9, color=COLOURS.get(a, '#888'))
-    patches = [mpatches.Patch(color=COLOURS[a], label=a) for a in ACTORS]
-    ax.legend(handles=patches, loc='upper left', fontsize=9)
-    plt.tight_layout()
-    out = 'wins_by_year_30.png'
-    plt.savefig(out, dpi=150, bbox_inches='tight')
-    print(f"\nPlot saved: {out}")
+    print(f"  Max concentration penalty:        {fmt(max(con_pens))}")
 
 
 if __name__ == '__main__':
