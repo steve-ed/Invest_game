@@ -69,6 +69,8 @@ def run_game(game_num, turns, SimulationKernel):
                 "n_props":      len(actor.portfolio),
                 "port_wealth":  round(port_wealth, 0),
                 "cash":         round(actor.cash, 0),
+                "final_score":  "",   # filled in after game ends
+                "risk_cost":    "",
             })
 
         orig_write(tick_events, *args, is_final=is_final)
@@ -82,6 +84,13 @@ def run_game(game_num, turns, SimulationKernel):
 
     results = kernel.run()
     lb = results["leaderboard"]
+
+    # Back-fill final_score and risk_cost into every row for this game
+    score_map = {e["actor_id"]: (e.get("final_score", 0), e.get("risk_cost", 0)) for e in lb}
+    for row in actor_rows:
+        fs, rc = score_map.get(row["actor_id"], ("", ""))
+        row["final_score"] = fs
+        row["risk_cost"]   = rc
 
     winner = lb[0]["name"] if lb else "?"
     winner_score = lb[0]["final_score"] if lb else 0
@@ -157,7 +166,7 @@ def main():
     with open(actor_csv, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=[
             "game", "tick", "actor_id", "name", "strategy",
-            "n_props", "port_wealth", "cash",
+            "n_props", "port_wealth", "cash", "final_score", "risk_cost",
         ])
         w.writeheader()
         w.writerows(all_actor_rows)

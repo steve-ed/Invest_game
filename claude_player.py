@@ -116,18 +116,20 @@ class ClaudePlayerEngine:
         return "hold", None, 0.0, f"rate={rate:.1%}"
 
 
-# ── SDLT helper ──────────────────────────────────────────────────────────────
+# ── SDLT helper (Oct 2024: 5% surcharge on all bands) ───────────────────────
 
 def _sdlt(price):
-    bands = [(125_000, 0.0), (250_000, 0.02), (925_000, 0.05),
-             (1_500_000, 0.10), (float("inf"), 0.12)]
-    tax, prev = 0.0, 0.0
-    for threshold, rate in bands:
-        if price <= prev:
+    bands = [(125_000, 0.05), (125_000, 0.07), (675_000, 0.10), (575_000, 0.15)]
+    tax, remaining = 0.0, price
+    for band_size, rate in bands:
+        taxable   = min(remaining, band_size)
+        tax      += taxable * rate
+        remaining -= taxable
+        if remaining <= 0:
             break
-        tax  += (min(price, threshold) - prev) * rate
-        prev  = threshold
-    return tax
+    if remaining > 0:
+        tax += remaining * 0.17
+    return round(tax, 2)
 
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -336,7 +338,7 @@ def main():
     _log(f"\n  Avg score: £{avg_score:,.0f}   Avg rank: {avg_rank:.1f}/3   Wins: {wins}/{args.games}")
 
     _log("\nAction coverage — all actors across all games:")
-    action_types = ["buy", "sell", "upgrade", "refi", "hold"]
+    action_types = ["buy", "sell", "upgrade", "refi", "renovate", "hold"]
     actors_seen  = sorted({aid for aid, _ in all_action_tally})
     header = f"  {'Actor':<24}" + "".join(f"{a:>10}" for a in action_types)
     _log(header)
