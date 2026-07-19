@@ -137,7 +137,11 @@ class AIController:
         prop_map = {p.id: p for p in state.properties}
 
         if rate > LEVERAGE_SELL_RATE and actor.portfolio:
-            return "sell", self._highest_ltv_hold(actor, state), 0.0
+            # Only sell mortgaged positions — unencumbered holdings carry no leverage risk
+            mortgaged = [pid for pid in actor.portfolio
+                         if pid in prop_map and prop_map[pid].mortgage_balance > 0]
+            if mortgaged:
+                return "sell", self._highest_ltv_hold(actor, state), 0.0
 
         # Refi: pull out appreciation at 75% LTV — core equity recycling for leverage strategy
         for pid in sorted(
