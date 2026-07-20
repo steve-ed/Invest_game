@@ -628,17 +628,24 @@ To use it well as a first-time investor: play five games before drawing any conc
 
 ## Conclusion: Three Rules and What to Do Next
 
-The central argument of this book is simple: the biggest mistake first-time landlords make is analysing the property and ignoring the economic environment around it. Part Two existed to make that argument concrete — to show that the 1989 landlord and the 1993 landlord, the 2007 landlord and the 2010 landlord, the 2020 landlord and the 2023 landlord were often operating in identical properties and having completely different outcomes, not because of different decisions about the property itself but because of different relationships to the economic cycle around it.
+The central argument of this book is simple: the biggest mistake first-time landlords make is analysing the property and ignoring the economic environment around it. Part Two existed to make that argument concrete — to show that the 1989 landlord and the 1993 landlord, the 2007 landlord and the 2010 landlord, the 2020 landlord and the 2023 landlord were often operating in identical properties with completely different outcomes, not because of different choices about the property itself but because of different relationships to the economic cycle around them.
 
-Three rules follow from that argument.
+Three rules follow directly from that argument. None of them are about finding the right property.
 
-Know what you can afford, and stay within it. Run the numbers in Chapter 14 for every property you consider. Run them again at rates 2% higher. If the property fails that test, the risk is too high for a first purchase.
+**Know what you can afford, and stay within it.** The landlords who survived the 1989–1993 crash and the 2008 financial crisis shared one characteristic: their rent covered their mortgage even when rates were painful. The ones who did not survive were not necessarily reckless — they were simply at full stretch when the environment turned. Run the numbers in Chapter 14 for every property you consider, including the +3% stress test. If the property fails that test, the risk is too high for a first purchase regardless of how promising it looks.
 
-The economy around the deal matters more than the deal. A good property in the wrong economic conditions will underperform. A decent property bought when conditions are in your favour will exceed your expectations. Know where you are in the cycle. Chapter 2 gives you the three-question dashboard to check once a year.
+**The economy around the deal matters more than the deal.** A good property in the wrong economic conditions will underperform. A decent property bought when conditions are in your favour will exceed your expectations. This is not a reason to try to time the market — it is a reason to understand where you are in it. Chapter 2 gives you the three-question dashboard to check once a year.
 
-Hold enough cash to survive being wrong. You will be wrong about something. The rate will move more than expected. The void will be longer. The boiler will fail. The 10–15% cash buffer is not pessimism — it is the difference between an inconvenience and a crisis.
+**Hold enough cash to survive being wrong.** You will be wrong about something. The rate will move more than expected. The void will be longer than forecast. The boiler will fail two weeks after completion. The 10–15% cash buffer above your deposit is not pessimism — it is the structural requirement for an investment that can absorb error without becoming a crisis.
 
-What to do next: run the budget calculation in Chapter 1 with your actual savings figure; identify two or three markets that fit your budget and the yield criteria in Chapter 12; call two letting agents in each market and ask about void periods and current demand; find a mortgage broker and get a Decision in Principle; start viewing properties and run the numbers from Chapter 14 on each one; and play the simulation five times to test your thinking against historical conditions.
+**What to do next:**
+
+1. Run the budget calculation in Chapter 1 with your actual savings figure
+2. Identify two or three markets that fit your budget and the yield criteria in Chapter 12
+3. Call two letting agents in each market — ask about void periods and current demand
+4. Find a mortgage broker and get a Decision in Principle
+5. Start viewing properties and run the numbers from Chapter 14 on each one
+6. Play the simulation five times to test your thinking against historical conditions
 
 ---
 
@@ -652,20 +659,27 @@ Full semi-annual dataset: year, half, House Price Index (base 100 = 1983 H1), Ba
 
 ---
 
-### Appendix B — Era Summary Cards
+### Appendix B — Era Summary
 
-| Era | Period | HPI Change | Key Event | One-Line Lesson |
-|---|---|---|---|---|
-| Early Thatcher Recovery | 1983–1985 | +19% | Post-recession stabilisation | Patience after a crash is rewarded |
-| Late Thatcher Boom | 1986–1989 | +103% | Housing Act 1988 — AST created | Booms create BTL; booms also end |
-| Boom & Bust | 1989–1993 | −21% | Negative equity crisis | Leverage kills when rates spike |
-| Mid-Nineties Recovery | 1993–1999 | +61% | BTL mortgage launch 1996 | Crises create the best entry points |
-| New Labour Boom I | 1997–2004 | +191% | BoE independence | Long booms feel permanent; they aren't |
-| Long Boom & GFC Run-Up | 2001–2008 | +82% | Northern Rock Sep 2007 | Amateur enthusiasm is a late-cycle signal |
-| GFC & Austerity | 2007–2014 | −8% then recovery | Lehman Sep 2008 | Hold if you can; rental demand surges in crises |
-| Post-GFC Long Recovery | 2010–2017 | +30% | Section 24 announced | Tax changes are first-order returns |
-| Brexit, COVID & SDLT Holiday | 2013–2020 | +32% | COVID rate cut to 0.1% | Policy spikes create false price signals |
-| Rate Shock Cycle | 2018–2024 | +23% peak / −12% | BoE rises to 5.25% | Mortgage timing matters more than deal selection |
+**Early Thatcher Recovery (1983–1985, +19% HPI).** The economy stabilised after the early-decade recession and house prices began a slow recovery. The lesson is straightforward: patience after a crash is rewarded. The investors who bought cautiously during the stabilisation set themselves up for the boom that followed.
+
+**Late Thatcher Boom (1986–1989, +103% HPI).** House prices more than doubled in three years. The Housing Act 1988 created the Assured Shorthold Tenancy — the legal foundation of modern buy-to-let. The era produced extraordinary returns for early buyers, and severe losses for those who stretched to buy at the peak. Booms create buy-to-let; booms also end.
+
+**Boom & Bust (1989–1993, −21% HPI).** Interest rates hit 15%. House prices fell 21%. 1.5 million homeowners entered negative equity. The defining lesson of forty years of UK property data: leverage kills when rates spike. The landlords who survived had rent that covered their mortgage. The ones who didn't were forced to sell at the bottom.
+
+**Mid-Nineties Recovery (1993–1999, +61% HPI).** Rates fell from 15% to 4% over nine years. The BTL mortgage launched in 1996 transformed private landlording from a cottage industry into a profession. The best buying opportunities appeared in 1993 when fear was highest — not in 1997 when the recovery was obvious to everyone. Crises create the best entry points for investors with the nerve to act.
+
+**New Labour Boom I (1997–2004, +191% HPI).** Bank of England independence in 1997 underpinned low and stable inflation. Cheap money flowed into property for seven years. The era felt permanent to those inside it. Long booms always do.
+
+**Long Boom & GFC Run-Up (2001–2008, +82% HPI).** BTL mortgages became a staple of high street banking. Interest-only products at 85% LTV were widely available. When Northern Rock failed in August 2007 — the first UK bank run in 150 years — the era was already over. When buying a rental property appears on television and feels risk-free, the easy money has been made.
+
+**GFC & Austerity (2007–2014, −8% then recovery).** House prices fell 20%. BTL mortgage products disappeared for 18 months. But rents rose — households who could not get mortgages became tenants instead. The investors who could hold through the crisis came out stronger. Survival, not performance, was the measure of success in this era.
+
+**Post-GFC Long Recovery (2010–2017, +30% HPI).** Rates held near zero. Property values recovered steadily. Section 24 — announced in 2015 and phased between 2015 and 2020 — removed mortgage interest deductibility for higher-rate personal landlords and restructured the economics of the entire sector. Tax changes are first-order events for property investors, not footnotes.
+
+**Brexit, COVID & SDLT Holiday (2013–2020, +32% HPI).** The COVID stamp duty holiday and the 0.1% base rate produced a 26% price surge in two years. Landlords who sold into the holiday achieved exceptional prices that in many regions would not return for years. Policy-driven spikes are not fundamentals — they are exits for those who recognise them.
+
+**Rate Shock Cycle (2018–2024, +23% peak / −12%).** The Bank of England raised rates 14 times to 5.25% — the fastest cycle in 30 years. Two landlords owning identical properties had completely different experiences based solely on whether they had fixed their mortgage before December 2021. In this era, mortgage timing mattered more than any other single decision.
 
 ---
 
@@ -696,15 +710,15 @@ Full semi-annual dataset: year, half, House Price Index (base 100 = 1983 H1), Ba
 
 *Payback via additional rent only. Full return including value uplift is typically within year one.*
 
-> **Note on rent uplift:** The 10% rent uplift from EPC upgrade is a national average. In high-demand urban markets and the South, tenants actively filter on EPC rating and the uplift is reliable. In secondary Northern markets with weaker demand, energy efficiency is less often a deciding factor for tenants. In these markets, assume the value uplift (6–18%) but treat the rent uplift as a bonus rather than a certainty.
+The 10% rent uplift is a national average. In high-demand urban markets and the South, tenants actively filter on EPC rating and the uplift is reliable. In secondary Northern markets with weaker demand, energy efficiency is less often a deciding factor for tenants — assume the value uplift (6–18%) but treat the rent uplift as a bonus rather than a certainty.
 
 ---
 
 ### Appendix E — The Full ICR Stress Test
 
-The Interest Coverage Ratio (ICR) is the definitive test of whether a property is financially sound at a given LTV and rate. Most BTL lenders require ICR of at least 1.25.
+The Interest Coverage Ratio (ICR) is the definitive test of whether a property is financially sound at a given LTV and rate. Most BTL lenders require ICR of at least 1.25. Run this calculation in three steps.
 
-**Step 1 — Current ICR**
+First, calculate the current ICR:
 
 ```
 Annual rent          = monthly rent × 12
@@ -717,7 +731,7 @@ Example: £900/month rent, £142,500 at 6.5%
 - Annual mortgage cost: £9,263
 - ICR: 1.17 — below 1.25, borderline
 
-**Step 2 — Stressed ICR (+3% rate)**
+Second, stress the ICR at +3%. The 2021–2023 rate cycle moved 5.15 percentage points in 20 months — a +2% stress would have felt conservative in early 2021 and proved dangerously optimistic by autumn 2022. Use +3%:
 
 ```
 Stressed rate          = current rate + 3%
@@ -729,24 +743,20 @@ Example at 9.5%:
 - Stressed cost: £142,500 × 9.5% = £13,538
 - Stressed ICR: 10,800 / 13,538 = 0.80 — fails; cashflow significantly negative under stress
 
-*Why +3%? The 2021–2023 rate cycle moved 5.15 percentage points in 20 months. A +2% stress would have felt conservative in early 2021 and proved dangerously optimistic by autumn 2022. Use +3%.*
-
-**Step 3 — Maximum safe rate**
+Third, calculate the maximum safe rate — the rate at which ICR falls to exactly 1.25:
 
 ```
 Maximum safe rate = annual rent / (mortgage balance × 1.25)
                  = 10,800 / (142,500 × 1.25) = 6.06%
 ```
 
-At rates above 6.06%, this property's ICR falls below 1.25. This tells you how much rate headroom you have. Check whether the maximum safe rate is at least 3% above your current rate — if not, the property has insufficient headroom for a significant rate cycle.
+At rates above 6.06%, this property's ICR falls below 1.25. Check whether the maximum safe rate is at least 3% above your current rate — if not, the property has insufficient headroom for a significant rate cycle.
 
 ---
 
 ### Appendix F — The Full Risk Scoring Model
 
-For readers who want to score their property or portfolio more rigorously, this appendix provides the six-pillar composite risk model used in the simulation scoring engine.
-
-**The six pillars:**
+For readers who want to score their property or portfolio more rigorously, this appendix provides the six-pillar composite risk model used in the simulation scoring engine. Each pillar is weighted by its contribution to overall investment risk:
 
 | Pillar | Weight | What it measures |
 |---|---|---|
@@ -757,7 +767,7 @@ For readers who want to score their property or portfolio more rigorously, this 
 | Regulatory Risk | 15% | Licensing costs, compliance burden, policy risk |
 | Liquidity Risk | 10% | Days on market, transaction costs, buyer pool depth |
 
-**Score bands:**
+A composite score across the six pillars falls into one of four bands:
 
 | Score | Meaning |
 |---|---|
