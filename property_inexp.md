@@ -15,7 +15,7 @@ The book has one central argument: **the biggest mistake first-time landlords ma
 
 ## A Note on the Numbers
 
-This book draws on 40 years of real UK property data: house prices, Bank of England base rates, rental growth, and inflation from 1983 to 2024. Where the underlying data is approximate (particularly rental growth before 2005), this is noted. The simulation engine referenced throughout uses this data to replay historical eras — see Chapter 22 for how to use it.
+This book draws on 40 years of real UK property data: house prices, Bank of England base rates, rental growth, and inflation from 1983 to 2024. Where the underlying data is approximate (particularly rental growth before 2005), this is noted. The simulation engine referenced throughout uses this data to replay historical eras — see Chapter 23 for how to use it.
 
 ---
 
@@ -244,13 +244,170 @@ Once you have run one property for two years and understand the practical realit
 
 ---
 
+### Chapter 4 — The Six Investment Strategies
+
+Chapter 3 described three types of landlord. In practice, serious investors use six distinct strategies — each with a different logic, a different risk profile, and a different era in which it works best. The simulation referenced in Chapter 23 tests all six against forty years of real UK data.
+
+You do not need to master all six. For your first property, Chapter 1 already told you the answer: Yield. But understanding why — and understanding what the other five strategies are and when they work — will make you a better investor as your portfolio grows.
+
+---
+
+**Strategy 1: Yield**
+
+*What it is*
+
+Buy properties where the rent generates strong income relative to the purchase price. Prioritise cash flow over capital growth. Hold long-term on low leverage (65–75% LTV). Never let the mortgage payment consume more than 70% of the rent.
+
+*What it looks like in practice*
+
+A two-bedroom terrace in a Northern or Midlands town. Purchase price £150,000. Rent £850/month. Gross yield 6.8%. After mortgage, agent fees, and costs, the property generates a small monthly surplus. You are not expecting spectacular price growth — you are buying an income stream.
+
+*When it wins*
+
+In uncertain or declining markets where income matters more than appreciation. In high-rate environments where leveraged strategies break. In crash and stagnation years (1990–1993, 1997) where capital growth investors saw values fall and overleveraged investors were wiped out, Yield landlords collected rent and waited. In the 40-year dataset, Yield is the most consistent strategy — it never produces the best result in any era, but it rarely produces a catastrophic one.
+
+*When it fails*
+
+In sustained long booms (2001–2014) where high-value properties are appreciating 10–15% per year. A Yield investor holding a £150,000 Northern terrace in 2005 made steady income but missed the capital growth a London or South East property delivered. The cost of safety is capped upside.
+
+*Right for you if:* this is your first property, your budget is £50,000–£80,000, you want the investment to pay its own way from day one, and you value not lying awake worrying about it.
+
+---
+
+**Strategy 2: Capital Growth**
+
+*What it is*
+
+Buy properties in high-demand locations where long-run price appreciation is structurally strong. Accept thin or negative cashflow in the short term because the 15-year gain on the asset is the point. Hold at 75% LTV and do not aggressively refinance.
+
+*What it looks like in practice*
+
+A two-bedroom flat in a major city — Manchester, Bristol, Edinburgh, or London commuter belt. Purchase price £280,000. Rent £1,200/month. Gross yield 5.1% — barely enough to cover the mortgage at current rates. You are supplementing the shortfall from employment income while the property appreciates.
+
+*When it wins*
+
+In extended boom periods. From 2001 to 2008, national house prices rose 82%. A £280,000 property bought in 2001 was worth over £500,000 by 2007. Even with thin cashflow in the interim, the capital gain dwarfed any income strategy. From 2001 to 2014, Capital Growth was the dominant strategy in the dataset — winning outright in 10 of 14 start years tested, often at a 100% win rate.
+
+*When it fails*
+
+When rates rise sharply. The 2022–2023 cycle was the clearest example: landlords who had bought high-value properties on thin yields at 2% rates found themselves cashflow-negative at 6.5% rates, with no income buffer to absorb the squeeze. Capital Growth requires the ability to fund shortfalls from other income for extended periods.
+
+*Right for you if:* you have a long time horizon (15+ years), you can absorb monthly cashflow shortfalls without stress, and you have significant savings beyond the deposit.
+
+---
+
+**Strategy 3: Value-Add**
+
+*What it is*
+
+Buy properties at a discount because they need work — typically poor EPC rating, cosmetic neglect, or structural issues that have scared off ordinary buyers. Carry out targeted improvements, then hold for income or sell at improved value.
+
+*What it looks like in practice*
+
+An EPC E-rated terrace at 8% below market value (£174,000 vs. £190,000 comparable). You spend £8,000 bringing it to EPC C — loft insulation, cavity wall fill, upgraded boiler. The improved property is worth £209,000. You have created £35,000 in value from a £16,000 discount plus £8,000 of work. Rent also rises 10% post-upgrade.
+
+*When it wins*
+
+In any era — the strategy is less rate-sensitive than Leverage or Capital Growth because the return is partly manufactured rather than purely market-driven. It particularly outperforms when EPC compliance pressure is tightening, creating a pool of discounted non-compliant stock that motivated sellers want to exit. Value-Add won outright in 1985, 1992, 1994, and 1996 in the 40-year dataset.
+
+*When it fails*
+
+When project costs overrun or the timeline extends. A property sitting empty during a six-month renovation generates no rent while the mortgage continues. Unexpected structural problems — subsidence, hidden damp, rewiring — can consume the discount and more. The strategy requires reliable tradespeople and realistic cost budgeting. It is not forgiving of optimism.
+
+*Right for you if:* you have building or project management experience, reliable contractors, and a realistic budget that includes a contingency of at least 15% of project costs.
+
+---
+
+**Strategy 4: BRRR (Buy, Refurbish, Rent, Refinance)**
+
+*What it is*
+
+Buy a property below market value, refurbish it to increase its appraised value, rent it out, then refinance at the new higher value to extract the equity — which funds the deposit on the next property. Repeat. The goal is to recycle the same capital across multiple purchases rather than saving a fresh deposit each time.
+
+*What it looks like in practice*
+
+Buy at £130,000 (below market due to condition). Spend £20,000 refurbishing. Appraised value post-works: £185,000. Remortgage at 75% LTV of £185,000 = £138,750. Total invested: £150,000 (purchase plus works). Mortgage proceeds: £138,750. Cash left in the deal: £11,250. You have a tenanted property with a small amount of equity locked in, and most of your original capital returned to redeploy.
+
+*When it wins*
+
+In moderate-rate environments with rising values. The mid-1990s BTL expansion (1993–1999) was the strongest era for this strategy: rates were falling, lenders were willing, and refurbished properties revalued strongly. BRRR won outright in 1993, 1995, 1998, and 1999 in the 40-year dataset. It is also one of the few strategies that can build a portfolio without proportionally increasing capital — time and effort substitute for savings.
+
+*When it fails*
+
+In two situations. First, when rates rise sharply: if you refinance onto a 7% mortgage to extract equity, the property may be cashflow-negative from day one with no income buffer. Second, in overheated markets: when the whole market is running hot, the gap between purchase cost and post-works value narrows and the numbers stop working.
+
+*Right for you if:* you understand construction costs, you can project manage a refurbishment, and you want to build a portfolio faster than saving individual deposits allows. Not appropriate as a first property strategy.
+
+---
+
+**Strategy 5: Leverage**
+
+*What it is*
+
+Borrow as much as the lender will allow — typically 75–80% LTV — across multiple properties, amplifying both gains and losses. The strategy relies on rising prices to generate equity that supports further borrowing. Unlike BRRR, Leverage does not require refurbishment — it is a bet on price direction amplified by debt.
+
+*What it looks like in practice*
+
+Instead of buying one property at 60% LTV, you buy two properties at 75% LTV with the same capital. If prices rise 10%, your equity gain is roughly twice what it would have been on one property at lower leverage. The rental income covers the mortgage payments — just — and the return is generated primarily through capital appreciation amplified by borrowing.
+
+*When it wins*
+
+In rising markets. In the 2001–2008 boom and the 2010–2014 recovery, Leverage was consistently the second-best performing strategy after Capital Growth. It won outright in 2006 — the only year in the dataset where it edged Capital Growth (78% vs 75%), catching the last of the pre-GFC price surge at peak credit availability.
+
+*When it fails*
+
+Catastrophically in rate shocks and falling markets. This is the strategy that destroyed the most landlords in 1989–1993. A 20% price fall wipes out your entire equity at 80% LTV. If rates simultaneously rise — as they did in 1989 and again in 2022 — the monthly cashflow turns sharply negative and you cannot sell without crystallising a loss. Leverage is the highest-risk strategy in the dataset and the worst-performing in stress conditions.
+
+*Right for you if:* you have significant experience, a substantial buffer, multiple existing properties generating income, and strong conviction that the market is in an early-to-mid expansion phase. Not appropriate as a first-property strategy.
+
+---
+
+**Strategy 6: Demographic**
+
+*What it is*
+
+Diversify across multiple regions, targeting areas with strong population and employment growth. Monitor rental demand actively and exit a region when rental growth stalls. The strategy reduces concentration risk — no single market can sink the portfolio — at the cost of capped upside.
+
+*What it looks like in practice*
+
+Rather than owning three properties in one Northern city, you hold one property each in three different regions — Manchester, Cardiff, and Edinburgh. Each property is selected on population inflow, employment growth, and rental vacancy data. When one region's rental market softens (rents flat, voids lengthening), you sell that property and redeploy into a region showing stronger demand.
+
+*When it wins*
+
+In uncertain or choppy markets where one regional market suffers while another holds up. Demographic won outright in 1990, 1991, 1997, and 2000 — all periods of significant macroeconomic disruption where concentration in a single market was punished. When the national picture is unclear, diversification across regions smooths returns.
+
+*When it fails*
+
+In sustained, broad-based booms. When the whole country is rising (2001–2014), being diversified across regions produces average returns rather than exceptional ones. The landlord who concentrated in London or the South East in 2001 and held to 2008 massively outperformed the Demographic investor who spread across four regions. Diversification costs you the upside when upside is everywhere.
+
+*Right for you if:* you already have several properties and want to reduce regional concentration risk. Requires the administrative capacity to manage properties across multiple areas and the discipline to monitor regional demand indicators consistently.
+
+---
+
+**How to Choose**
+
+The honest answer is that you do not choose a strategy in isolation — the era you are investing in partly chooses it for you.
+
+| If you are starting now and... | Consider |
+|---|---|
+| Budget is £50k–£80k, first property | Yield — it is the most forgiving |
+| You can absorb cashflow shortfalls, long horizon | Capital Growth |
+| You have construction experience and reliable trades | Value-Add |
+| You have 2+ years' landlord experience, rising market | BRRR |
+| You have multiple properties, strong buffer, rising market | Leverage |
+| You have 3+ properties, want to reduce concentration | Demographic |
+
+The simulation in Chapter 23 lets you run any of these strategies against a randomly drawn historical era. The single most useful exercise is to play the same strategy across five different eras and observe when it works and when it breaks.
+
+---
+
 ## PART TWO: FORTY YEARS OF HISTORY IN PLAIN ENGLISH
 
 The story of UK property from 1983 to 2024 is told through ten eras. Each one holds lessons for today's landlord. You do not need to memorise the data — you need to understand the pattern.
 
 ---
 
-### Chapter 4 — The Lawson Boom (1983–1989): When Everything Went Up
+### Chapter 5 — The Lawson Boom (1983–1989): When Everything Went Up
 
 In 1983 the average UK house price was around £31,000. By 1989 it was £65,000. House prices doubled in six years.
 
@@ -262,7 +419,7 @@ Interest rates were high throughout — between 10% and 15% — but rising price
 
 ---
 
-### Chapter 5 — The Crash (1989–1993): The Chapter Every Landlord Must Read
+### Chapter 6 — The Crash (1989–1993): The Chapter Every Landlord Must Read
 
 The Bank of England raised interest rates to 15% in 1989 to control inflation. On a £50,000 mortgage, that is £7,500 per year in interest. If you were paying £400 per month rent on a property that cost £600 per month to mortgage, you were losing £200 every month — and that was before maintenance, voids, and management fees.
 
@@ -276,11 +433,11 @@ The landlords who had bought with low deposits at peak prices and high rates wer
 
 **The rule of thumb this chapter teaches:** Before you buy any property, work out what happens to your cashflow if the base rate rises by 3%. If the answer is "I can still cover the mortgage from the rent," you are in a defensible position. If the answer is "I would need to top up from savings every month," you are taking on more risk than you should.
 
-See Appendix E for the full interest coverage calculation. The simplified version is in Chapter 13.
+See Appendix E for the full interest coverage calculation. The simplified version is in Chapter 14.
 
 ---
 
-### Chapter 6 — The Recovery (1993–2001): Patient Buyers Were Rewarded
+### Chapter 7 — The Recovery (1993–2001): Patient Buyers Were Rewarded
 
 With rates falling from 15% to 4% over nine years, the conditions for a sustained recovery were in place. House prices rose from their 1993 trough and more than doubled by 2001.
 
@@ -288,13 +445,13 @@ In 1996, the buy-to-let mortgage was formally launched. For the first time, lend
 
 Labour won the 1997 election. The Bank of England was granted independence to set interest rates without political interference — a structural change that helped underpin the low and stable inflation of the following decade.
 
-**The lesson:** The best buying opportunities appear during the fear phase — in 1993, not in 1997 when everyone could see prices were rising. The investors who read Chapter 5 carefully, held their nerve, and bought in 1992–1994 produced the best returns of any cohort in the 40-year dataset.
+**The lesson:** The best buying opportunities appear during the fear phase — in 1993, not in 1997 when everyone could see prices were rising. The investors who read Chapter 6 carefully, held their nerve, and bought in 1992–1994 produced the best returns of any cohort in the 40-year dataset.
 
 You will not always buy at the bottom. Nobody does. But you can avoid buying at the top — and this history shows you what the top looks like.
 
 ---
 
-### Chapter 7 — The Great Boom (2001–2008): When Everyone Became a Landlord
+### Chapter 8 — The Great Boom (2001–2008): When Everyone Became a Landlord
 
 The Dotcom bust in 2000 and the September 11 attacks in 2001 caused the Bank of England to cut rates. Cheap money flowed into property. House prices rose 82% over seven years. Buy-to-let mortgages became a staple of high street banking. Interest-only products at 85% loan-to-value were widely available. Programmes on television followed amateur investors buying properties abroad.
 
@@ -306,7 +463,7 @@ Northern Rock — a bank whose business model depended on borrowing cheap money 
 
 ---
 
-### Chapter 8 — The Financial Crisis (2007–2014): Survival Was the Win
+### Chapter 9 — The Financial Crisis (2007–2014): Survival Was the Win
 
 Lehman Brothers went bankrupt on 15 September 2008. The Bank of England cut rates from 5.75% to 0.5% in four months — the fastest cutting cycle in its history. House prices fell 20% from peak to trough. Buy-to-let mortgage products virtually disappeared for 18 months — lenders required 40% deposits from those they would lend to at all.
 
@@ -318,7 +475,7 @@ Survival requires: a mortgage you can service from rent alone, a cash buffer to 
 
 ---
 
-### Chapter 9 — Twelve Years of Near-Zero Rates (2009–2021): A Distorted Decade
+### Chapter 10 — Twelve Years of Near-Zero Rates (2009–2021): A Distorted Decade
 
 The Bank of England held the base rate at 0.5% from March 2009 until December 2021 — twelve years. This had never happened before in the Bank's 314-year history.
 
@@ -336,7 +493,7 @@ Three important things happened during this era that matter for your understandi
 
 ---
 
-### Chapter 10 — Rate Shock (2021–2024): The Era We Are Still Living Through
+### Chapter 11 — Rate Shock (2021–2024): The Era We Are Still Living Through
 
 The Bank of England raised rates 14 times between December 2021 and August 2023, from 0.1% to 5.25%. This was the fastest rate rise in 30 years. House prices fell around 12% from their 2022 peak.
 
@@ -354,7 +511,7 @@ This is the most important illustration of the book's central argument: the cond
 
 ---
 
-### Chapter 11 — Choosing a Market
+### Chapter 12 — Choosing a Market
 
 With a budget of £50,000–£80,000, your market choice is largely determined by what you can afford. But within that constraint, here is how to think about it.
 
@@ -389,7 +546,7 @@ Some local councils require landlords to obtain a licence to operate. This appli
 
 ---
 
-### Chapter 12 — What to Look For in a Property
+### Chapter 13 — What to Look For in a Property
 
 **Archetype**
 
@@ -449,11 +606,11 @@ Before making an offer, look for:
 - Electrics: when was the consumer unit (fuse box) last updated?
 - EPC certificate: check the current rating and what was recommended to improve it
 
-You will also commission a survey (see Chapter 14). But the viewing tells you whether to proceed to a survey at all.
+You will also commission a survey (see Chapter 15). But the viewing tells you whether to proceed to a survey at all.
 
 ---
 
-### Chapter 13 — Running the Numbers
+### Chapter 14 — Running the Numbers
 
 Before you make an offer, you need to know whether the property makes financial sense. This does not require a spreadsheet or a formula. It requires answering three questions.
 
@@ -544,7 +701,7 @@ This illustrates why rent-to-value yield matters so much. A property yielding 5.
 
 ---
 
-### Chapter 14 — The Purchase Process
+### Chapter 15 — The Purchase Process
 
 Buying a BTL property involves more steps than buying a home, and more people. Here is the sequence from offer to keys.
 
@@ -618,7 +775,7 @@ Completion is when the money transfers and you get the keys. On completion day, 
 
 ---
 
-### Chapter 15 — Your First Tenant
+### Chapter 16 — Your First Tenant
 
 Finding a good tenant is the most operationally important thing you will do as a landlord. A good tenant pays on time, treats the property well, and renews their tenancy. A bad tenant can cost you months of lost rent, legal fees, and damage repair costs.
 
@@ -660,7 +817,7 @@ Get all of this right. If you ever need to evict a tenant, you will need to prov
 
 ---
 
-### Chapter 16 — Working With a Letting Agent
+### Chapter 17 — Working With a Letting Agent
 
 Most first-time landlords use a letting agent for at least the first year. The three service levels are:
 
@@ -695,7 +852,7 @@ After two years, if you are comfortable with how it works, you can consider mana
 
 ---
 
-### Chapter 17 — Your Ongoing Costs
+### Chapter 18 — Your Ongoing Costs
 
 Running a rental property costs money beyond the mortgage. Here is a complete picture.
 
@@ -738,7 +895,7 @@ Optional but worth considering:
 
 ---
 
-### Chapter 18 — Your Remortgage Window
+### Chapter 19 — Your Remortgage Window
 
 Every two years, your fixed-rate mortgage expires. What you do next matters.
 
@@ -752,11 +909,11 @@ The lender automatically charges a 1% arrangement fee on your outstanding balanc
 
 Set a calendar reminder 3 months before your fixed term ends. This is the single most important recurring task in your first two years as a landlord.
 
-At the remortgage point, also ask: has the property risen in value enough for me to release equity toward a second purchase? See Chapter 21.
+At the remortgage point, also ask: has the property risen in value enough for me to release equity toward a second purchase? See Chapter 22.
 
 ---
 
-### Chapter 19 — EPC: Why It Matters Now
+### Chapter 20 — EPC: Why It Matters Now
 
 The government has proposed that all privately rented properties must achieve a minimum EPC C rating by 2028. The direction of travel is clear: sub-standard energy efficiency in rental properties is becoming a liability.
 
@@ -783,7 +940,7 @@ Get an EPC assessment first (£60–£120) — it shows exactly which measures w
 
 ---
 
-### Chapter 20 — When Things Go Wrong
+### Chapter 21 — When Things Go Wrong
 
 Things will go wrong. Not always, and not always badly — but over a 10-year hold of a rental property, you will encounter at least some of the following.
 
@@ -814,7 +971,7 @@ Void periods cost you rent while mortgage and insurance continue. Budget for one
 
 **The property needs major work**
 
-Your survey (Chapter 14) should catch most serious issues before you buy. But properties deteriorate. Maintain your cash buffer, treat maintenance as an ongoing reserve rather than an emergency fund, and keep the property in good repair rather than deferring until it becomes expensive.
+Your survey (Chapter 15) should catch most serious issues before you buy. But properties deteriorate. Maintain your cash buffer, treat maintenance as an ongoing reserve rather than an emergency fund, and keep the property in good repair rather than deferring until it becomes expensive.
 
 **The company account runs out**
 
@@ -832,7 +989,7 @@ The deeper lesson reinforces Chapter 1: the cash buffer exists precisely to avoi
 
 ---
 
-### Chapter 21 — Should You Buy a Second Property?
+### Chapter 22 — Should You Buy a Second Property?
 
 After two years of running your first property, you will have learned more about being a landlord than any book can teach you. If the experience has been broadly positive and you want to scale, here is how to think about it.
 
@@ -858,7 +1015,7 @@ With two properties generating income, your tax position becomes more complex. B
 
 ---
 
-### Chapter 22 — Using the Simulation to Test Your Thinking
+### Chapter 23 — Using the Simulation to Test Your Thinking
 
 The simulation referenced throughout this book replays actual historical UK property eras. You and two AI competitors each run a different investment strategy through 20 turns — representing 10 simulated years. The era is hidden until the end.
 
@@ -890,7 +1047,7 @@ Tax, tenant law, the emotional reality of a non-paying tenant, and the practical
 
 **Rule 1: Know what you can afford, and stay within it.**
 
-Run the numbers in Chapter 13 for every property you consider. Run them again at rates 2% higher. If the property fails that test, the risk is too high for a first purchase.
+Run the numbers in Chapter 14 for every property you consider. Run them again at rates 2% higher. If the property fails that test, the risk is too high for a first purchase.
 
 **Rule 2: The economy around the deal matters more than the deal.**
 
@@ -903,10 +1060,10 @@ You will be wrong about something. The rate will move more than expected. The vo
 **What to do next**
 
 1. Run the budget calculation (Chapter 1) with your actual savings figure
-2. Identify two or three markets that fit your budget and the yield criteria in Chapter 11
+2. Identify two or three markets that fit your budget and the yield criteria in Chapter 12
 3. Call two letting agents in each market — ask about void periods and current demand
 4. Find a mortgage broker and get a Decision in Principle
-5. Start viewing properties and run the numbers from Chapter 13 on each one
+5. Start viewing properties and run the numbers from Chapter 14 on each one
 6. Play the simulation five times to test your thinking against historical conditions
 
 ---
