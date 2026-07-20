@@ -52,7 +52,7 @@ You are typically the sole director and shareholder. The company holds the prope
 | Tax rate on profit | 40–45% income tax | 19–25% corporation tax |
 | Mortgage rate premium | — | +0.4% above personal rates |
 | Annual accountancy | — | £800–£1,500 |
-| Companies House fee | — | £13/yr |
+| Companies House fee | — | £34/yr |
 
 The company pays corporation tax at 19% (small profits, under £50,000/yr) or 25% (profits above £50,000/yr). Mortgage interest is deducted before tax — exactly as Section 24 removed from personal landlords. For a mortgaged portfolio, the SPV structure typically saves thousands of pounds per year versus personal higher-rate ownership.
 
@@ -62,7 +62,7 @@ The main additional costs are:
 
 1. **Higher mortgage rate:** Company BTL mortgages carry approximately 0.4% more than equivalent personal products. This is the price of the structure and is already reflected in all examples in this book.
 2. **Accountancy:** £800–£1,500 per year for a sole-director property company with one or two properties. Increases modestly with portfolio size.
-3. **Companies House annual confirmation statement:** £13 per year.
+3. **Companies House annual confirmation statement:** £34 per year.
 4. **Personal guarantees:** Most lenders will require you to personally guarantee the mortgage. This is standard — it does not undermine the legal separation for tax purposes.
 
 **Setup cost and process**
@@ -166,16 +166,7 @@ Everything else — BRRR, capital growth, leverage — can come later once you u
 
 ---
 
-> **Before you search for properties — your four setup steps**
->
-> This book assumes SPV ownership throughout (see *Why This Book Assumes SPV Ownership* above). These four steps must happen before you instruct a mortgage broker or view a property:
->
-> 1. **Incorporate your limited company** — companies.gov.uk, £50, 24 hours
-> 2. **Open a business bank account** — Starling Business, Mettle, or Tide are straightforward for a sole-director company
-> 3. **Appoint an accountant** — find one who regularly files accounts for property SPVs; ask specifically: "How many single-director BTL company accounts did you file last year?"
-> 4. **Find a mortgage broker** — not all brokers place company BTL. Ask: "Will you accept an SPV incorporated less than six months ago?" If they hesitate, find another broker.
->
-> If you buy in your personal name, you cannot transfer the property to a company later without paying SDLT again and triggering Capital Gains Tax. There is no route back.
+> **Before you search for properties:** Complete the SPV setup steps described in *Why This Book Assumes SPV Ownership* at the start of this book before you instruct a broker or view a property. Buy in the company name from day one — there is no route back once you have bought in your personal name.
 
 ---
 
@@ -497,7 +488,7 @@ Your mortgage is not your only cost. For every property you own, budget for the 
 | Maintenance (average reserve) | £500–£2,500 |
 | Void periods (see note) | £900–£1,800 |
 | SPV accountancy (sole-director company) | £800–£1,500 |
-| Companies House annual confirmation | £13 |
+| Companies House annual confirmation | £34 |
 | **Total non-mortgage costs** | **£4,013–£8,313** |
 
 > **Letting agent note:** Agents quote a headline monthly management rate (typically 10–12%), but the all-in annual cost is higher once you include VAT, re-letting fees (50–100% of one month's rent each time a tenancy renews or changes), and occasional admin charges. Budget 14–16% of gross rent as your annual letting agent cost. The simulation models 12% — use 15% for your own planning.
@@ -526,7 +517,7 @@ Example: £190,000 property at 75% LTV, 7.0% company rate
 | Mortgage interest (£142,500 × 7.0%) | −£9,975 |
 | Maintenance reserve | −£1,000 |
 | Accountancy | −£1,000 |
-| Companies House | −£13 |
+| Companies House | −£34 |
 | **Net profit / (loss)** | **−£2,934** |
 
 At current rates (7.0% on a 75% LTV mortgage), a £190,000 property with £900/month rent makes a pre-tax loss inside the company. The company pays no Corporation Tax in this scenario. The loss accumulates as a carried-forward loss against future profits (for example, when rates fall or rent rises).
@@ -541,7 +532,7 @@ The table below shows why base rate matters more than the property itself. Same 
 | 5.0% | 7.2% | −£10,260 | **−£3,219** | £0 (loss carried forward) |
 | 7.0% | 9.2% | −£13,110 | **−£6,069** | £0 (loss carried forward) |
 
-*Fixed costs in all scenarios: letting agent £1,296, insurance £450, maintenance £1,000, accountancy £1,000, Companies House £13.*
+*Fixed costs in all scenarios: letting agent £1,296, insurance £450, maintenance £1,000, accountancy £1,000, Companies House £34.*
 
 The same property that was moderately profitable in 2014–2018 (base rate ~0.5–0.75%, mortgage ~2.7–2.95%) became heavily loss-making at 2022–2023 rates. It does not make the property a bad investment — the accumulated losses carry forward and reduce future Corporation Tax when rates normalise. But it does mean you need a cash buffer large enough to fund those monthly shortfalls for however long high rates persist.
 
@@ -567,12 +558,6 @@ Before you instruct a broker or view a property, incorporate your limited compan
 - An accountant with property company experience — appoint one before you apply for a mortgage
 
 The mortgage application goes in the company name. If you start the mortgage process in your personal name and then decide to use a company, you start again from scratch.
-
-**What to say to a broker on your first call:**
-
-"I have incorporated a limited company to hold investment property. I am looking to buy a property at around £[price] through the company. Can you advise which lenders offer company BTL and what rate I would likely qualify for, given my personal income is £[amount]?"
-
-Not all brokers are familiar with company BTL lending — if the broker cannot answer basic questions about company structure requirements, find one who can.
 
 **Step 1: Find a mortgage broker (before you make an offer)**
 
@@ -725,7 +710,7 @@ Running a rental property costs money beyond the mortgage. Here is a complete pi
 | EICR (every 5 years, budget annually) | £30–£60 |
 | Ground rent / service charge (leasehold only) | Varies — check before buying |
 | SPV accountancy | £800–£1,500 |
-| Companies House annual confirmation | £13 |
+| Companies House annual confirmation | £34 |
 
 > **Planning note:** Budget £1,500 for accountancy in year one (the first set of accounts takes more time), and £1,000–£1,200 in subsequent years for a straightforward one-property company.
 
@@ -1167,7 +1152,7 @@ For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Gu
 | Maintenance reserve | £500–£2,500 |
 | Void reserve (1 month) | Monthly rent amount |
 | SPV accountancy | £800–£1,500 |
-| Companies House annual confirmation | £13 |
+| Companies House annual confirmation | £34 |
 
 **On sale**
 
