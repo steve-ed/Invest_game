@@ -52,6 +52,7 @@ def main():
 
         if results.get("aborted"):
             print("Game aborted (client disconnected). Waiting for new player…", flush=True)
+            bus.wait_restart()
             continue
 
         leaderboard = results["leaderboard"]
@@ -66,6 +67,7 @@ def main():
             )
 
         print("\nGame complete. Waiting for player to start new game…", flush=True)
+        bus.wait_restart()
     except KeyboardInterrupt:
         print("\nExiting.")
 

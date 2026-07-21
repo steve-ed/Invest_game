@@ -104,6 +104,11 @@ class GameBus:
     def signal_restart(self):
         self._restart.set()
 
+    def wait_restart(self):
+        """Block until player signals ready for a new game."""
+        self._restart.wait()
+        self._restart.clear()
+
     def restart_requested(self):
         return self._restart.is_set()
 
