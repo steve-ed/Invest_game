@@ -128,9 +128,9 @@ For your first property, the income investor approach is the right one. You are 
 
 ---
 
-### Chapter 4 — The Six Investment Strategies
+### Chapter 4 — The Seven Investment Strategies
 
-Chapter 3 described three types of landlord. In practice, serious investors use six distinct strategies — each with a different logic, a different risk profile, and a different era in which it works best. The simulation referenced in Chapter 23 tests all six against forty years of real UK data.
+Chapter 3 described three types of landlord. In practice, serious investors use seven distinct strategies — each with a different logic, a different risk profile, and a different era in which it works best. The simulation referenced in Chapter 23 tests all seven against forty years of real UK data.
 
 You do not need to master all six. For your first property, Chapter 1 already told you the answer: Yield. But understanding why — and understanding what the other five strategies are and when they work — will make you a better investor as your portfolio grows.
 
@@ -218,6 +218,22 @@ This strategy requires the administrative capacity to manage properties across m
 
 ---
 
+**Strategy 7: Balanced**
+
+Buy income-generating properties ranked by yield, refinance when equity headroom allows, and set a yield floor that rises with interest rates so every purchase remains cash-flow positive from day one. Do not specialise — avoid both the highest-leverage and the most capital-dependent positions.
+
+In practice this means buying the highest-yielding affordable property available rather than the cheapest or the most appreciable. When rates are at 5%, the yield floor sits at roughly 7.5% — meaning the property must generate at least £7,500 annual rent per £100,000 of value before the mortgage makes the numbers work. When rates fall to 2%, the floor drops to roughly 4.5% and a wider range of properties qualify. The strategy is self-regulating: it becomes more selective in expensive rate environments and more active in cheap ones.
+
+The refinance discipline matters. A balanced investor who buys a property at 50% LTV and sees prices rise does not simply sit on the appreciation — they refinance when enough headroom has built up and redeploy the extracted equity into the next property. The capital stays working rather than accumulating silently in the bricks.
+
+What balanced sacrifices is concentration. The yield-focused investor in Sunderland builds expertise in a single market and may achieve better yields through local knowledge. The capital-growth investor in Bristol benefits from a market with structural long-run demand. The balanced investor holds neither — they buy the best available option wherever it is, which means average returns in eras where specialists thrive.
+
+What balanced preserves is optionality. Because every property is bought on positive cash flow at a yield above the rate of borrowing, the strategy survives rate shocks that destroy leveraged positions. Because refinancing is tactical rather than automatic, the balance sheet stays flexible. In the 40-year dataset, balanced rarely wins an era outright but almost never finishes last. It is the strategy most likely to leave you with an intact portfolio when conditions change unexpectedly — which, in property, they always eventually do.
+
+For a first property, the gap between balanced and yield is small. Both prioritise cash flow; both work on modest leverage; both survive rate shocks. The distinction is that balanced is more willing to refinance actively and more dynamic in adjusting the yield floor to conditions. Once you have two properties and are thinking about the third, balanced is worth understanding.
+
+---
+
 **How to Choose**
 
 The honest answer is that you do not choose a strategy in isolation — the era you are investing in partly chooses it for you. A Leverage strategy that would have worked brilliantly in 2003 would have been ruinous in 2023. A Yield strategy that looked conservative in 2005 looked prescient in 2009.
@@ -226,7 +242,7 @@ This is exactly the book's central argument in action. The landlords who struggl
 
 For your first property: Yield. Not because it is the most exciting strategy, but because it is the most forgiving of mistakes, the most appropriate for someone still learning the trade, and the one least likely to require the era to cooperate. If you want to deploy another strategy later, you will be making that choice with two years of practical knowledge behind you. That is a much sounder basis for the decision than choosing now on theory alone.
 
-The simulation in Chapter 23 lets you run any of these strategies against a randomly drawn historical era. The single most useful exercise is to play the same strategy across five different eras and observe when it works and when it breaks.
+The simulation in Chapter 23 lets you run any of these strategies against a randomly drawn historical era. The single most useful exercise is to play the same strategy across five different eras and observe when it works and when it breaks. The simulation default is Balanced — a useful starting position precisely because it imposes cash-flow discipline without committing to a specialist view of the market.
 
 ---
 
@@ -752,44 +768,66 @@ Maximum safe rate = annual rent / (mortgage balance × 1.25)
 
 At rates above 6.06%, this property's ICR falls below 1.25. Check whether the maximum safe rate is at least 3% above your current rate — if not, the property has insufficient headroom for a significant rate cycle.
 
+A note on stress rates: most BTL lenders apply a +2% stress in their affordability calculations. This appendix uses +3% because the 2022 rate cycle demonstrated that lender minimums are floors, not targets. The simulation uses the lender standard of +2% for its ICR gate; for your own decisions, use +3%.
+
+Fourth, stress the LTV under a price correction. ICR tells you whether you can afford the monthly cost; LTV tells you whether a bank would force a sale if values fell. Apply a 20% price shock:
+
+```
+Shocked value    = current value × 0.80
+Shocked LTV      = mortgage balance / shocked value
+```
+
+Example: property now worth £210,000, mortgage £142,500
+- Shocked value: £210,000 × 0.80 = £168,000
+- Shocked LTV: £142,500 / £168,000 = 84.8%
+
+At 84.8% shocked LTV, a lender requiring 75% LTV as a maximum would be in breach. If values fall 20% and rates simultaneously spike — as happened in 1989 and threatened again in 2023 — the lender has grounds to demand capital repayment or trigger a forced sale. This is the mechanism that destroyed overleveraged landlords in the early 1990s crash.
+
+The rule of thumb: shocked LTV should remain below 75%. If a 20% fall takes you above that, you are relying on the market not falling, which is not a strategy.
+
 ---
 
-### Appendix F — The Full Risk Scoring Model
+### Appendix F — The Bank Risk Rating Model
 
-For readers who want to score their property or portfolio more rigorously, this appendix provides the six-pillar composite risk model used in the simulation scoring engine. Each pillar is weighted by its contribution to overall investment risk:
+When a lender reviews a buy-to-let portfolio, they do not look at individual properties in isolation. They look at the portfolio as a whole across four axes. Understanding how lenders think is useful not because you are trying to satisfy them — you already have the mortgage — but because the same framework is an honest test of how exposed you are if conditions deteriorate.
 
-| Pillar | Weight | What it measures |
-|---|---|---|
-| Market Risk | 20% | Regional HPI volatility, vacancy rates, population trends |
-| Asset Risk | 20% | EPC band, property age, maintenance intensity |
-| Tenant Risk | 15% | Arrears probability, tenancy length, income stability |
-| Financial Risk | 20% | LTV, ICR, interest rate sensitivity |
-| Regulatory Risk | 15% | Licensing costs, compliance burden, policy risk |
-| Liquidity Risk | 10% | Days on market, transaction costs, buyer pool depth |
+The simulation scores every actor's portfolio at game end using this model. Scores run from 0 to 100; a higher score is lower risk. The key feature is that LTV is measured after a hypothetical 20% price shock, not at current appreciated values. This is the critical distinction: a property bought at 75% LTV ten years ago may sit at 35% LTV today after appreciation — but if prices fell 20%, that LTV rises to 44%. A bank assessing your portfolio in a downturn uses the stressed figure, not the appreciated one.
 
-A composite score across the six pillars falls into one of four bands:
+**The four pillars:**
 
-| Score | Meaning |
+LTV after price shock (up to 35 points deducted). Apply a 20% fall to current values, then recalculate LTV. Below 60% shocked LTV: no deduction. Between 60% and 75%: up to 20 points deducted proportionally. Above 75%: up to 35 points deducted. A leverage investor who has been refinancing at 75% LTV throughout would score near 35 points deducted on this pillar alone after a market correction.
+
+Stressed ICR at rate +2% (up to 35 points deducted). Recalculate ICR using current mortgage balances at a rate 2% above the current rate. ICR above 2.0x: no deduction. Between 1.25x and 2.0x: up to 15 points deducted. Below 1.25x: up to 35 points deducted. Properties bought at high LTV on thin yields fail this test first when rates move.
+
+Regional concentration (up to 15 points deducted). If more than 60% of the portfolio by value sits in a single region, deductions apply. A single-region portfolio concentrated in one city is fully exposed to a regional downturn — redundancies at a major employer, planning blight, demographic outflow — that a diversified portfolio would absorb without catastrophe.
+
+EPC non-compliance (up to 15 points deducted). The share of portfolio value in EPC E, F, or G properties. Non-compliant properties face forced-sale scenarios if the government mandates minimum EPC C by a given date. Even if the mandate slips, non-compliant stock attracts a void premium and a discount at sale.
+
+**The five rating bands:**
+
+| Score | Bank rating |
 |---|---|
-| 0–25 | Low risk |
-| 26–50 | Moderate risk — standard BTL |
-| 51–70 | Elevated risk — active management needed |
-| 71–100 | High risk — stress test before proceeding |
+| 80–100 | Investment Grade |
+| 60–79 | Acceptable Risk |
+| 40–59 | Enhanced Monitoring |
+| 20–39 | Watch List |
+| 0–19 | Default Risk |
 
-For the mathematical formulas, see *Property Through the Cycle: A Data-Driven Guide for UK Landlords* (the experienced investor version).
+In the simulation's 99-game dataset, leverage strategies end up in Enhanced Monitoring in roughly one in nine games — the only strategy that regularly falls below Acceptable Risk. Demographic and balanced strategies consistently score Investment Grade because their buying discipline (yield floors, diversification) naturally keeps shocked LTV low and ICR healthy. Capital growth strategies sit in the middle: strong appreciation keeps shocked LTV acceptable in good eras, but concentration in high-value regions and thin yields make them vulnerable in rate-shock scenarios.
 
 ---
 
-### Appendix G — The Six AI Strategies
+### Appendix G — The Seven Simulation Strategies
 
 | Strategy | What it does | Best era | Worst era |
 |---|---|---|---|
-| Yield | High income, low LTV, defensive | Any era | Missing capital upside in long booms |
-| Capital Growth | High-value properties, appreciates over time | Long booms | Rate spikes, corrections |
-| Value-Add | Buys EPC-discounted stock, upgrades | Any era | High capex risk |
-| BRRR | Buy, refurbish, refinance, repeat | Moderate rates, rising values | Rate shocks, zero-rate eras |
-| Leverage | Maximum borrowing, sells on rate spikes | Rising markets | Rate spikes, falling markets |
+| Yield | High income, ICR-constrained LTV, defensive | Any era | Missing capital upside in long booms |
+| Capital Growth | High-value properties, holds for appreciation | Long booms | Rate spikes, corrections |
+| Value-Add | Buys EPC-discounted stock, upgrades then refis | Any era | High capex risk, tight markets |
+| BRRR | Buy, refurbish, refinance, repeat at 75% LTV | Moderate rates, rising values | Rate shocks, zero-rate eras |
+| Leverage | Maximum borrowing at 75% LTV, sells on rate spikes | Rising markets | Rate spikes, falling markets |
 | Demographic | Diversifies by region, exits on rent decline | Any era | Missing concentrated upside |
+| Balanced | Yield-ranked buying, dynamic yield floor, tactical refi | Any era | Specialists outperform in strong trends |
 
 ---
 
