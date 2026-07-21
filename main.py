@@ -42,7 +42,8 @@ def main():
         _start_tunnel(port)
 
     game_num = 0
-    while True:
+    try:
+      while True:
         game_num += 1
         print(f"\n=== GAME {game_num} STARTING ===", flush=True)
 
@@ -64,13 +65,9 @@ def main():
                 f"Cash: £{entry['cash']:>10,.0f})"
             )
 
-        print("\nGame complete. Restarting in 10 seconds — press Ctrl+C to exit.", flush=True)
-        try:
-            import time
-            time.sleep(10)
-        except KeyboardInterrupt:
-            print("\nExiting.")
-            break
+        print("\nGame complete. Waiting for player to start new game…", flush=True)
+    except KeyboardInterrupt:
+        print("\nExiting.")
 
 
 if __name__ == "__main__":
