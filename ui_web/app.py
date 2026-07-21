@@ -1095,7 +1095,7 @@ def build_chart_data(gs):
 
 @app.template_filter('currency')
 def currency_filter(value):
-    return f'${value:,.0f}'
+    return f'£{value:,.0f}'
 
 
 @app.template_filter('pct')
