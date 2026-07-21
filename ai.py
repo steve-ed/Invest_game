@@ -430,9 +430,25 @@ class AIController:
         rate = state.macro.interest_rate
         if rate > 0.06:
             return "hold", None, 0.0
-        for prop in available:
+
+        # Refi: extract equity when headroom exists at moderate LTV
+        prop_map = {p.id: p for p in state.properties}
+        for pid in sorted(
+            actor.portfolio,
+            key=lambda pid: prop_map[pid].current_value * LTV_MODERATE - prop_map[pid].mortgage_balance
+                            if pid in prop_map else 0,
+            reverse=True,
+        ):
+            prop = prop_map.get(pid)
+            if prop and prop.mortgage_balance > 0 and prop.fixed_ticks_remaining == 0:
+                if prop.current_value * LTV_MODERATE - prop.mortgage_balance >= 20_000:
+                    return "refi", pid, LTV_MODERATE
+
+        # Yield floor rises with rate so buying stays cash-flow positive
+        yield_floor = rate + MORTGAGE_SPREAD + 0.01
+        for prop in sorted(available, key=lambda p: -(p.rent * 12) / p.current_value):
             net_yield = (prop.rent * 12) / prop.current_value * (1 - MGMT_FEE_RATE)
-            if net_yield >= 0.035:
+            if net_yield >= yield_floor:
                 deposit = prop.current_value * (1 - LTV_MODERATE)
                 if actor.cash >= deposit * 1.1 + expected_maintenance_reserve(prop):
                     return "buy", prop.id, LTV_MODERATE

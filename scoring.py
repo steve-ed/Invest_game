@@ -10,6 +10,62 @@ CONC_SEVERITY      = 0.10   # max additional loss as fraction of portfolio value
 EPC_DISCOUNT       = 0.15   # forced-sale discount for non-compliant properties
 
 
+BANK_PRICE_SHOCK = 0.20  # hypothetical downturn applied before scoring LTV
+
+
+def compute_bank_score(risk_breakdown):
+    """Convert a risk_breakdown dict into a 0-100 bank risk score and label.
+
+    LTV is stressed by a 20% price shock before scoring — this reflects what a
+    bank sees after a downturn, not the appreciated end-state value.
+    """
+    ltv_current = risk_breakdown.get("portfolio_ltv_pct", 0) / 100
+    # Apply price shock: if prices fall 20%, mortgage stays fixed so LTV rises
+    ltv       = ltv_current / (1 - BANK_PRICE_SHOCK)
+    icr       = risk_breakdown.get("stressed_icr")
+    conc      = risk_breakdown.get("max_region_pct", 0) / 100
+    epc_pct   = risk_breakdown.get("non_compliant_pct", 0) / 100
+
+    # LTV penalty (0–35)
+    if ltv <= 0.60:
+        ltv_pen = 0
+    elif ltv <= 0.75:
+        ltv_pen = round(20 * (ltv - 0.60) / 0.15)
+    else:
+        ltv_pen = round(20 + 15 * min(1.0, (ltv - 0.75) / 0.25))
+
+    # Stressed ICR penalty (0–35)
+    if icr is None:
+        icr_pen = 0
+    elif icr >= 2.0:
+        icr_pen = 0
+    elif icr >= 1.25:
+        icr_pen = round(15 * (2.0 - icr) / 0.75)
+    else:
+        icr_pen = round(15 + 20 * min(1.0, (1.25 - icr) / 1.25))
+
+    # Concentration penalty (0–15)
+    conc_pen = round(15 * min(1.0, max(0, conc - 0.60) / 0.40)) if conc > 0.60 else 0
+
+    # EPC penalty (0–15)
+    epc_pen = round(15 * min(1.0, epc_pct))
+
+    score = max(0, 100 - ltv_pen - icr_pen - conc_pen - epc_pen)
+
+    if score >= 80:
+        label = "Investment Grade"
+    elif score >= 60:
+        label = "Acceptable Risk"
+    elif score >= 40:
+        label = "Enhanced Monitoring"
+    elif score >= 20:
+        label = "Watch List"
+    else:
+        label = "Default Risk"
+
+    return score, label
+
+
 class ScoringEngine:
     def record_rent(self, actor_id, amount):
         pass   # tracked directly on ActorState.total_rent_received

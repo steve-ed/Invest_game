@@ -127,6 +127,63 @@
 </div>
 {% endif %}
 
+<!-- Bank Risk Assessment -->
+{% if gs.end.bank_ratings %}
+<div class="panel" style="margin-bottom:24px;">
+  <div class="panel-title">Bank Risk Assessment</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Actor</th>
+        <th style="text-align:center;">Rating</th>
+        <th style="text-align:center;">LTV (actual)</th>
+        <th style="text-align:center;">LTV (–20% shock)</th>
+        <th style="text-align:center;">Stressed ICR</th>
+        <th style="text-align:center;">Region Conc.</th>
+        <th style="text-align:center;">EPC Risk</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in gs.end.bank_ratings %}
+      {% set bd = r.breakdown %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td style="text-align:center;">
+          {% if r.score >= 80 %}
+            <span style="color:#00FF88; font-weight:bold;">{{ r.label }} ({{ r.score }})</span>
+          {% elif r.score >= 60 %}
+            <span style="color:#FBBF24; font-weight:bold;">{{ r.label }} ({{ r.score }})</span>
+          {% elif r.score >= 40 %}
+            <span style="color:#FB923C; font-weight:bold;">{{ r.label }} ({{ r.score }})</span>
+          {% else %}
+            <span style="color:#F87171; font-weight:bold;">{{ r.label }} ({{ r.score }})</span>
+          {% endif %}
+        </td>
+        <td style="text-align:center;" class="muted">
+          {% if bd.current_ltv_pct is defined %}{{ bd.current_ltv_pct }}%{% else %}—{% endif %}
+        </td>
+        <td style="text-align:center;" class="muted">
+          {% if bd.ltv_pct is defined %}{{ bd.ltv_pct }}%{% else %}—{% endif %}
+        </td>
+        <td style="text-align:center;" class="muted">
+          {% if bd.stressed_icr %}{{ bd.stressed_icr }}x{% else %}—{% endif %}
+        </td>
+        <td style="text-align:center;" class="muted">
+          {% if bd.conc_pct is defined %}{{ bd.conc_pct }}%{% else %}—{% endif %}
+        </td>
+        <td style="text-align:center;" class="muted">
+          {% if bd.epc_pct is defined %}{{ bd.epc_pct }}%{% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="muted" style="font-size:11px; margin-top:10px;">
+    Score 0–100. LTV scored after a hypothetical 20% price shock — reflecting bank exposure in a downturn, not current appreciated value. Deductions for shocked LTV &gt;60%, stressed ICR (rate+2%) &lt;2×, regional concentration &gt;60%, and EPC non-compliant stock.
+  </div>
+</div>
+{% endif %}
+
 <!-- Play again -->
 <div style="text-align:center; padding: 12px 0 28px;">
   <form method="POST" action="/play-again" id="play-again-form">

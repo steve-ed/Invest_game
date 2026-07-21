@@ -24,6 +24,7 @@ READY_PATH  = os.path.join(os.path.dirname(__file__), "visualisation", "ready.js
 ACTION_PATH = os.path.join(os.path.dirname(__file__), "visualisation", "player_action.json")
 
 from claude_player import ClaudePlayerEngine, _patch_kernel
+from scoring import compute_bank_score
 
 
 def run_game(game_num, turns, SimulationKernel):
@@ -105,7 +106,15 @@ def run_game(game_num, turns, SimulationKernel):
         flush=True,
     )
 
-    return lb, actor_rows, macro_rows, kernel.era_label, start_year, start_half, actor_roster
+    # Compute bank scores from risk_breakdown in leaderboard
+    bank_scores = {}
+    for e in lb:
+        bd = e.get("risk_breakdown", {})
+        score, label = compute_bank_score(bd)
+        bank_scores[e["actor_id"]] = {"score": score, "label": label, "name": e["name"],
+                                       "strategy": actor_roster.get(e["actor_id"], "?")}
+
+    return lb, actor_rows, macro_rows, kernel.era_label, start_year, start_half, actor_roster, bank_scores
 
 
 def main():
@@ -127,12 +136,19 @@ def main():
     wins           = collections.Counter()
     seconds        = collections.Counter()
     appearances    = collections.Counter()
+    # bank risk tracking: strategy -> list of scores
+    bank_score_by_strategy = collections.defaultdict(list)
+    bank_label_by_strategy = collections.defaultdict(collections.Counter)
 
     print(f"Running {args.games} games x {args.turns} turns...\n")
 
     for g in range(1, args.games + 1):
-        lb, actor_rows, macro_rows, era, start_year, start_half, roster = \
+        lb, actor_rows, macro_rows, era, start_year, start_half, roster, bank_scores = \
             run_game(g, args.turns, SimulationKernel)
+        for aid, bs in bank_scores.items():
+            strat = bs["strategy"]
+            bank_score_by_strategy[strat].append(bs["score"])
+            bank_label_by_strategy[strat][bs["label"]] += 1
         all_actor_rows.extend(actor_rows)
         all_macro_rows.extend(macro_rows)
         all_lb.append((g, lb))
@@ -234,6 +250,22 @@ def main():
         for rank in sorted(rank_dist):
             cnt = rank_dist[rank]
             print(f"    Rank {rank}: {cnt:>4}  ({cnt/n*100:.1f}%)")
+
+    # ── Bank risk summary ─────────────────────────────────────────────────────
+    print(f"\n{'─'*85}")
+    print(f"  Bank Risk Assessment (avg score across games played)")
+    print(f"  {'Strategy':<14} {'Avg Score':>10}  {'Investment Grade':>17}  {'Acceptable':>10}  {'Enhanced Mon.':>14}  {'Watch List+':>12}")
+    print(f"  {'─'*80}")
+    for strat in sorted(bank_score_by_strategy, key=lambda s: -sum(bank_score_by_strategy[s]) / len(bank_score_by_strategy[s])):
+        scores = bank_score_by_strategy[strat]
+        labels = bank_label_by_strategy[strat]
+        n      = len(scores)
+        avg    = sum(scores) / n
+        ig_pct = labels.get("Investment Grade", 0) / n * 100
+        ar_pct = labels.get("Acceptable Risk", 0) / n * 100
+        em_pct = labels.get("Enhanced Monitoring", 0) / n * 100
+        wl_pct = (labels.get("Watch List", 0) + labels.get("Default Risk", 0)) / n * 100
+        print(f"  {strat:<14} {avg:>10.1f}  {ig_pct:>16.1f}%  {ar_pct:>9.1f}%  {em_pct:>13.1f}%  {wl_pct:>11.1f}%")
 
     print(f"\nDone — {args.games} games completed.")
 

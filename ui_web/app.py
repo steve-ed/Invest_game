@@ -181,6 +181,85 @@ def score_for_archetype(archetype, portfolio_value, cash, cumulative_rent, total
     return portfolio_value - total_debt + cash - concentration_pen
 
 
+def compute_bank_rating(portfolio, mortgages, current_rate):
+    """Return (score 0-100, label, breakdown dict) for a bank risk assessment."""
+    if not portfolio:
+        return 100, "Investment Grade", {}
+
+    PRICE_SHOCK = 0.20  # 20% downturn applied before scoring LTV
+
+    total_value        = sum(p['value'] for p in portfolio)
+    shocked_value      = total_value * (1 - PRICE_SHOCK)
+    total_debt         = sum(m['loan'] for m in mortgages)
+    annual_rent        = sum(p['rent'] * 12 for p in portfolio)
+
+    # LTV penalty (0–35 pts) — scored on post-shock value
+    ltv = total_debt / shocked_value if shocked_value > 0 else 0.0
+    if ltv <= 0.60:
+        ltv_penalty = 0
+    elif ltv <= 0.75:
+        ltv_penalty = round(20 * (ltv - 0.60) / 0.15)
+    else:
+        ltv_penalty = round(20 + 15 * min(1.0, (ltv - 0.75) / 0.25))
+
+    # Stressed ICR penalty (0–35 pts): rate stored as % in mortgages
+    stressed_interest = sum(m['loan'] * (m['rate'] / 100 + 0.02) for m in mortgages)
+    if stressed_interest > 0:
+        stressed_icr = annual_rent / stressed_interest
+        if stressed_icr >= 2.0:
+            icr_penalty = 0
+        elif stressed_icr >= 1.25:
+            icr_penalty = round(15 * (2.0 - stressed_icr) / 0.75)
+        else:
+            icr_penalty = round(15 + 20 * min(1.0, (1.25 - stressed_icr) / 1.25))
+    else:
+        stressed_icr = None
+        icr_penalty  = 0
+
+    # Concentration penalty (0–15 pts)
+    region_totals = {}
+    for p in portfolio:
+        r = p.get('region', 'Unknown')
+        region_totals[r] = region_totals.get(r, 0) + p['value']
+    max_conc = max(region_totals.values()) / total_value if total_value > 0 else 1.0
+    if max_conc <= 0.60:
+        conc_penalty = 0
+    else:
+        conc_penalty = round(15 * min(1.0, (max_conc - 0.60) / 0.40))
+
+    # EPC penalty (0–15 pts)
+    non_compliant_val = sum(p['value'] for p in portfolio if not p.get('epc_compliant', True))
+    epc_pct = non_compliant_val / total_value if total_value > 0 else 0.0
+    epc_penalty = round(15 * min(1.0, epc_pct))
+
+    score = max(0, 100 - ltv_penalty - icr_penalty - conc_penalty - epc_penalty)
+
+    if score >= 80:
+        label = "Investment Grade"
+    elif score >= 60:
+        label = "Acceptable Risk"
+    elif score >= 40:
+        label = "Enhanced Monitoring"
+    elif score >= 20:
+        label = "Watch List"
+    else:
+        label = "Default Risk"
+
+    current_ltv = total_debt / total_value if total_value > 0 else 0.0
+    breakdown = {
+        'ltv_pct':         round(ltv * 100, 1),          # shocked LTV (used for scoring)
+        'current_ltv_pct': round(current_ltv * 100, 1),  # actual LTV for display
+        'stressed_icr':    round(stressed_icr, 2) if stressed_icr is not None else None,
+        'conc_pct':        round(max_conc * 100, 1),
+        'epc_pct':         round(epc_pct * 100, 1),
+        'ltv_penalty':     ltv_penalty,
+        'icr_penalty':     icr_penalty,
+        'conc_penalty':    conc_penalty,
+        'epc_penalty':     epc_penalty,
+    }
+    return score, label, breakdown
+
+
 def player_score(gs):
     player = gs['player']
     portfolio_val = sum(p['value'] for p in player['portfolio'])
@@ -1019,6 +1098,20 @@ def _build_end_state(gs):
     era_label = hist.get_era_label(start_year)
     min_year, max_year = hist.get_quarterly_start_limits(gs['total_ticks'])
 
+    # Bank risk ratings for all actors
+    current_rate = gs['macro']['rate']
+    bank_ratings = []
+    p_score, p_label, p_bd = compute_bank_rating(
+        player['portfolio'], player.get('mortgages', []), current_rate
+    )
+    bank_ratings.append({'name': 'You', 'score': p_score, 'label': p_label, 'breakdown': p_bd})
+    for ai in gs['ai']:
+        a_score, a_label, a_bd = compute_bank_rating(
+            ai.get('portfolio', []), ai.get('mortgages', []), current_rate
+        )
+        bank_ratings.append({'name': ai['name'], 'score': a_score, 'label': a_label, 'breakdown': a_bd})
+    bank_ratings.sort(key=lambda x: -x['score'])
+
     gs['end'] = {
         'player_breakdown': {
             'portfolio': portfolio_val,
@@ -1029,6 +1122,7 @@ def _build_end_state(gs):
             'archetype_label': ARCHETYPE_META[archetype]['label'],
             'archetype_desc': ARCHETYPE_META[archetype]['desc'],
         },
+        'bank_ratings': bank_ratings,
         'key_events': [
             {'tick': 1, 'text': 'Game started'},
             {'tick': gs['tick'], 'text': 'Game complete — final scores tallied'},
